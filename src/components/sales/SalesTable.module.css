@@ -1,0 +1,197 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  background: var(--color-surface-2);
+}
+
+/* ─── Toolbar ─────────────────────────────────────────────────────────────── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.toolbarLeft {
+  flex: 1;
+  min-width: 200px;
+}
+
+.toolbarRight {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.searchWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchIcon {
+  position: absolute;
+  left: var(--space-3);
+  font-size: var(--text-sm);
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.searchInput {
+  width: 100%;
+  max-width: 360px;
+  padding: var(--space-2) var(--space-3) var(--space-2) calc(var(--space-3) + 24px);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  min-height: var(--touch-target);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.searchInput:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(13, 115, 119, 0.12);
+  outline: none;
+  background: var(--color-surface);
+}
+
+/* ─── Table container ─────────────────────────────────────────────────────── */
+.tableContainer {
+  flex: 1;
+  overflow: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+/* ─── Header ──────────────────────────────────────────────────────────────── */
+.headerRow {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.th {
+  background: var(--color-surface);
+  padding: var(--space-3) var(--space-3);
+  text-align: left;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  border-bottom: 2px solid var(--color-border);
+  user-select: none;
+}
+
+/* ─── Rows ────────────────────────────────────────────────────────────────── */
+.row {
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color var(--transition-fast);
+}
+
+.row:hover {
+  background-color: var(--color-primary-subtle);
+}
+
+.selectedRow {
+  background-color: var(--color-primary-light) !important;
+}
+
+.newRow {
+  animation: rowSlideIn 0.4s ease;
+}
+
+.td {
+  padding: var(--space-2) var(--space-3);
+  vertical-align: middle;
+}
+
+/* ─── Cell inputs ─────────────────────────────────────────────────────────── */
+.cellInput {
+  width: 100%;
+  padding: var(--space-2) var(--space-2);
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  min-height: var(--touch-target);
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.cellInput:hover {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+}
+
+.cellInput:focus {
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(13, 115, 119, 0.1);
+}
+
+/* ─── Checkbox ────────────────────────────────────────────────────────────── */
+.checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--color-primary);
+  border-radius: 4px;
+}
+
+/* ─── Empty state ─────────────────────────────────────────────────────────── */
+.emptyState {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  padding: var(--space-12);
+}
+
+/* ─── Loading ─────────────────────────────────────────────────────────────── */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-12);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ─── Status bar ──────────────────────────────────────────────────────────── */
+.statusBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}

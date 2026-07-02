@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+/// A standalone dimension entity, e.g. "2.5mg", "5mg", "10mg"
+/// Multiple products from different brands can share the same dimension.
+model Dimension {
+  id        String    @id @default(cuid())
+  label     String    @unique
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+/// Product = brand name + dimension + unit price
+/// e.g. { name: "Ozempic", dimension: { label: "2.5mg" }, unitPrice: 150 }
+/// e.g. { name: "Wegovy",  dimension: { label: "2.5mg" }, unitPrice: 200 }
+model Product {
+  id          String     @id @default(cuid())
+  name        String
+  dimensionId String
+  dimension   Dimension  @relation(fields: [dimensionId], references: [id])
+  unitPrice   Float
+  saleItems   SaleItem[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@unique([name, dimensionId])
+}
+
+model Sale {
+  id             String         @id @default(cuid())
+  date           DateTime
+  clientName     String
+  address        String?
+  deliveryStatus DeliveryStatus @default(NOT_DELIVERED)
+  paymentStatus  PaymentStatus  @default(NOT_PAID)
+  comments       String?
+  items          SaleItem[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
+
+/// Each item on a sale references a Product (which carries its Dimension).
+/// totalPrice is NOT stored — always computed as quantity * product.unitPrice.
+model SaleItem {
+  id        String  @id @default(cuid())
+  saleId    String
+  sale      Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+}
+
+enum DeliveryStatus {
+  NOT_DELIVERED
+  DELIVERED
+}
+
+enum PaymentStatus {
+  NOT_PAID
+  WAITING_BANK_CONFIRMATION
+  PAID
+}
