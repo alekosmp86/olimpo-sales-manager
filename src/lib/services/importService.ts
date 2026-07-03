@@ -4,6 +4,7 @@ import { DeliveryStatus, PaymentStatus } from "@/lib/constants/statuses";
 import { findOrCreateDimension } from "@/lib/services/dimensionService";
 import { findOrCreateProduct } from "@/lib/services/productService";
 import { resolveProductAliases } from "@/lib/services/aliasService";
+import { standardizeDimension } from "@/lib/utils/dimensionUtils";
 import type {
   CsvRow,
   ImportValidRow,
@@ -67,12 +68,6 @@ function parsePaymentStatus(raw: string | null | undefined): PaymentStatus {
   return PaymentStatus.NOT_PAID;
 }
 
-
-
-function standardizeDimension(raw: string | null | undefined): string {
-  if (!raw) return "";
-  return raw.trim().replace(",", ".");
-}
 
 /**
  * Parses a price string using Uruguayan/Spanish locale conventions where

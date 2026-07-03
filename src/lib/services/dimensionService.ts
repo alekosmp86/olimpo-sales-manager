@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
+import { standardizeDimension } from "@/lib/utils/dimensionUtils";
 
 export async function getDimensions() {
   return prisma.dimension.findMany({
@@ -10,7 +11,7 @@ export async function getDimensions() {
 
 export async function createDimension(label: string) {
   return prisma.dimension.create({
-    data: { label: label.trim() },
+    data: { label: standardizeDimension(label) },
     select: { id: true, label: true, createdAt: true, updatedAt: true },
   });
 }
@@ -18,7 +19,7 @@ export async function createDimension(label: string) {
 export async function updateDimension(id: string, label: string) {
   return prisma.dimension.update({
     where: { id },
-    data: { label: label.trim() },
+    data: { label: standardizeDimension(label) },
     select: { id: true, label: true, createdAt: true, updatedAt: true },
   });
 }
@@ -36,8 +37,8 @@ export async function deleteDimension(id: string) {
 
 /** Find or create a dimension by label (used during CSV import) */
 export async function findOrCreateDimension(label: string) {
-  const trimmed = label.trim();
-  const existing = await prisma.dimension.findUnique({ where: { label: trimmed } });
+  const canonical = standardizeDimension(label);
+  const existing = await prisma.dimension.findUnique({ where: { label: canonical } });
   if (existing) return existing;
-  return prisma.dimension.create({ data: { label: trimmed } });
+  return prisma.dimension.create({ data: { label: canonical } });
 }
