@@ -21,3 +21,11 @@ export async function verifyUser(username: string, password: string) {
   if (!valid) return null;
   return { id: user.id, username: user.username };
 }
+
+export async function checkUserExists(id: string): Promise<boolean> {
+  const user = await prisma.user.findUnique({
+    where: { id },
+    select: { id: true },
+  });
+  return !!user;
+}
