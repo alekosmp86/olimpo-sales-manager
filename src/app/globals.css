@@ -3,20 +3,20 @@
 /* ─── Design Tokens ──────────────────────────────────────────────────────────── */
 :root {
   /* Colors */
-  --color-primary: #0D7377;
-  --color-primary-dark: #095f63;
-  --color-primary-light: #e6f4f4;
-  --color-primary-subtle: #f0fafa;
+  --color-primary: #0d9488;
+  --color-primary-dark: #0f766e;
+  --color-primary-light: #ccfbf1;
+  --color-primary-subtle: #f0fdfa;
 
   --color-surface: #ffffff;
-  --color-surface-2: #f8fafb;
-  --color-surface-3: #f0f4f5;
-  --color-border: #e2e8ea;
-  --color-border-strong: #c9d4d6;
+  --color-surface-2: #f9fafb;
+  --color-surface-3: #f3f4f6;
+  --color-border: #e5e7eb;
+  --color-border-strong: #d1d5db;
 
-  --color-text: #1a2526;
-  --color-text-secondary: #4a6265;
-  --color-text-muted: #7a9496;
+  --color-text: #111827;
+  --color-text-secondary: #374151;
+  --color-text-muted: #6b7280;
   --color-text-inverse: #ffffff;
 
   /* Status colors */

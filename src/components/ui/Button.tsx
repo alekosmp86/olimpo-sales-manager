@@ -23,12 +23,18 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
-        className={[styles.btn, styles[variant], styles[size], className].join(" ")}
+        className={[
+          styles.btn,
+          styles[variant],
+          styles[size],
+          loading ? styles.loading : "",
+          className,
+        ].join(" ")}
         disabled={disabled || loading}
         {...rest}
       >
         {loading && <span className={styles.spinner} aria-hidden />}
-        <span className={loading ? styles.loadingContent : undefined}>{children}</span>
+        {children}
       </button>
     );
   }

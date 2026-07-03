@@ -5,6 +5,7 @@ import Papa from "papaparse";
 import { Button } from "@/components/ui/Button";
 import type { CsvRow, ImportClassificationResult } from "@/lib/types";
 import { ImportReviewModal } from "./ImportReviewModal";
+import { Upload } from "lucide-react";
 
 export function ImportCSVButton() {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -88,7 +89,7 @@ export function ImportCSVButton() {
         onClick={handleClick}
         loading={loading}
       >
-        📥 Importar CSV
+        <Upload size={16} /> Importar
       </Button>
 
       {error && (

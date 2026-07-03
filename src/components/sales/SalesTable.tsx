@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/Button";
 import { CatalogModal } from "@/components/catalog/CatalogModal";
 import { ImportCSVButton } from "@/components/import/ImportCSVButton";
 import type { Sale } from "@/lib/types";
+import { Search, Package, Trash2, Plus } from "lucide-react";
 
 const columnHelper = createColumnHelper<Sale>();
 
@@ -265,7 +266,7 @@ export function SalesTable() {
       <div className={styles.toolbar}>
         <div className={styles.toolbarLeft}>
           <div className={styles.searchWrapper}>
-            <span className={styles.searchIcon}>🔍</span>
+            <Search className={styles.searchIcon} size={16} />
             <input
               id="search-input"
               type="search"
@@ -283,7 +284,7 @@ export function SalesTable() {
             size="sm"
             onClick={() => setCatalogOpen(true)}
           >
-            📦 Catálogo
+            <Package size={16} /> Catálogo
           </Button>
           <ImportCSVButton />
           <Button
@@ -302,7 +303,7 @@ export function SalesTable() {
               }
             }}
           >
-            🗑 Eliminar ({selectedCount})
+            <Trash2 size={16} /> Eliminar ({selectedCount})
           </Button>
           <Button
             id="add-row-btn"
@@ -311,7 +312,7 @@ export function SalesTable() {
             loading={createMutation.isPending}
             onClick={() => createMutation.mutate()}
           >
-            + Nueva venta
+            <Plus size={16} /> Nueva venta
           </Button>
         </div>
       </div>
@@ -324,60 +325,62 @@ export function SalesTable() {
             <span>Cargando ventas...</span>
           </div>
         ) : (
-          <table className={styles.table}>
-            <thead>
-              {table.getHeaderGroups().map((hg) => (
-                <tr key={hg.id} className={styles.headerRow}>
-                  {hg.headers.map((header) => (
-                    <th
-                      key={header.id}
-                      className={styles.th}
-                      style={{ width: header.getSize() }}
-                    >
-                      {flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody>
-              {table.getRowModel().rows.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={columns.length}
-                    className={styles.emptyState}
-                  >
-                    {debouncedSearch
-                      ? "No se encontraron resultados."
-                      : "No hay ventas. Cree una o importe un CSV."}
-                  </td>
-                </tr>
-              ) : (
-                table.getRowModel().rows.map((row) => (
-                  <tr
-                    key={row.id}
-                    className={[
-                      styles.row,
-                      row.getIsSelected() ? styles.selectedRow : "",
-                      row.original.id === newRowId ? styles.newRow : "",
-                    ].join(" ")}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className={styles.td}>
+          <div className={styles.tableCard}>
+            <table className={styles.table}>
+              <thead>
+                {table.getHeaderGroups().map((hg) => (
+                  <tr key={hg.id} className={styles.headerRow}>
+                    {hg.headers.map((header) => (
+                      <th
+                        key={header.id}
+                        className={styles.th}
+                        style={{ width: header.getSize() }}
+                      >
                         {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
+                          header.column.columnDef.header,
+                          header.getContext()
                         )}
-                      </td>
+                      </th>
                     ))}
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ))}
+              </thead>
+              <tbody>
+                {table.getRowModel().rows.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={columns.length}
+                      className={styles.emptyState}
+                    >
+                      {debouncedSearch
+                        ? "No se encontraron resultados."
+                        : "No hay ventas. Cree una o importe un CSV."}
+                    </td>
+                  </tr>
+                ) : (
+                  table.getRowModel().rows.map((row) => (
+                    <tr
+                      key={row.id}
+                      className={[
+                        styles.row,
+                        row.getIsSelected() ? styles.selectedRow : "",
+                        row.original.id === newRowId ? styles.newRow : "",
+                      ].join(" ")}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <td key={cell.id} className={styles.td}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 

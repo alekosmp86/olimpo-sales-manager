@@ -6,6 +6,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import styles from "./CatalogModal.module.css";
 import type { Product, Dimension } from "@/lib/types";
+import { Trash2 } from "lucide-react";
 
 interface CatalogModalProps {
   isOpen: boolean;
@@ -213,8 +214,9 @@ function ProductsTab() {
                     variant="danger"
                     onClick={() => deleteMutation.mutate(p.id)}
                     loading={deleteMutation.isPending}
+                    aria-label="Eliminar producto"
                   >
-                    ✕
+                    <Trash2 size={14} />
                   </Button>
                 </div>
               )}
@@ -351,8 +353,9 @@ function DimensionsTab() {
                     variant="danger"
                     onClick={() => deleteMutation.mutate(d.id)}
                     loading={deleteMutation.isPending}
+                    aria-label="Eliminar dimensión"
                   >
-                    ✕
+                    <Trash2 size={14} />
                   </Button>
                 </div>
               )}

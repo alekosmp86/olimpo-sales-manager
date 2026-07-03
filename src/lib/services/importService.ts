@@ -11,22 +11,6 @@ import type {
   ImportClassificationResult,
 } from "@/lib/types";
 
-const DELIVERY_STATUS_MAP: Record<string, DeliveryStatus> = {
-  "not delivered": DeliveryStatus.NOT_DELIVERED,
-  "no entregado": DeliveryStatus.NOT_DELIVERED,
-  delivered: DeliveryStatus.DELIVERED,
-  entregado: DeliveryStatus.DELIVERED,
-};
-
-const PAYMENT_STATUS_MAP: Record<string, PaymentStatus> = {
-  "not paid": PaymentStatus.NOT_PAID,
-  "no pagado": PaymentStatus.NOT_PAID,
-  "waiting bank confirmation": PaymentStatus.WAITING_BANK_CONFIRMATION,
-  "esperando confirmación": PaymentStatus.WAITING_BANK_CONFIRMATION,
-  paid: PaymentStatus.PAID,
-  pagado: PaymentStatus.PAID,
-};
-
 function parseCsvDate(str: string): Date | null {
   if (!str) return null;
   const parsed = Date.parse(str);

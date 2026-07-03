@@ -39,9 +39,8 @@
 .searchIcon {
   position: absolute;
   left: var(--space-3);
-  font-size: var(--text-sm);
   pointer-events: none;
-  opacity: 0.6;
+  color: var(--color-text-muted);
 }
 
 .searchInput {
@@ -68,6 +67,15 @@
 .tableContainer {
   flex: 1;
   overflow: auto;
+  padding: var(--space-4);
+}
+
+.tableCard {
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  overflow: hidden;
 }
 
 .table {

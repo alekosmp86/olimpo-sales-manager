@@ -3,6 +3,7 @@
 import { useState, useActionState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
+import { Hexagon } from "lucide-react";
 
 interface FormState {
   error?: string;
@@ -56,7 +57,7 @@ export default function LoginPage() {
     <div className={styles.page}>
       <div className={styles.card}>
         <div className={styles.logo}>
-          <span className={styles.logoIcon}>⬡</span>
+          <Hexagon className={styles.logoIcon} size={32} />
           <span className={styles.logoText}>Olimpo</span>
         </div>
         <h1 className={styles.title}>
