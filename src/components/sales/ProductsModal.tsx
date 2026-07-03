@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
@@ -54,7 +54,10 @@ export function ProductsModal({ isOpen, onClose, saleId, items }: ProductsModalP
     },
   });
 
-  const productMap = new Map(products.map((p) => [p.id, p]));
+  const productMap = useMemo(
+    () => new Map(products.map((p) => [p.id, p])),
+    [products]
+  );
 
   function addItem() {
     if (products.length === 0) return;

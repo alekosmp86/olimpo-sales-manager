@@ -198,17 +198,16 @@ export async function insertConfirmedRows(rows: ImportValidRow[]) {
       },
     });
 
+    // Resolve dimension/product serially to avoid findOrCreate race conditions,
+    // then batch-insert all items in one query.
+    const itemData: { saleId: string; productId: string; quantity: number }[] = [];
     for (const row of groupRows) {
       const dim = await findOrCreateDimension(row.dimension);
       const product = await findOrCreateProduct(row.product, dim.id, row.unitPrice);
-
-      await prisma.saleItem.create({
-        data: {
-          saleId: sale.id,
-          productId: product.id,
-          quantity: row.quantity,
-        },
-      });
+      itemData.push({ saleId: sale.id, productId: product.id, quantity: row.quantity });
+    }
+    if (itemData.length > 0) {
+      await prisma.saleItem.createMany({ data: itemData });
     }
   }
 }
