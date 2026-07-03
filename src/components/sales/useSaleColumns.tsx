@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { DeliveryDropdown, PaymentDropdown } from "./StatusDropdown";
 import { ProductsCell } from "./ProductsCell";
+import { ClientNameCell } from "./ClientNameCell";
 import type { Sale } from "@/lib/types";
 import { formatReviewDate } from "@/lib/dateUtils";
 import { Calendar } from "lucide-react";
@@ -20,7 +21,8 @@ type UpdatePayload = { id: string; data: Record<string, unknown> };
  */
 export function useSaleColumns(
   onUpdate: (payload: UpdatePayload) => void,
-  onOpenProducts: (saleId: string) => void
+  onOpenProducts: (saleId: string) => void,
+  sales: Sale[]
 ) {
   return useMemo(
     () => [
@@ -80,19 +82,15 @@ export function useSaleColumns(
         size: 170,
       }),
 
-      // ── Client name ─────────────────────────────────────────────────────────
+      // ── Client name (with autocomplete) ─────────────────────────────────────
       columnHelper.accessor("clientName", {
         header: "Nombre",
         cell: ({ getValue, row }) => (
-          <input
-            type="text"
-            className={styles.cellInput}
-            defaultValue={getValue()}
-            placeholder="Cliente"
-            onBlur={(e) => {
-              if (e.target.value !== getValue())
-                onUpdate({ id: row.original.id, data: { clientName: e.target.value } });
-            }}
+          <ClientNameCell
+            saleId={row.original.id}
+            initialValue={getValue()}
+            sales={sales}
+            onUpdate={onUpdate}
           />
         ),
         size: 240,
@@ -192,6 +190,6 @@ export function useSaleColumns(
         size: 350,
       }),
     ],
-    [onUpdate, onOpenProducts]
+    [onUpdate, onOpenProducts, sales]
   );
 }

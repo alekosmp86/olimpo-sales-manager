@@ -79,7 +79,7 @@ export function SalesTable() {
   }, [rowSelection, deleteSales]);
 
   // ── Table ─────────────────────────────────────────────────────────────────
-  const columns = useSaleColumns(updateMutation.mutate, handleOpenProducts);
+  const columns = useSaleColumns(updateMutation.mutate, handleOpenProducts, sales);
 
   const filteredSales = useMemo(
     () =>

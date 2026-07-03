@@ -174,7 +174,7 @@
 
 /* ─── Empty state ─────────────────────────────────────────────────────────── */
 .emptyState {
-  text-align: center;
+  text-align: start;
   color: var(--color-text-muted);
   font-size: var(--text-sm);
   padding: var(--space-12);
