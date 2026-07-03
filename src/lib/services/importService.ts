@@ -121,16 +121,16 @@ export async function validateAndClassifyRows(
   for (const row of rows) {
     const errors: string[] = [];
 
-    const dateStr = row["Date"]?.trim();
-    const clientName = row["Client Name"]?.trim();
-    const address = row["Address"]?.trim() ?? "";
-    const productRaw = row["Product"]?.trim();
-    const dimensionRaw = row["Dimension"]?.trim();
-    const quantityStr = row["Quantity"]?.trim();
-    const totalPriceStr = row["Total Price"]?.trim();
-    const deliveryRaw = row["Delivery Status"]?.trim() ?? "";
-    const paymentRaw = row["Payment Status"]?.trim() ?? "";
-    const comments = row["Comments"]?.trim() ?? "";
+    const dateStr = row.date?.trim();
+    const clientName = row.clientName?.trim();
+    const address = row.address?.trim() ?? "";
+    const productRaw = row.product?.trim();
+    const dimensionRaw = row.dimension?.trim();
+    const quantityStr = row.quantity?.trim();
+    const totalPriceStr = row.totalPrice?.trim();
+    const deliveryRaw = row.deliveryStatus?.trim() ?? "";
+    const paymentRaw = row.paymentStatus?.trim() ?? "";
+    const comments = row.comments?.trim() ?? "";
 
     const dateObj = parseCsvDate(dateStr);
     if (!dateObj) {

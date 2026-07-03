@@ -51,16 +51,16 @@ export interface Sale {
 // ─── CSV Import ───────────────────────────────────────────────────────────────
 
 export interface CsvRow {
-  Date: string;
-  "Client Name": string;
-  Address: string;
-  Product: string;
-  Dimension: string;
-  Quantity: string;
-  "Total Price": string;
-  "Delivery Status": string;
-  "Payment Status": string;
-  Comments: string;
+  date: string;
+  clientName: string;
+  address: string;
+  product: string;
+  dimension: string;
+  quantity: string;
+  totalPrice: string;
+  deliveryStatus: string;
+  paymentStatus: string;
+  comments: string;
 }
 
 export interface ImportValidRow {

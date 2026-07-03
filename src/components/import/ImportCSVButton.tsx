@@ -3,8 +3,8 @@
 import { useRef, useState } from "react";
 import Papa from "papaparse";
 import { Button } from "@/components/ui/Button";
-import { ImportReviewModal } from "./ImportReviewModal";
 import type { CsvRow, ImportClassificationResult } from "@/lib/types";
+import { ImportReviewModal } from "./ImportReviewModal";
 
 export function ImportCSVButton() {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -23,15 +23,35 @@ export function ImportCSVButton() {
     setLoading(true);
     setError("");
 
-    Papa.parse<CsvRow>(file, {
-      header: true,
+    Papa.parse<string[]>(file, {
+      header: false,
       skipEmptyLines: true,
       complete: async (parsed) => {
         try {
+          const rawRows = parsed.data;
+          if (rawRows.length === 0) return;
+
+          // Check if first row is a header row by testing for typical header keywords
+          const hasHeader = rawRows[0] && rawRows[0][0]?.toLowerCase().includes("date");
+          const startIdx = hasHeader ? 1 : 0;
+
+          const formattedRows: CsvRow[] = rawRows.slice(startIdx).map((row) => ({
+            date: row[0] ?? "",
+            clientName: row[1] ?? "",
+            address: row[2] ?? "",
+            product: row[3] ?? "",
+            dimension: row[4] ?? "",
+            quantity: row[5] ?? "",
+            totalPrice: row[6] ?? "",
+            deliveryStatus: row[7] ?? "",
+            paymentStatus: row[8] ?? "",
+            comments: row[9] ?? "",
+          }));
+
           const res = await fetch("/api/import", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ rows: parsed.data }),
+            body: JSON.stringify({ rows: formattedRows }),
           });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error);

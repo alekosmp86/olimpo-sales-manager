@@ -137,13 +137,13 @@ export function SalesTable() {
 
     // Client name
     columnHelper.accessor("clientName", {
-      header: "Cliente",
+      header: "Nombre",
       cell: ({ getValue, row }) => (
         <input
           type="text"
           className={styles.cellInput}
           defaultValue={getValue()}
-          placeholder="Nombre del cliente"
+          placeholder="Cliente"
           onBlur={(e) => {
             if (e.target.value !== getValue()) {
               updateMutation.mutate({

@@ -181,7 +181,7 @@ function InvalidTab({ rows }: { rows: ImportClassificationResult["invalid"] }) {
           <div className={styles.invalidHeader}>
             <span className={styles.invalidLabel}>Fila {i + 1}</span>
             <span className={styles.invalidClient}>
-              {item.row["Client Name"] || "(sin nombre)"}
+              {item.row.clientName || "(sin nombre)"}
             </span>
           </div>
           <ul className={styles.errorList}>
