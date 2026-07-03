@@ -52,6 +52,8 @@ export interface Sale {
 // ─── CSV Import ───────────────────────────────────────────────────────────────
 
 export interface CsvRow {
+  /** 1-based line number in the original CSV file */
+  rowNumber: number;
   date: string;
   clientName: string;
   phone?: string;

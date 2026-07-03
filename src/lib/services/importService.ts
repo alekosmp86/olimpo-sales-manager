@@ -74,9 +74,15 @@ function standardizeDimension(raw: string | null | undefined): string {
   return raw.trim().replace(",", ".");
 }
 
+/**
+ * Parses a price string using Uruguayan/Spanish locale conventions where
+ * '.' is the thousands separator and ',' is the decimal separator.
+ * e.g. "15.000" → 15000,  "19.500" → 19500,  "1.166.800" → 1166800
+ */
 function parseCsvFloat(raw: string | null | undefined): number {
   if (!raw) return NaN;
-  const clean = raw.trim().replace(",", ".");
+  // Strip thousands-separator dots, then replace decimal comma with dot
+  const clean = raw.trim().replace(/\./g, "").replace(",", ".");
   return parseFloat(clean);
 }
 
@@ -137,6 +143,9 @@ export async function validateAndClassifyRows(
     const paymentRaw = row.paymentStatus?.trim() ?? "";
     const comments = row.comments?.trim() ?? "";
 
+    // Silently skip rows that are completely blank (no date, no client, no product)
+    if (!dateStr && !clientName && !productRaw) continue;
+
     const dateObj = parseCsvDate(dateStr);
     if (!dateObj) {
       errors.push("Fecha inválida o faltante.");
@@ -146,8 +155,10 @@ export async function validateAndClassifyRows(
     if (!productRaw) errors.push("Producto faltante.");
     if (!dimensionRaw) errors.push("Dimensión faltante.");
 
-    const quantity = parseInt(quantityStr, 10);
-    if (isNaN(quantity) || quantity <= 0) errors.push("Cantidad inválida.");
+    // Quantities may be written as "1/1" for split doses — take the minimum positive integer
+    const quantityParts = (quantityStr ?? "").split("/").map((p) => parseInt(p.trim(), 10));
+    const quantity = Math.min(...quantityParts.filter((n) => !isNaN(n) && n > 0));
+    if (!isFinite(quantity) || quantity <= 0) errors.push("Cantidad inválida.");
 
     const totalPrice = parseCsvFloat(totalPriceStr);
     if (isNaN(totalPrice) || totalPrice < 0) errors.push("Precio total inválido.");

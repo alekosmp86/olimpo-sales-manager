@@ -78,6 +78,11 @@
   background: var(--color-surface-2);
 }
 
+.emptyPhone {
+  color: var(--color-text-muted);
+}
+
+
 /* Invalid tab */
 .invalidList {
   display: flex;
@@ -121,6 +126,28 @@
   flex-direction: column;
   gap: 2px;
 }
+
+.rawData {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  background: rgba(0, 0, 0, 0.04);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.rawField {
+  white-space: nowrap;
+}
+
+.rawLabel {
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-muted);
+}
+
 
 /* Duplicates tab */
 .duplicateList {

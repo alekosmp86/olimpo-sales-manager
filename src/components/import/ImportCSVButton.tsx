@@ -62,28 +62,38 @@ export function ImportCSVButton() {
         const rawRows = parsed.data;
         if (rawRows.length === 0) return;
 
-        // Check if first row is a header row by testing for typical header keywords
-        const hasHeader = rawRows[0] && rawRows[0][0]?.toLowerCase().includes("date");
-        const startIdx = hasHeader ? 1 : 0;
+        // No header row — data always starts at index 0
+        const formattedRows: CsvRow[] = rawRows
+          .slice(0)
+          .map((row, index) => ({
+            rowNumber: index + 1,
+            date: row[0] ?? "",
+            clientName: row[1] ?? "",
+            address: row[2] ?? "",
+            product: row[3] ?? "",
+            dimension: row[4] ?? "",
+            quantity: row[5] ?? "",
+            totalPrice: row[6] ?? "",
+            deliveryStatus: row[7] ?? "",
+            paymentStatus: row[8] ?? "",
+            comments: row[9] ?? "",
+            phone: row[10] ?? "",
+          }))
+          // Pre-filter completely blank rows (all fields empty) client-side
+          .filter((r) =>
+            r.date || r.clientName || r.product
+          );
 
-        const formattedRows: CsvRow[] = rawRows.slice(startIdx).map((row) => ({
-          date: row[0] ?? "",
-          clientName: row[1] ?? "",
-          address: row[2] ?? "",
-          product: row[3] ?? "",
-          dimension: row[4] ?? "",
-          quantity: row[5] ?? "",
-          totalPrice: row[6] ?? "",
-          deliveryStatus: row[7] ?? "",
-          paymentStatus: row[8] ?? "",
-          comments: row[9] ?? "",
-          phone: row[10] ?? "",
-        }));
+        if (formattedRows.length === 0) {
+          setError("El archivo CSV no contiene filas válidas.");
+          return;
+        }
 
         await submitImport(formattedRows);
 
         // Reset input so same file can be re-selected
         if (fileRef.current) fileRef.current.value = "";
+
       },
       error: (err) => {
         setError(err.message);

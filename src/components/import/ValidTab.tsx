@@ -20,6 +20,7 @@ export function ValidTab({ rows }: ValidTabProps) {
           <tr>
             <th>Fecha</th>
             <th>Cliente</th>
+            <th>Teléfono</th>
             <th>Producto</th>
             <th>Dimensión</th>
             <th>Cantidad</th>
@@ -31,6 +32,7 @@ export function ValidTab({ rows }: ValidTabProps) {
             <tr key={i} className={styles.validRow}>
               <td>{formatReviewDate(row.date)}</td>
               <td>{row.clientName}</td>
+              <td>{row.phone || <span className={styles.emptyPhone}>—</span>}</td>
               <td>{row.product}</td>
               <td>{row.dimension}</td>
               <td>{row.quantity}</td>
@@ -42,3 +44,4 @@ export function ValidTab({ rows }: ValidTabProps) {
     </div>
   );
 }
+
