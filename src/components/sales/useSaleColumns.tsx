@@ -77,7 +77,7 @@ export function useSaleColumns(
             </div>
           );
         },
-        size: 150,
+        size: 170,
       }),
 
       // ── Client name ─────────────────────────────────────────────────────────
@@ -95,6 +95,7 @@ export function useSaleColumns(
             }}
           />
         ),
+        size: 240,
       }),
 
       // ── Phone ───────────────────────────────────────────────────────────────
@@ -112,7 +113,7 @@ export function useSaleColumns(
             }}
           />
         ),
-        size: 150,
+        size: 160,
       }),
 
       // ── Address ─────────────────────────────────────────────────────────────
@@ -130,6 +131,7 @@ export function useSaleColumns(
             }}
           />
         ),
+        size: 400,
       }),
 
       // ── Products ────────────────────────────────────────────────────────────
@@ -141,7 +143,7 @@ export function useSaleColumns(
             onClick={() => onOpenProducts(row.original.id)}
           />
         ),
-        size: 220,
+        size: 250,
       }),
 
       // ── Delivery status ─────────────────────────────────────────────────────
@@ -155,7 +157,7 @@ export function useSaleColumns(
             }
           />
         ),
-        size: 160,
+        size: 150,
       }),
 
       // ── Payment status ──────────────────────────────────────────────────────
@@ -169,7 +171,7 @@ export function useSaleColumns(
             }
           />
         ),
-        size: 200,
+        size: 170,
       }),
 
       // ── Comments ────────────────────────────────────────────────────────────
@@ -187,6 +189,7 @@ export function useSaleColumns(
             }}
           />
         ),
+        size: 350,
       }),
     ],
     [onUpdate, onOpenProducts]
