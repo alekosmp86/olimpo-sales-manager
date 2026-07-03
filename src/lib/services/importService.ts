@@ -27,12 +27,80 @@ const PAYMENT_STATUS_MAP: Record<string, PaymentStatus> = {
   pagado: PaymentStatus.PAID,
 };
 
-function parseDeliveryStatus(raw: string): DeliveryStatus | null {
-  return DELIVERY_STATUS_MAP[raw.trim().toLowerCase()] ?? null;
+function parseCsvDate(str: string): Date | null {
+  if (!str) return null;
+  const parsed = Date.parse(str);
+  if (!isNaN(parsed)) return new Date(parsed);
+
+  const parts = str.split(/[-/]/);
+  if (parts.length === 3) {
+    const day = parseInt(parts[0], 10);
+    const monthStr = parts[1].toLowerCase();
+    const year = parseInt(parts[2], 10);
+
+    const months: Record<string, number> = {
+      jan: 0, ene: 0,
+      feb: 1,
+      mar: 2,
+      apr: 3, abr: 3,
+      may: 4,
+      jun: 5,
+      jul: 6,
+      aug: 7, ago: 7,
+      sep: 8,
+      oct: 9,
+      nov: 10,
+      dec: 11, dic: 11,
+    };
+
+    const month = months[monthStr.substring(0, 3)];
+    if (month !== undefined && !isNaN(day) && !isNaN(year)) {
+      return new Date(year, month, day);
+    }
+  }
+  return null;
 }
 
-function parsePaymentStatus(raw: string): PaymentStatus | null {
-  return PAYMENT_STATUS_MAP[raw.trim().toLowerCase()] ?? null;
+function parseDeliveryStatus(raw: string | null | undefined): DeliveryStatus {
+  if (!raw) return DeliveryStatus.NOT_DELIVERED;
+  const clean = raw.trim().toLowerCase();
+  if (clean === "e") {
+    return DeliveryStatus.DELIVERED;
+  }
+  return DeliveryStatus.NOT_DELIVERED;
+}
+
+function parsePaymentStatus(raw: string | null | undefined): PaymentStatus {
+  if (!raw) return PaymentStatus.NOT_PAID;
+  const clean = raw.trim().toLowerCase();
+  if (clean === "p") {
+    return PaymentStatus.PAID;
+  }
+  if (clean === "w") {
+    return PaymentStatus.WAITING_BANK_CONFIRMATION;
+  }
+  return PaymentStatus.NOT_PAID;
+}
+
+function resolveProductAlias(rawName: string | null | undefined): string {
+  if (!rawName) return "";
+  const clean = rawName.trim().toLowerCase();
+  const PRODUCT_ALIASES: Record<string, string> = {
+    w: "Wegovy",
+    o: "Ozempic",
+  };
+  return PRODUCT_ALIASES[clean] ?? rawName.trim();
+}
+
+function standardizeDimension(raw: string | null | undefined): string {
+  if (!raw) return "";
+  return raw.trim().replace(",", ".");
+}
+
+function parseCsvFloat(raw: string | null | undefined): number {
+  if (!raw) return NaN;
+  const clean = raw.trim().replace(",", ".");
+  return parseFloat(clean);
 }
 
 export async function validateAndClassifyRows(
@@ -53,33 +121,34 @@ export async function validateAndClassifyRows(
   for (const row of rows) {
     const errors: string[] = [];
 
-    const date = row["Date"]?.trim();
+    const dateStr = row["Date"]?.trim();
     const clientName = row["Client Name"]?.trim();
     const address = row["Address"]?.trim() ?? "";
-    const product = row["Product"]?.trim();
-    const dimension = row["Dimension"]?.trim();
+    const productRaw = row["Product"]?.trim();
+    const dimensionRaw = row["Dimension"]?.trim();
     const quantityStr = row["Quantity"]?.trim();
     const totalPriceStr = row["Total Price"]?.trim();
     const deliveryRaw = row["Delivery Status"]?.trim() ?? "";
     const paymentRaw = row["Payment Status"]?.trim() ?? "";
     const comments = row["Comments"]?.trim() ?? "";
 
-    if (!date || isNaN(Date.parse(date))) errors.push("Fecha inválida o faltante.");
+    const dateObj = parseCsvDate(dateStr);
+    if (!dateObj) {
+      errors.push("Fecha inválida o faltante.");
+    }
+
     if (!clientName) errors.push("Nombre de cliente faltante.");
-    if (!product) errors.push("Producto faltante.");
-    if (!dimension) errors.push("Dimensión faltante.");
+    if (!productRaw) errors.push("Producto faltante.");
+    if (!dimensionRaw) errors.push("Dimensión faltante.");
 
     const quantity = parseInt(quantityStr, 10);
     if (isNaN(quantity) || quantity <= 0) errors.push("Cantidad inválida.");
 
-    const totalPrice = parseFloat(totalPriceStr);
+    const totalPrice = parseCsvFloat(totalPriceStr);
     if (isNaN(totalPrice) || totalPrice < 0) errors.push("Precio total inválido.");
 
     const deliveryStatus = parseDeliveryStatus(deliveryRaw);
-    if (!deliveryStatus) errors.push(`Estado de entrega desconocido: "${deliveryRaw}".`);
-
     const paymentStatus = parsePaymentStatus(paymentRaw);
-    if (!paymentStatus) errors.push(`Estado de pago desconocido: "${paymentRaw}".`);
 
     if (errors.length > 0) {
       invalid.push({ row, errors });
@@ -87,18 +156,20 @@ export async function validateAndClassifyRows(
     }
 
     const unitPrice = totalPrice / quantity;
+    const resolvedProduct = resolveProductAlias(productRaw!);
+    const resolvedDimension = standardizeDimension(dimensionRaw!);
 
     const validRow: ImportValidRow = {
-      date: date!,
+      date: dateObj!.toISOString(),
       clientName: clientName!,
       address,
-      product: product!,
-      dimension: dimension!,
+      product: resolvedProduct,
+      dimension: resolvedDimension,
       quantity,
       totalPrice,
       unitPrice,
-      deliveryStatus: deliveryStatus!,
-      paymentStatus: paymentStatus!,
+      deliveryStatus,
+      paymentStatus,
       comments,
     };
 
