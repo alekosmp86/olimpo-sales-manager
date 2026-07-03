@@ -2,7 +2,7 @@ import styles from "./ProductsCell.module.css";
 import type { SaleItem } from "@/lib/types";
 
 interface ProductsCellProps {
-  items: SaleItem[];
+  items?: SaleItem[];
   onClick: () => void;
 }
 
@@ -11,32 +11,38 @@ function formatPrice(n: number) {
     style: "currency",
     currency: "ARS",
     maximumFractionDigits: 2,
-  }).format(n);
+  }).format(n ?? 0);
 }
 
-export function ProductsCell({ items, onClick }: ProductsCellProps) {
-  if (items.length === 0) {
+export function ProductsCell({ items = [], onClick }: ProductsCellProps) {
+  const safeItems = items ?? [];
+  if (safeItems.length === 0) {
     return (
-      <button className={styles.emptyCell} onClick={onClick}>
+      <button type="button" className={styles.emptyCell} onClick={onClick}>
         <span className={styles.emptyLabel}>+ Agregar productos</span>
       </button>
     );
   }
 
   return (
-    <button className={styles.cell} onClick={onClick}>
+    <button type="button" className={styles.cell} onClick={onClick}>
       <ul className={styles.list}>
-        {items.map((item) => (
-          <li key={item.id} className={styles.item}>
-            <span className={styles.name}>
-              {item.product.name}
-              <span className={styles.dim}>{item.product.dimension.label}</span>
-            </span>
-            <span className={styles.meta}>
-              {item.quantity} u. · {formatPrice(item.totalPrice)}
-            </span>
-          </li>
-        ))}
+        {safeItems.map((item) => {
+          if (!item || !item.product) return null;
+          const label = item.product.dimension?.label ?? "";
+          const totalPrice = item.totalPrice ?? (item.quantity * (item.product.unitPrice ?? 0));
+          return (
+            <li key={item.id} className={styles.item}>
+              <span className={styles.name}>
+                {item.product.name}
+                {label && <span className={styles.dim}>{label}</span>}
+              </span>
+              <span className={styles.meta}>
+                {item.quantity} u. · {formatPrice(totalPrice)}
+              </span>
+            </li>
+          );
+        })}
       </ul>
     </button>
   );

@@ -44,7 +44,7 @@ model Product {
 
 model Sale {
   id             String         @id @default(cuid())
-  date           DateTime
+  date           DateTime       @db.Date
   clientName     String
   address        String?
   deliveryStatus DeliveryStatus @default(NOT_DELIVERED)

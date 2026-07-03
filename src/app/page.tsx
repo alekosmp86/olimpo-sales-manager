@@ -1,4 +1,5 @@
 import { SalesTable } from "@/components/sales/SalesTable";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function SalesPage() {
-  return <SalesTable />;
+  return (
+    <ErrorBoundary>
+      <SalesTable />
+    </ErrorBoundary>
+  );
 }

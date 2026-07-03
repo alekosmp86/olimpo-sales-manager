@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -17,7 +17,12 @@ import { Button } from "@/components/ui/Button";
 import { CatalogModal } from "@/components/catalog/CatalogModal";
 import { ImportCSVButton } from "@/components/import/ImportCSVButton";
 import type { Sale } from "@/lib/types";
-import { Search, Package, Trash2, Plus } from "lucide-react";
+import { Search, Package, Trash2, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+
+const MONTH_NAMES = [
+  "Ene", "Feb", "Mar", "Abr", "May", "Jun",
+  "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"
+];
 
 const columnHelper = createColumnHelper<Sale>();
 
@@ -31,6 +36,10 @@ export function SalesTable() {
   } | null>(null);
   const [catalogOpen, setCatalogOpen] = useState(false);
   const [newRowId, setNewRowId] = useState<string | null>(null);
+
+  const [selectedYear, setSelectedYear] = useState<number>(2026);
+  const [selectedMonth, setSelectedMonth] = useState<number>(0);
+  const [hasSetDefault, setHasSetDefault] = useState(false);
 
   // Debounced search
   const handleSearch = useCallback((val: string) => {
@@ -46,18 +55,65 @@ export function SalesTable() {
         .then((r) => r.json()),
   });
 
+  useEffect(() => {
+    if (sales.length > 0 && !hasSetDefault) {
+      const mostRecent = sales[0];
+      if (mostRecent && mostRecent.date) {
+        const parts = mostRecent.date.split("-");
+        if (parts.length >= 2) {
+          const year = parseInt(parts[0], 10);
+          const month = parseInt(parts[1], 10) - 1;
+          setSelectedYear(year);
+          setSelectedMonth(month);
+          setHasSetDefault(true);
+        }
+      }
+    } else if (sales.length === 0 && !hasSetDefault && !isLoading) {
+      const today = new Date();
+      setSelectedYear(today.getFullYear());
+      setSelectedMonth(today.getMonth());
+      setHasSetDefault(true);
+    }
+  }, [sales, hasSetDefault, isLoading]);
+
+  const handleMonthChange = useCallback((e: React.MouseEvent, month: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedMonth(month);
+  }, []);
+
+  const handleYearChange = useCallback((e: React.MouseEvent, year: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedYear(year);
+  }, []);
+
   const createMutation = useMutation({
-    mutationFn: () =>
-      fetch("/api/sales", {
+    mutationFn: () => {
+      const today = new Date();
+      let saleDate: Date;
+      if (selectedYear === today.getFullYear() && selectedMonth === today.getMonth()) {
+        saleDate = today;
+      } else {
+        saleDate = new Date(selectedYear, selectedMonth, 1);
+      }
+
+      const yyyy = saleDate.getFullYear();
+      const mm = String(saleDate.getMonth() + 1).padStart(2, '0');
+      const dd = String(saleDate.getDate()).padStart(2, '0');
+      const dateStr = `${yyyy}-${mm}-${dd}`;
+
+      return fetch("/api/sales", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          date: new Date().toISOString(),
+          date: dateStr,
           clientName: "",
           address: "",
           comments: "",
         }),
-      }).then((r) => r.json()),
+      }).then((r) => r.json());
+    },
     onSuccess: (newSale: Sale) => {
       queryClient.invalidateQueries({ queryKey: ["sales"] });
       setNewRowId(newSale.id);
@@ -118,21 +174,25 @@ export function SalesTable() {
     // Date
     columnHelper.accessor("date", {
       header: "Fecha",
-      cell: ({ getValue, row }) => (
-        <input
-          type="date"
-          className={styles.cellInput}
-          defaultValue={getValue().slice(0, 10)}
-          onBlur={(e) => {
-            if (e.target.value !== getValue().slice(0, 10)) {
-              updateMutation.mutate({
-                id: row.original.id,
-                data: { date: e.target.value },
-              });
-            }
-          }}
-        />
-      ),
+      cell: ({ getValue, row }) => {
+        const val = getValue();
+        const dateStr = typeof val === "string" ? val.slice(0, 10) : "";
+        return (
+          <input
+            type="date"
+            className={styles.cellInput}
+            defaultValue={dateStr}
+            onBlur={(e) => {
+              if (e.target.value !== dateStr) {
+                updateMutation.mutate({
+                  id: row.original.id,
+                  data: { date: e.target.value },
+                });
+              }
+            }}
+          />
+        );
+      },
       size: 140,
     }),
 
@@ -246,8 +306,22 @@ export function SalesTable() {
     }),
   ];
 
+  const filteredSales = useMemo(() =>
+    sales.filter((sale) => {
+      if (!sale || !sale.date) return false;
+      const parts = sale.date.split("-");
+      if (parts.length >= 2) {
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        return year === selectedYear && month === selectedMonth;
+      }
+      return false;
+    }),
+    [sales, selectedYear, selectedMonth]
+  );
+
   const table = useReactTable({
-    data: sales,
+    data: filteredSales,
     columns,
     getCoreRowModel: getCoreRowModel(),
     state: { rowSelection },
@@ -354,7 +428,7 @@ export function SalesTable() {
                     >
                       {debouncedSearch
                         ? "No se encontraron resultados."
-                        : "No hay ventas. Cree una o importe un CSV."}
+                        : "No hay ventas en este mes. Cree una o importe un CSV."}
                     </td>
                   </tr>
                 ) : (
@@ -384,11 +458,49 @@ export function SalesTable() {
         )}
       </div>
 
+      {/* Excel Month Sheet Tabs */}
+      <div className={styles.excelTabs}>
+        <div className={styles.yearSelector}>
+          <button
+            type="button"
+            className={styles.yearBtn}
+            onClick={(e) => handleYearChange(e, selectedYear - 1)}
+            title="Año anterior"
+          >
+            <ChevronLeft size={14} />
+          </button>
+          <span className={styles.yearDisplay}>{selectedYear}</span>
+          <button
+            type="button"
+            className={styles.yearBtn}
+            onClick={(e) => handleYearChange(e, selectedYear + 1)}
+            title="Año siguiente"
+          >
+            <ChevronRight size={14} />
+          </button>
+        </div>
+        <div className={styles.sheetsScrollContainer}>
+          {MONTH_NAMES.map((name, index) => {
+            const isActive = selectedMonth === index;
+            return (
+              <button
+                key={index}
+                type="button"
+                className={[styles.sheetTab, isActive ? styles.activeSheet : ""].join(" ")}
+                onClick={(e) => handleMonthChange(e, index)}
+              >
+                {name}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Status bar */}
       <div className={styles.statusBar}>
         <span>
-          {sales.length} venta{sales.length !== 1 ? "s" : ""}
-          {debouncedSearch ? ` (filtradas)` : ""}
+          {filteredSales.length} de {sales.length} venta{sales.length !== 1 ? "s" : ""}
+          {debouncedSearch ? ` (búsqueda)` : ""}
         </span>
         {selectedCount > 0 && (
           <span>{selectedCount} seleccionada{selectedCount !== 1 ? "s" : ""}</span>
