@@ -2,6 +2,8 @@
 
 import React, { Component, ErrorInfo, ReactNode } from "react";
 
+import styles from "./ErrorBoundary.module.css";
+
 interface Props {
   children?: ReactNode;
 }
@@ -31,17 +33,17 @@ export class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div style={{ padding: "2rem", background: "#FFF0F0", border: "2px solid #FF8080", borderRadius: "8px", margin: "2rem", color: "#A00000", fontFamily: "sans-serif" }}>
-          <h2 style={{ marginTop: 0 }}>Hubo un error en la aplicación (Render Crash)</h2>
-          <p style={{ fontWeight: "bold" }}>{this.state.error?.toString()}</p>
+        <div className={styles.container}>
+          <h2 className={styles.title}>Hubo un error en la aplicación (Render Crash)</h2>
+          <p className={styles.message}>{this.state.error?.toString()}</p>
           {this.state.errorInfo && (
-            <pre style={{ background: "#FFF", padding: "1rem", border: "1px solid #FFC0C0", borderRadius: "4px", overflowX: "auto", fontSize: "0.85rem", color: "#333" }}>
+            <pre className={styles.stack}>
               {this.state.errorInfo.componentStack}
             </pre>
           )}
           <button
             onClick={() => window.location.reload()}
-            style={{ padding: "0.5rem 1rem", background: "#A00000", color: "#FFF", border: "none", borderRadius: "4px", cursor: "pointer", fontWeight: "bold", marginTop: "1rem" }}
+            className={styles.btn}
           >
             Recargar página
           </button>

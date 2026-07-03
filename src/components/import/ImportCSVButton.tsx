@@ -8,6 +8,8 @@ import { ImportReviewModal } from "./ImportReviewModal";
 import { AliasMappingModal } from "./AliasMappingModal";
 import { Upload } from "lucide-react";
 
+import styles from "./ImportCSVButton.module.css";
+
 export function ImportCSVButton() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
@@ -110,7 +112,7 @@ export function ImportCSVButton() {
       </Button>
 
       {error && (
-        <span style={{ fontSize: "var(--text-xs)", color: "var(--color-red-text)" }}>
+        <span className={styles.errorText}>
           {error}
         </span>
       )}

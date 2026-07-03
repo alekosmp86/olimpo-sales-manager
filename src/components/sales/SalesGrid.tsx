@@ -37,11 +37,11 @@ export function SalesGrid({
           <thead>
             {table.getHeaderGroups().map((hg) => (
               <tr key={hg.id} className={styles.headerRow}>
-                {hg.headers.map((header) => (
+                 {hg.headers.map((header) => (
                   <th
                     key={header.id}
                     className={styles.th}
-                    style={{ width: header.getSize() }}
+                    style={{ "--col-width": `${header.getSize()}px` } as React.CSSProperties}
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}
                   </th>
@@ -72,7 +72,11 @@ export function SalesGrid({
                     .join(" ")}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className={styles.td}>
+                    <td
+                      key={cell.id}
+                      className={styles.td}
+                      style={{ "--col-width": `${cell.column.getSize()}px` } as React.CSSProperties}
+                    >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}
