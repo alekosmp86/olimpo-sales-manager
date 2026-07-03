@@ -300,3 +300,44 @@
   border-top: 3px solid var(--color-primary) !important;
   padding-top: calc(var(--space-1) - 2px) !important;
 }
+
+/* ─── Date Overlay Picker ─────────────────────────────────────────────────── */
+.dateInputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 6px var(--space-3);
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.dateInputWrapper:hover {
+  background: var(--color-surface-2);
+  border-color: var(--color-border);
+}
+
+.dateDisplayText {
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  pointer-events: none;
+}
+
+.dateCalendarIcon {
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.dateHiddenInput {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+

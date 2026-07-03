@@ -77,3 +77,10 @@ enum PaymentStatus {
   WAITING_BANK_CONFIRMATION
   PAID
 }
+
+model ProductAlias {
+  id        String   @id @default(cuid())
+  alias     String   @unique
+  name      String
+  createdAt DateTime @default(now())
+}

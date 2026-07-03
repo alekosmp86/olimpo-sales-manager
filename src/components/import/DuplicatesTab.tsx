@@ -2,6 +2,7 @@
 
 import type { ImportDuplicatePair } from "@/lib/types";
 import styles from "./ImportReviewModal.module.css";
+import { formatReviewDate } from "@/lib/dateUtils";
 
 interface DuplicatesTabProps {
   pairs: ImportDuplicatePair[];
@@ -32,7 +33,7 @@ export function DuplicatesTab({
               <h4 className={styles.dupColTitle}>Nuevo (CSV)</h4>
               <p className={styles.dupName}>{pair.incoming.clientName}</p>
               <p className={styles.dupMeta}>
-                {pair.incoming.date} · {pair.incoming.product}{" "}
+                {formatReviewDate(pair.incoming.date)} · {pair.incoming.product}{" "}
                 {pair.incoming.dimension}
               </p>
             </div>

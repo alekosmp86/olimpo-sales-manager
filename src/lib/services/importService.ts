@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { DeliveryStatus, PaymentStatus } from "@/lib/constants/statuses";
 import { findOrCreateDimension } from "@/lib/services/dimensionService";
 import { findOrCreateProduct } from "@/lib/services/productService";
+import { resolveProductAliases } from "@/lib/services/aliasService";
 import type {
   CsvRow,
   ImportValidRow,
@@ -23,18 +24,18 @@ function parseCsvDate(str: string): Date | null {
     const year = parseInt(parts[2], 10);
 
     const months: Record<string, number> = {
-      jan: 0, ene: 0,
+      ene: 0,
       feb: 1,
       mar: 2,
-      apr: 3, abr: 3,
+      abr: 3,
       may: 4,
       jun: 5,
       jul: 6,
-      aug: 7, ago: 7,
+      ago: 7,
       sep: 8,
       oct: 9,
       nov: 10,
-      dec: 11, dic: 11,
+      dic: 11,
     };
 
     const month = months[monthStr.substring(0, 3)];
@@ -66,15 +67,7 @@ function parsePaymentStatus(raw: string | null | undefined): PaymentStatus {
   return PaymentStatus.NOT_PAID;
 }
 
-function resolveProductAlias(rawName: string | null | undefined): string {
-  if (!rawName) return "";
-  const clean = rawName.trim().toLowerCase();
-  const PRODUCT_ALIASES: Record<string, string> = {
-    w: "Wegovy",
-    o: "Ozempic",
-  };
-  return PRODUCT_ALIASES[clean] ?? rawName.trim();
-}
+
 
 function standardizeDimension(raw: string | null | undefined): string {
   if (!raw) return "";
@@ -89,7 +82,34 @@ function parseCsvFloat(raw: string | null | undefined): number {
 
 export async function validateAndClassifyRows(
   rows: CsvRow[]
-): Promise<ImportClassificationResult> {
+): Promise<ImportClassificationResult | { unmatched: string[] }> {
+  // Get all unique product names in the CSV
+  const csvProductNames = Array.from(
+    new Set(rows.map((r) => r.product?.trim()).filter(Boolean))
+  );
+
+  // Resolve against db aliases
+  const aliasMap = await resolveProductAliases(csvProductNames);
+
+  // Get standard names
+  const existingProducts = await prisma.product.findMany({
+    select: { name: true },
+  });
+  const standardNames = new Set(existingProducts.map((p) => p.name.toLowerCase()));
+
+  // Find unmatched product names
+  const unmatched = new Set<string>();
+  for (const rawName of csvProductNames) {
+    const clean = rawName.toLowerCase();
+    if (!aliasMap.has(clean) && !standardNames.has(clean)) {
+      unmatched.add(rawName);
+    }
+  }
+
+  if (unmatched.size > 0) {
+    return { unmatched: Array.from(unmatched) };
+  }
+
   const valid: ImportValidRow[] = [];
   const invalid: ImportInvalidRow[] = [];
   const duplicates: ImportDuplicatePair[] = [];
@@ -141,7 +161,8 @@ export async function validateAndClassifyRows(
     }
 
     const unitPrice = totalPrice / quantity;
-    const resolvedProduct = resolveProductAlias(productRaw!);
+    const cleanProductRaw = productRaw!.toLowerCase();
+    const resolvedProduct = aliasMap.get(cleanProductRaw) ?? productRaw!;
     const resolvedDimension = standardizeDimension(dimensionRaw!);
 
     const validRow: ImportValidRow = {

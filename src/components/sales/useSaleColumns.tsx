@@ -5,6 +5,8 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { DeliveryDropdown, PaymentDropdown } from "./StatusDropdown";
 import { ProductsCell } from "./ProductsCell";
 import type { Sale } from "@/lib/types";
+import { formatReviewDate } from "@/lib/dateUtils";
+import { Calendar } from "lucide-react";
 import styles from "./SalesTable.module.css";
 
 const columnHelper = createColumnHelper<Sale>();
@@ -52,18 +54,30 @@ export function useSaleColumns(
         cell: ({ getValue, row }) => {
           const dateStr = (getValue() ?? "").slice(0, 10);
           return (
-            <input
-              type="date"
-              className={styles.cellInput}
-              defaultValue={dateStr}
-              onBlur={(e) => {
-                if (e.target.value !== dateStr)
-                  onUpdate({ id: row.original.id, data: { date: e.target.value } });
-              }}
-            />
+            <div className={styles.dateInputWrapper}>
+              <span className={styles.dateDisplayText}>
+                {formatReviewDate(dateStr)}
+              </span>
+              <Calendar size={14} className={styles.dateCalendarIcon} />
+              <input
+                type="date"
+                className={styles.dateHiddenInput}
+                defaultValue={dateStr}
+                onClick={(e) => {
+                  try {
+                    e.currentTarget.showPicker();
+                  } catch {}
+                }}
+                onChange={(e) => {
+                  if (e.target.value && e.target.value !== dateStr) {
+                    onUpdate({ id: row.original.id, data: { date: e.target.value } });
+                  }
+                }}
+              />
+            </div>
           );
         },
-        size: 140,
+        size: 150,
       }),
 
       // ── Client name ─────────────────────────────────────────────────────────

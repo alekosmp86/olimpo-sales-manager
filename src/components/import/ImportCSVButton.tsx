@@ -5,70 +5,86 @@ import Papa from "papaparse";
 import { Button } from "@/components/ui/Button";
 import type { CsvRow, ImportClassificationResult } from "@/lib/types";
 import { ImportReviewModal } from "./ImportReviewModal";
+import { AliasMappingModal } from "./AliasMappingModal";
 import { Upload } from "lucide-react";
 
 export function ImportCSVButton() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ImportClassificationResult | null>(null);
+  const [unmatched, setUnmatched] = useState<string[] | null>(null);
+  const [pendingRows, setPendingRows] = useState<CsvRow[] | null>(null);
   const [error, setError] = useState("");
 
   function handleClick() {
     fileRef.current?.click();
   }
 
+  async function submitImport(rows: CsvRow[]) {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rows }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      if (data.unmatched) {
+        setUnmatched(data.unmatched);
+        setPendingRows(rows);
+      } else {
+        setResult(data);
+        setUnmatched(null);
+        setPendingRows(null);
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Error al procesar CSV.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setLoading(true);
     setError("");
 
     Papa.parse<string[]>(file, {
       header: false,
       skipEmptyLines: true,
       complete: async (parsed) => {
-        try {
-          const rawRows = parsed.data;
-          if (rawRows.length === 0) return;
+        const rawRows = parsed.data;
+        if (rawRows.length === 0) return;
 
-          // Check if first row is a header row by testing for typical header keywords
-          const hasHeader = rawRows[0] && rawRows[0][0]?.toLowerCase().includes("date");
-          const startIdx = hasHeader ? 1 : 0;
+        // Check if first row is a header row by testing for typical header keywords
+        const hasHeader = rawRows[0] && rawRows[0][0]?.toLowerCase().includes("date");
+        const startIdx = hasHeader ? 1 : 0;
 
-          const formattedRows: CsvRow[] = rawRows.slice(startIdx).map((row) => ({
-            date: row[0] ?? "",
-            clientName: row[1] ?? "",
-            address: row[2] ?? "",
-            product: row[3] ?? "",
-            dimension: row[4] ?? "",
-            quantity: row[5] ?? "",
-            totalPrice: row[6] ?? "",
-            deliveryStatus: row[7] ?? "",
-            paymentStatus: row[8] ?? "",
-            comments: row[9] ?? "",
-            phone: row[10] ?? "",
-          }));
+        const formattedRows: CsvRow[] = rawRows.slice(startIdx).map((row) => ({
+          date: row[0] ?? "",
+          clientName: row[1] ?? "",
+          address: row[2] ?? "",
+          product: row[3] ?? "",
+          dimension: row[4] ?? "",
+          quantity: row[5] ?? "",
+          totalPrice: row[6] ?? "",
+          deliveryStatus: row[7] ?? "",
+          paymentStatus: row[8] ?? "",
+          comments: row[9] ?? "",
+          phone: row[10] ?? "",
+        }));
 
-          const res = await fetch("/api/import", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ rows: formattedRows }),
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error);
-          setResult(data);
-        } catch (err: unknown) {
-          setError(err instanceof Error ? err.message : "Error al procesar CSV.");
-        } finally {
-          setLoading(false);
-          // Reset input so same file can be re-selected
-          if (fileRef.current) fileRef.current.value = "";
-        }
+        await submitImport(formattedRows);
+
+        // Reset input so same file can be re-selected
+        if (fileRef.current) fileRef.current.value = "";
       },
       error: (err) => {
         setError(err.message);
-        setLoading(false);
       },
     });
   }
@@ -104,6 +120,18 @@ export function ImportCSVButton() {
           isOpen={true}
           onClose={() => setResult(null)}
           result={result}
+        />
+      )}
+
+      {unmatched && pendingRows && (
+        <AliasMappingModal
+          isOpen={true}
+          unmatched={unmatched}
+          onClose={() => {
+            setUnmatched(null);
+            setPendingRows(null);
+          }}
+          onSuccess={() => submitImport(pendingRows)}
         />
       )}
     </>

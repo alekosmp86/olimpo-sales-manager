@@ -2,6 +2,7 @@
 
 import type { ImportValidRow } from "@/lib/types";
 import styles from "./ImportReviewModal.module.css";
+import { formatReviewDate } from "@/lib/dateUtils";
 
 interface ValidTabProps {
   rows: ImportValidRow[];
@@ -28,7 +29,7 @@ export function ValidTab({ rows }: ValidTabProps) {
         <tbody>
           {rows.map((row, i) => (
             <tr key={i} className={styles.validRow}>
-              <td>{row.date}</td>
+              <td>{formatReviewDate(row.date)}</td>
               <td>{row.clientName}</td>
               <td>{row.product}</td>
               <td>{row.dimension}</td>

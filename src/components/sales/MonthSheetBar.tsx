@@ -2,11 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import styles from "./SalesTable.module.css";
-
-const MONTH_NAMES = [
-  "Ene", "Feb", "Mar", "Abr", "May", "Jun",
-  "Jul", "Ago", "Sep", "Oct", "Nov", "Dic",
-];
+import { MONTH_ABBRS } from "@/lib/dateUtils";
 
 interface MonthSheetBarProps {
   selectedYear: number;
@@ -46,7 +42,7 @@ export function MonthSheetBar({
       </div>
 
       <div className={styles.sheetsScrollContainer}>
-        {MONTH_NAMES.map((name, index) => (
+        {MONTH_ABBRS.map((name, index) => (
           <button
             key={index}
             type="button"
