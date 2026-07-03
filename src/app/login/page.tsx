@@ -36,6 +36,8 @@ async function loginAction(
 export default function LoginPage() {
   const router = useRouter();
   const [showConfirm, setShowConfirm] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [state, action, pending] = useActionState(
     async (prev: FormState, formData: FormData) => {
       const result = await loginAction(prev, formData);
@@ -77,6 +79,8 @@ export default function LoginPage() {
               type="text"
               className={styles.input}
               placeholder="Nombre de usuario"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               autoComplete="username"
               required
             />
@@ -92,6 +96,8 @@ export default function LoginPage() {
               type="password"
               className={styles.input}
               placeholder="Contraseña"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               autoComplete={showConfirm ? "new-password" : "current-password"}
               required
             />

@@ -23,6 +23,13 @@ export async function POST(req: NextRequest) {
     const { username, password, confirmPassword } = parsed.data;
     const count = await getUserCount();
 
+    if (confirmPassword && count > 0) {
+      return NextResponse.json(
+        { error: "Ya existe un usuario registrado en el sistema." },
+        { status: 400 }
+      );
+    }
+
     if (count === 0) {
       // First-time setup — create the user
       if (!confirmPassword) {
