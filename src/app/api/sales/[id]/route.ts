@@ -6,6 +6,7 @@ import { DeliveryStatus, PaymentStatus } from "@/lib/constants/statuses";
 const UpdateSaleSchema = z.object({
   date: z.string().optional(),
   clientName: z.string().optional(),
+  phone: z.string().nullable().optional(),
   address: z.string().nullable().optional(),
   deliveryStatus: z.enum([DeliveryStatus.NOT_DELIVERED, DeliveryStatus.DELIVERED]).optional(),
   paymentStatus: z

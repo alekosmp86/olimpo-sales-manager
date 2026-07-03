@@ -8,8 +8,10 @@ import styles from "./ImportReviewModal.module.css";
 import type {
   ImportClassificationResult,
   ImportValidRow,
-  ImportDuplicatePair,
 } from "@/lib/types";
+import { ValidTab } from "./ValidTab";
+import { InvalidTab } from "./InvalidTab";
+import { DuplicatesTab } from "./DuplicatesTab";
 
 interface Props {
   isOpen: boolean;
@@ -134,111 +136,3 @@ export function ImportReviewModal({ isOpen, onClose, result }: Props) {
   );
 }
 
-// ─── Tab Components ───────────────────────────────────────────────────────────
-
-function ValidTab({ rows }: { rows: ImportValidRow[] }) {
-  if (rows.length === 0)
-    return <p className={styles.empty}>No hay filas válidas.</p>;
-
-  return (
-    <div className={styles.tableWrapper}>
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>Fecha</th>
-            <th>Cliente</th>
-            <th>Producto</th>
-            <th>Dimensión</th>
-            <th>Cantidad</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, i) => (
-            <tr key={i} className={styles.validRow}>
-              <td>{row.date}</td>
-              <td>{row.clientName}</td>
-              <td>{row.product}</td>
-              <td>{row.dimension}</td>
-              <td>{row.quantity}</td>
-              <td>${row.totalPrice.toFixed(2)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function InvalidTab({ rows }: { rows: ImportClassificationResult["invalid"] }) {
-  if (rows.length === 0)
-    return <p className={styles.empty}>✓ No hay filas inválidas.</p>;
-
-  return (
-    <div className={styles.invalidList}>
-      {rows.map((item, i) => (
-        <div key={i} className={styles.invalidItem}>
-          <div className={styles.invalidHeader}>
-            <span className={styles.invalidLabel}>Fila {i + 1}</span>
-            <span className={styles.invalidClient}>
-              {item.row.clientName || "(sin nombre)"}
-            </span>
-          </div>
-          <ul className={styles.errorList}>
-            {item.errors.map((err, j) => (
-              <li key={j}>{err}</li>
-            ))}
-          </ul>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function DuplicatesTab({
-  pairs,
-  decisions,
-  onDecision,
-}: {
-  pairs: ImportDuplicatePair[];
-  decisions: Record<number, boolean>;
-  onDecision: (i: number, val: boolean) => void;
-}) {
-  if (pairs.length === 0)
-    return <p className={styles.empty}>✓ No hay duplicados.</p>;
-
-  return (
-    <div className={styles.duplicateList}>
-      {pairs.map((pair, i) => (
-        <div key={i} className={styles.duplicateCard}>
-          <div className={styles.dupColumns}>
-            <div className={styles.dupCol}>
-              <h4 className={styles.dupColTitle}>Existente en DB</h4>
-              <p className={styles.dupName}>{pair.existingClientName}</p>
-            </div>
-            <div className={styles.dupArrow}>↔</div>
-            <div className={styles.dupCol}>
-              <h4 className={styles.dupColTitle}>Nuevo (CSV)</h4>
-              <p className={styles.dupName}>{pair.incoming.clientName}</p>
-              <p className={styles.dupMeta}>{pair.incoming.date} · {pair.incoming.product} {pair.incoming.dimension}</p>
-            </div>
-          </div>
-          <div className={styles.dupActions}>
-            <button
-              className={[styles.dupBtn, decisions[i] === false ? styles.dupBtnActive : ""].join(" ")}
-              onClick={() => onDecision(i, false)}
-            >
-              Misma persona — ignorar
-            </button>
-            <button
-              className={[styles.dupBtn, styles.dupBtnGreen, decisions[i] === true ? styles.dupBtnActive : ""].join(" ")}
-              onClick={() => onDecision(i, true)}
-            >
-              Persona diferente — agregar ambos
-            </button>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}

@@ -83,6 +83,24 @@ export function useSaleColumns(
         ),
       }),
 
+      // ── Phone ───────────────────────────────────────────────────────────────
+      columnHelper.accessor("phone", {
+        header: "Teléfono",
+        cell: ({ getValue, row }) => (
+          <input
+            type="text"
+            className={styles.cellInput}
+            defaultValue={getValue() ?? ""}
+            placeholder="Teléfono"
+            onBlur={(e) => {
+              if (e.target.value !== (getValue() ?? ""))
+                onUpdate({ id: row.original.id, data: { phone: e.target.value || null } });
+            }}
+          />
+        ),
+        size: 150,
+      }),
+
       // ── Address ─────────────────────────────────────────────────────────────
       columnHelper.accessor("address", {
         header: "Dirección",

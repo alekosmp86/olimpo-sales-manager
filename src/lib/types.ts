@@ -39,6 +39,7 @@ export interface Sale {
   id: string;
   date: string;
   clientName: string;
+  phone: string | null;
   address: string | null;
   deliveryStatus: DeliveryStatus;
   paymentStatus: PaymentStatus;
@@ -53,6 +54,7 @@ export interface Sale {
 export interface CsvRow {
   date: string;
   clientName: string;
+  phone?: string;
   address: string;
   product: string;
   dimension: string;
@@ -66,6 +68,7 @@ export interface CsvRow {
 export interface ImportValidRow {
   date: string;
   clientName: string;
+  phone?: string;
   address: string;
   product: string;
   dimension: string;

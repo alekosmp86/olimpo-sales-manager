@@ -47,6 +47,7 @@ export function ImportCSVButton() {
             deliveryStatus: row[7] ?? "",
             paymentStatus: row[8] ?? "",
             comments: row[9] ?? "",
+            phone: row[10] ?? "",
           }));
 
           const res = await fetch("/api/import", {

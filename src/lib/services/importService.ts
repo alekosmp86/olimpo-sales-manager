@@ -107,6 +107,7 @@ export async function validateAndClassifyRows(
 
     const dateStr = row.date?.trim();
     const clientName = row.clientName?.trim();
+    const phone = row.phone?.trim() ?? "";
     const address = row.address?.trim() ?? "";
     const productRaw = row.product?.trim();
     const dimensionRaw = row.dimension?.trim();
@@ -146,6 +147,7 @@ export async function validateAndClassifyRows(
     const validRow: ImportValidRow = {
       date: dateObj!.toISOString(),
       clientName: clientName!,
+      phone: phone || undefined,
       address,
       product: resolvedProduct,
       dimension: resolvedDimension,
@@ -174,12 +176,12 @@ export async function validateAndClassifyRows(
 }
 
 export async function insertConfirmedRows(rows: ImportValidRow[]) {
-  // Group by clientName + date + address (one Sale per group)
+  // Group by clientName + phone + date + address (one Sale per group)
   type GroupKey = string;
   const groups = new Map<GroupKey, ImportValidRow[]>();
 
   for (const row of rows) {
-    const key = `${row.clientName}|${row.date}|${row.address}|${row.deliveryStatus}|${row.paymentStatus}|${row.comments}`;
+    const key = `${row.clientName}|${row.phone ?? ""}|${row.date}|${row.address}|${row.deliveryStatus}|${row.paymentStatus}|${row.comments}`;
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key)!.push(row);
   }
@@ -191,6 +193,7 @@ export async function insertConfirmedRows(rows: ImportValidRow[]) {
       data: {
         date: new Date(first.date),
         clientName: first.clientName,
+        phone: first.phone || null,
         address: first.address || null,
         deliveryStatus: first.deliveryStatus,
         paymentStatus: first.paymentStatus,

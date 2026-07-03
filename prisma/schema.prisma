@@ -46,6 +46,7 @@ model Sale {
   id             String         @id @default(cuid())
   date           DateTime       @db.Date
   clientName     String
+  phone          String?
   address        String?
   deliveryStatus DeliveryStatus @default(NOT_DELIVERED)
   paymentStatus  PaymentStatus  @default(NOT_PAID)

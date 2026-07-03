@@ -5,6 +5,7 @@ import { getSales, createSale } from "@/lib/services/saleService";
 const CreateSaleSchema = z.object({
   date: z.string().datetime({ offset: true }).or(z.string().date()),
   clientName: z.string(),
+  phone: z.string().optional(),
   address: z.string().optional(),
   comments: z.string().optional(),
 });
@@ -30,10 +31,11 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    const { date, clientName, address, comments } = parsed.data;
+    const { date, clientName, phone, address, comments } = parsed.data;
     const sale = await createSale({
       date: new Date(date),
       clientName,
+      phone,
       address,
       comments,
     });

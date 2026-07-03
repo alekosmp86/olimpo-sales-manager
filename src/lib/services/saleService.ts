@@ -20,6 +20,7 @@ export async function getSales(search?: string) {
         OR: [
           { clientName: { contains: search, mode: "insensitive" as const } },
           { address: { contains: search, mode: "insensitive" as const } },
+          { phone: { contains: search, mode: "insensitive" as const } },
         ],
       }
     : {};
@@ -36,6 +37,7 @@ export async function getSales(search?: string) {
 export async function createSale(data: {
   date: Date;
   clientName: string;
+  phone?: string;
   address?: string;
   comments?: string;
 }) {
@@ -43,6 +45,7 @@ export async function createSale(data: {
     data: {
       date: data.date,
       clientName: data.clientName,
+      phone: data.phone ?? null,
       address: data.address ?? null,
       comments: data.comments ?? null,
     },
@@ -56,6 +59,7 @@ export async function updateSale(
   data: Partial<{
     date: Date;
     clientName: string;
+    phone: string | null;
     address: string | null;
     deliveryStatus: DeliveryStatus;
     paymentStatus: PaymentStatus;
