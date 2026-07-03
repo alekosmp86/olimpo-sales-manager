@@ -28,7 +28,10 @@ export async function getSales(search?: string) {
   const sales = await prisma.sale.findMany({
     where,
     include: saleInclude,
-    orderBy: { date: "desc" },
+    orderBy: [
+      { date: "asc" },
+      { id: "asc" },
+    ],
   });
 
   return sales.map(serializeSale);
