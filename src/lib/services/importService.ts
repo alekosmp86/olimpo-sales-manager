@@ -203,41 +203,28 @@ export async function validateAndClassifyRows(
 }
 
 export async function insertConfirmedRows(rows: ImportValidRow[]) {
-  // Group by clientName + phone + date + address (one Sale per group)
-  type GroupKey = string;
-  const groups = new Map<GroupKey, ImportValidRow[]>();
-
   for (const row of rows) {
-    const key = `${row.clientName}|${row.phone ?? ""}|${row.date}|${row.address}|${row.deliveryStatus}|${row.paymentStatus}|${row.comments}`;
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key)!.push(row);
-  }
-
-  for (const [, groupRows] of groups) {
-    const first = groupRows[0];
-
     const sale = await prisma.sale.create({
       data: {
-        date: new Date(first.date),
-        clientName: first.clientName,
-        phone: first.phone || null,
-        address: first.address || null,
-        deliveryStatus: first.deliveryStatus,
-        paymentStatus: first.paymentStatus,
-        comments: first.comments || null,
+        date: new Date(row.date),
+        clientName: row.clientName,
+        phone: row.phone || null,
+        address: row.address || null,
+        deliveryStatus: row.deliveryStatus,
+        paymentStatus: row.paymentStatus,
+        comments: row.comments || null,
       },
     });
 
-    // Resolve dimension/product serially to avoid findOrCreate race conditions,
-    // then batch-insert all items in one query.
-    const itemData: { saleId: string; productId: string; quantity: number }[] = [];
-    for (const row of groupRows) {
-      const dim = await findOrCreateDimension(row.dimension);
-      const product = await findOrCreateProduct(row.product, dim.id, row.unitPrice);
-      itemData.push({ saleId: sale.id, productId: product.id, quantity: row.quantity });
-    }
-    if (itemData.length > 0) {
-      await prisma.saleItem.createMany({ data: itemData });
-    }
+    const dim = await findOrCreateDimension(row.dimension);
+    const product = await findOrCreateProduct(row.product, dim.id, row.unitPrice);
+
+    await prisma.saleItem.create({
+      data: {
+        saleId: sale.id,
+        productId: product.id,
+        quantity: row.quantity,
+      },
+    });
   }
 }
