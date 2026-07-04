@@ -15,7 +15,7 @@ function makeQueryClient() {
       },
     },
     queryCache: new QueryCache({
-      onError: (err: any, query) => {
+      onError: (err: Error, query) => {
         const meta = query.meta as { errorMessage?: string; silent?: boolean } | undefined;
         if (meta?.silent) return;
         const message = meta?.errorMessage || err.message || "Error al cargar datos";
@@ -30,7 +30,7 @@ function makeQueryClient() {
           triggerGlobalToast(meta.successMessage, MessageType.SUCCESS);
         }
       },
-      onError: (err: any, variables, context, mutation) => {
+      onError: (err: Error, variables, context, mutation) => {
         const meta = mutation.meta as { errorMessage?: string; silent?: boolean } | undefined;
         if (meta?.silent) return;
         const message = meta?.errorMessage || err.message || "Ha ocurrido un error";

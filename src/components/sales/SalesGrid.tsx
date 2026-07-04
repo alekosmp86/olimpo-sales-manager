@@ -21,13 +21,14 @@ export function SalesGrid({
   hasSearch,
 }: SalesGridProps) {
   const newRowRef = useRef<HTMLTableRowElement>(null);
+  const rows = table.getRowModel().rows;
 
   // Smoothly scroll the new row into view when it is rendered
   useEffect(() => {
     if (newRowId && newRowRef.current) {
       newRowRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
-  }, [newRowId, table.getRowModel().rows]);
+  }, [newRowId, rows]);
 
   if (isLoading) {
     return (

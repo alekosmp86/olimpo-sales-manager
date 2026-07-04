@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { Sale } from "@/lib/types";
 import styles from "./ClientNameCell.module.css";
@@ -42,21 +42,30 @@ function getSuggestions(query: string, sales: Sale[], excludeId: string): Client
 
 export function ClientNameCell({ saleId, initialValue, sales, onUpdate }: ClientNameCellProps) {
   const [value, setValue] = useState(initialValue);
-  const [suggestions, setSuggestions] = useState<ClientSuggestion[]>([]);
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
   const [showUpward, setShowUpward] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
+  // Sync state with props/focus changes directly in render to prevent post-effect cascading renders
+  const [prevInitialValue, setPrevInitialValue] = useState(initialValue);
+  const [prevFocused, setPrevFocused] = useState(focused);
+
+  if (initialValue !== prevInitialValue || focused !== prevFocused) {
+    setPrevInitialValue(initialValue);
+    setPrevFocused(focused);
+    if (!focused) {
+      setValue(initialValue);
+    }
+  }
+
   // Debounce the typed value before running the suggestion lookup
   const debouncedValue = useDebounce(value, 200);
 
-  // Run suggestion lookup whenever the debounced value changes
-  useEffect(() => {
-    if (!focused) return;
-    const results = getSuggestions(debouncedValue, sales, saleId);
-    setSuggestions(results);
-    setOpen(results.length > 0);
+  // Compute suggestions during render instead of performing cascading setState in useEffect
+  const suggestions = useMemo(() => {
+    if (!focused) return [];
+    return getSuggestions(debouncedValue, sales, saleId);
   }, [debouncedValue, sales, saleId, focused]);
 
   // Dynamic upward dropdown detection
@@ -71,17 +80,14 @@ export function ClientNameCell({ saleId, initialValue, sales, onUpdate }: Client
     setShowUpward(spaceBelow < 240);
   }, [open]);
 
-  // Sync external value changes (e.g. after a server update) when not focused
-  useEffect(() => {
-    if (!focused) setValue(initialValue);
-  }, [initialValue, focused]);
-
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setValue(e.target.value);
+    setOpen(true);
   }
 
   function handleFocus() {
     setFocused(true);
+    setOpen(true);
   }
 
   function handleBlur() {
@@ -127,6 +133,7 @@ export function ClientNameCell({ saleId, initialValue, sales, onUpdate }: Client
             <li
               key={i}
               role="option"
+              aria-selected={value === s.clientName}
               className={styles.item}
               // mousedown fires before blur — e.preventDefault() keeps the input focused
               // long enough for the click to complete, then handleSelect fires
