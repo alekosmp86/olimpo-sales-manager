@@ -7,7 +7,7 @@ import { Trash2 } from "lucide-react";
 import { useConfirm } from "@/components/ui/Confirm";
 import { MessageType } from "@/lib/constants/messageType";
 import type { Product, Dimension } from "@/lib/types";
-import styles from "./CatalogModal.module.css";
+import styles from "./ProductsTab.module.css";
 
 export function ProductsTab() {
   const queryClient = useQueryClient();

@@ -7,7 +7,7 @@ import { Trash2 } from "lucide-react";
 import { useConfirm } from "@/components/ui/Confirm";
 import { MessageType } from "@/lib/constants/messageType";
 import type { Dimension } from "@/lib/types";
-import styles from "./CatalogModal.module.css";
+import styles from "./DimensionsTab.module.css";
 
 export function DimensionsTab() {
   const queryClient = useQueryClient();
@@ -107,6 +107,7 @@ export function DimensionsTab() {
         <ul className={styles.list}>
           {dimensions.map((d) => (
             <li key={d.id} className={styles.listItem}>
+              {editId !== d.id && <span className={styles.dimLabel}>{d.label}</span>}
               {editId === d.id ? (
                 <div className={styles.editRow}>
                   <input
@@ -129,7 +130,6 @@ export function DimensionsTab() {
                 </div>
               ) : (
                 <div className={styles.itemActions}>
-                  <span className={styles.dimLabel}>{d.label}</span>
                   <Button
                     size="sm"
                     variant="ghost"
