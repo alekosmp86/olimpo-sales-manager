@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { updateDimension, deleteDimension } from "@/lib/services/dimensionService";
+import { validateSession } from "@/lib/session";
 
 const UpdateSchema = z.object({ label: z.string().min(1) });
 
@@ -9,6 +10,11 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await validateSession();
+    if (!session) {
+      return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+    }
+
     const { id } = await params;
     const body = await req.json();
     const parsed = UpdateSchema.safeParse(body);
@@ -28,6 +34,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await validateSession();
+    if (!session) {
+      return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+    }
+
     const { id } = await params;
     await deleteDimension(id);
     return NextResponse.json({ ok: true });

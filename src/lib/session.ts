@@ -1,6 +1,7 @@
 import "server-only";
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { checkUserExists } from "./services/userService";
 
 const SESSION_COOKIE = "olimpo_session";
 const secretKey = process.env.SESSION_SECRET;
@@ -53,8 +54,22 @@ export async function deleteSession(): Promise<void> {
   cookieStore.delete(SESSION_COOKIE);
 }
 
-export async function getSession(): Promise<SessionPayload | null> {
+export async function validateSession(): Promise<SessionPayload | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE)?.value;
-  return decrypt(token);
+  if (!token) return null;
+
+  const session = await decrypt(token);
+  if (!session) {
+    cookieStore.delete(SESSION_COOKIE);
+    return null;
+  }
+
+  const userExists = await checkUserExists(session.userId);
+  if (!userExists) {
+    cookieStore.delete(SESSION_COOKIE);
+    return null;
+  }
+
+  return session;
 }

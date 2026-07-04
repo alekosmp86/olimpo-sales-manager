@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createProductAlias } from "@/lib/services/aliasService";
+import { validateSession } from "@/lib/session";
 
 const AliasMappingSchema = z.object({
   mappings: z.array(
@@ -13,6 +14,11 @@ const AliasMappingSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await validateSession();
+    if (!session) {
+      return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+    }
+
     const body = await req.json();
     const parsed = AliasMappingSchema.safeParse(body);
     if (!parsed.success) {

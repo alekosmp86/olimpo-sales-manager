@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { decrypt } from "@/lib/session";
-import { checkUserExists } from "@/lib/services/userService";
 
 const PUBLIC_PATHS = ["/login", "/api/auth/login", "/api/auth/me"];
 
@@ -21,19 +20,21 @@ export async function proxy(req: NextRequest) {
   const token = req.cookies.get("olimpo_session")?.value;
   const session = await decrypt(token);
 
-  const userExists = session?.userId ? await checkUserExists(session.userId) : false;
-
-  if (!session || !userExists) {
+  if (!session) {
     // If it's an API request, return a 401 Unauthorized instead of redirecting
     if (pathname.startsWith("/api/")) {
-      return NextResponse.json(
+      const response = NextResponse.json(
         { error: "No autorizado." },
         { status: 401 }
       );
+      response.cookies.delete("olimpo_session");
+      return response;
     }
 
     const loginUrl = new URL("/login", req.url);
-    return NextResponse.redirect(loginUrl);
+    const response = NextResponse.redirect(loginUrl);
+    response.cookies.delete("olimpo_session");
+    return response;
   }
 
   return NextResponse.next();

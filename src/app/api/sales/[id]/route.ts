@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { updateSale, deleteSales } from "@/lib/services/saleService";
 import { DeliveryStatus, PaymentStatus } from "@/lib/constants/statuses";
+import { validateSession } from "@/lib/session";
 
 const UpdateSaleSchema = z.object({
   date: z.string().optional(),
@@ -32,6 +33,11 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await validateSession();
+    if (!session) {
+      return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+    }
+
     const { id } = await params;
     const body = await req.json();
     const parsed = UpdateSaleSchema.safeParse(body);
@@ -61,6 +67,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await validateSession();
+    if (!session) {
+      return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+    }
+
     const { id } = await params;
     await deleteSales([id]);
     return NextResponse.json({ ok: true });

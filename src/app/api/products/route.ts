@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getProducts, createProduct } from "@/lib/services/productService";
+import { validateSession } from "@/lib/session";
 
 const CreateProductSchema = z.object({
   name: z.string().min(1, "Nombre requerido."),
@@ -10,6 +11,11 @@ const CreateProductSchema = z.object({
 
 export async function GET() {
   try {
+    const session = await validateSession();
+    if (!session) {
+      return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+    }
+
     const products = await getProducts();
     return NextResponse.json(products);
   } catch (err) {
@@ -20,6 +26,11 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await validateSession();
+    if (!session) {
+      return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+    }
+
     const body = await req.json();
     const parsed = CreateProductSchema.safeParse(body);
     if (!parsed.success) {

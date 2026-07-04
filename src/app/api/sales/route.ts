@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getSales, createSale } from "@/lib/services/saleService";
+import { validateSession } from "@/lib/session";
 
 const CreateSaleSchema = z.object({
   date: z.string().datetime({ offset: true }).or(z.string().date()),
@@ -12,6 +13,11 @@ const CreateSaleSchema = z.object({
 
 export async function GET(req: NextRequest) {
   try {
+    const session = await validateSession();
+    if (!session) {
+      return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+    }
+
     const search = req.nextUrl.searchParams.get("search") ?? undefined;
     const sales = await getSales(search);
     return NextResponse.json(sales);
@@ -23,6 +29,11 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await validateSession();
+    if (!session) {
+      return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+    }
+
     const body = await req.json();
     const parsed = CreateSaleSchema.safeParse(body);
     if (!parsed.success) {

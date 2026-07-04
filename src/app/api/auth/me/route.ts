@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server";
-import { getSession } from "@/lib/session";
-import { getUserCount, checkUserExists } from "@/lib/services/userService";
+import { validateSession } from "@/lib/session";
+import { getUserCount } from "@/lib/services/userService";
 
 export async function GET() {
-  const session = await getSession();
+  const session = await validateSession();
   const userCount = await getUserCount();
 
-  const userExists = session?.userId ? await checkUserExists(session.userId) : false;
-
-  if (!session || !userExists) {
+  if (!session) {
     return NextResponse.json(
       { authenticated: false, firstTime: userCount === 0 },
       { status: 401 }

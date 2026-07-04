@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { updateProduct, deleteProduct } from "@/lib/services/productService";
+import { validateSession } from "@/lib/session";
 
 const UpdateSchema = z.object({
   name: z.string().min(1).optional(),
@@ -13,6 +14,11 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await validateSession();
+    if (!session) {
+      return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+    }
+
     const { id } = await params;
     const body = await req.json();
     const parsed = UpdateSchema.safeParse(body);
@@ -32,6 +38,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await validateSession();
+    if (!session) {
+      return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+    }
+
     const { id } = await params;
     await deleteProduct(id);
     return NextResponse.json({ ok: true });

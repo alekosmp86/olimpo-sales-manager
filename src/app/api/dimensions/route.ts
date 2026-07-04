@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getDimensions, createDimension } from "@/lib/services/dimensionService";
+import { validateSession } from "@/lib/session";
 
 const CreateDimensionSchema = z.object({
   label: z.string().min(1, "Etiqueta requerida."),
@@ -8,6 +9,11 @@ const CreateDimensionSchema = z.object({
 
 export async function GET() {
   try {
+    const session = await validateSession();
+    if (!session) {
+      return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+    }
+
     const dimensions = await getDimensions();
     return NextResponse.json(dimensions);
   } catch (err) {
@@ -18,6 +24,11 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await validateSession();
+    if (!session) {
+      return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+    }
+
     const body = await req.json();
     const parsed = CreateDimensionSchema.safeParse(body);
     if (!parsed.success) {
