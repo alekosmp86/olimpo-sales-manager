@@ -6,6 +6,8 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import type { Product } from "@/lib/types";
 import styles from "./AliasMappingModal.module.css";
+import { useConfirm } from "@/components/ui/Confirm";
+import { MessageType } from "@/lib/constants/messageType";
 
 interface AliasMappingModalProps {
   isOpen: boolean;
@@ -20,6 +22,7 @@ export function AliasMappingModal({
   unmatched,
   onSuccess,
 }: AliasMappingModalProps) {
+  const confirm = useConfirm();
   const { data: products = [] } = useQuery<Product[]>({
     queryKey: ["products"],
     queryFn: () => fetch("/api/products").then((r) => r.json()),
@@ -61,7 +64,7 @@ export function AliasMappingModal({
     },
   });
 
-  function handleSave() {
+  async function handleSave() {
     const mappings = Object.entries(selections).map(([alias, sel]) => {
       const isNew = sel.value === "__NEW__" || !standardNames.includes(sel.value);
       const name = isNew ? sel.customName.trim() : sel.value;
@@ -70,7 +73,13 @@ export function AliasMappingModal({
 
     // Validation
     if (mappings.some((m) => !m.name)) {
-      alert("Por favor, complete todos los campos de nombre para continuar.");
+      await confirm({
+        title: "Atención",
+        message: "Por favor, complete todos los campos de nombre para continuar.",
+        onlyConfirm: true,
+        confirmText: "Entendido",
+        type: MessageType.WARNING,
+      });
       return;
     }
 

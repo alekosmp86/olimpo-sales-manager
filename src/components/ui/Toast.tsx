@@ -2,27 +2,18 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { CheckCircle, AlertCircle, AlertTriangle, Info, X } from "lucide-react";
+import { MessageType, MessageTypeValue } from "@/lib/constants/messageType";
 import styles from "./Toast.module.css";
-
-// 1. Define ToastType as a const (enum-like) as requested by the user
-export const ToastType = {
-  SUCCESS: "success",
-  ERROR: "error",
-  INFO: "info",
-  WARNING: "warning",
-} as const;
-
-export type ToastTypeValue = typeof ToastType[keyof typeof ToastType];
 
 export interface Toast {
   id: string;
   message: string;
-  type: ToastTypeValue;
+  type: MessageTypeValue;
   duration?: number;
 }
 
 interface ToastContextType {
-  showToast: (message: string, type: ToastTypeValue, duration?: number) => void;
+  showToast: (message: string, type: MessageTypeValue, duration?: number) => void;
   success: (message: string, duration?: number) => void;
   error: (message: string, duration?: number) => void;
   info: (message: string, duration?: number) => void;
@@ -37,11 +28,11 @@ let globalToast: {
   warn: (msg: string, duration?: number) => void;
 } | null = null;
 
-export const triggerGlobalToast = (message: string, type: ToastTypeValue, duration?: number) => {
+export const triggerGlobalToast = (message: string, type: MessageTypeValue, duration?: number) => {
   if (globalToast) {
-    if (type === ToastType.SUCCESS) globalToast.success(message, duration);
-    else if (type === ToastType.ERROR) globalToast.error(message, duration);
-    else if (type === ToastType.WARNING) globalToast.warn(message, duration);
+    if (type === MessageType.SUCCESS) globalToast.success(message, duration);
+    else if (type === MessageType.DANGER) globalToast.error(message, duration);
+    else if (type === MessageType.WARNING) globalToast.warn(message, duration);
     else globalToast.info(message, duration);
   }
 };
@@ -67,13 +58,13 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
 
   const getIcon = () => {
     switch (type) {
-      case ToastType.SUCCESS:
+      case MessageType.SUCCESS:
         return <CheckCircle size={20} />;
-      case ToastType.ERROR:
+      case MessageType.DANGER:
         return <AlertCircle size={20} />;
-      case ToastType.WARNING:
+      case MessageType.WARNING:
         return <AlertTriangle size={20} />;
-      case ToastType.INFO:
+      case MessageType.INFO:
       default:
         return <Info size={20} />;
     }
@@ -100,25 +91,25 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const showToast = useCallback((message: string, type: ToastTypeValue, duration = 4000) => {
+  const showToast = useCallback((message: string, type: MessageTypeValue, duration = 4000) => {
     const id = Math.random().toString(36).substring(2, 9);
     setToasts((prev) => [...prev, { id, message, type, duration }]);
   }, []);
 
   const success = useCallback((message: string, duration?: number) => {
-    showToast(message, ToastType.SUCCESS, duration);
+    showToast(message, MessageType.SUCCESS, duration);
   }, [showToast]);
 
   const error = useCallback((message: string, duration?: number) => {
-    showToast(message, ToastType.ERROR, duration);
+    showToast(message, MessageType.DANGER, duration);
   }, [showToast]);
 
   const info = useCallback((message: string, duration?: number) => {
-    showToast(message, ToastType.INFO, duration);
+    showToast(message, MessageType.INFO, duration);
   }, [showToast]);
 
   const warn = useCallback((message: string, duration?: number) => {
-    showToast(message, ToastType.WARNING, duration);
+    showToast(message, MessageType.WARNING, duration);
   }, [showToast]);
 
   const removeToast = useCallback((id: string) => {

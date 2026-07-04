@@ -17,19 +17,9 @@ import { ProductsModal } from "./ProductsModal";
 import { CatalogModal } from "@/components/catalog/CatalogModal";
 import styles from "./SalesTable.module.css";
 import type { Sale } from "@/lib/types";
-
-/** Builds the date string to use when creating a new sale in the current sheet. */
-function buildSheetDate(year: number, month: number): string {
-  const today = new Date();
-  const isCurrentMonth =
-    year === today.getFullYear() && month === today.getMonth();
-  const date = isCurrentMonth ? today : new Date(year, month, 1);
-  return [
-    date.getFullYear(),
-    String(date.getMonth() + 1).padStart(2, "0"),
-    String(date.getDate()).padStart(2, "0"),
-  ].join("-");
-}
+import { useConfirm } from "@/components/ui/Confirm";
+import { MessageType } from "@/lib/constants/messageType";
+import { buildSheetDate } from "@/lib/dateUtils";
 
 export function SalesTable() {
   // ── UI state ──────────────────────────────────────────────────────────────
@@ -39,6 +29,8 @@ export function SalesTable() {
   const [newRowId, setNewRowId] = useState<string | null>(null);
   const [productsModal, setProductsModal] = useState<{ saleId: string } | null>(null);
   const [catalogOpen, setCatalogOpen] = useState(false);
+
+  const confirm = useConfirm();
 
   // ── Data + mutations ──────────────────────────────────────────────────────
   const { sales, isLoading, createMutation, updateMutation, deleteMutation } =
@@ -65,18 +57,24 @@ export function SalesTable() {
     });
   }, [selectedYear, selectedMonth, createSale]);
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback(async () => {
     const ids = Object.keys(rowSelection).filter((k) => rowSelection[k]);
-    if (
-      !window.confirm(
-        `¿Eliminar ${ids.length} venta(s)? Esta acción no se puede deshacer.`
-      )
-    )
-      return;
+    if (ids.length === 0) return;
+
+    const ok = await confirm({
+      title: "¿Eliminar ventas?",
+      message: `¿Está seguro de que desea eliminar ${ids.length} venta(s)? Esta acción no se puede deshacer.`,
+      confirmText: "Eliminar",
+      cancelText: "Cancelar",
+      type: MessageType.DANGER,
+    });
+
+    if (!ok) return;
+
     deleteSales(ids, {
       onSuccess: () => setRowSelection({}),
     });
-  }, [rowSelection, deleteSales]);
+  }, [rowSelection, deleteSales, confirm]);
 
   // ── Table ─────────────────────────────────────────────────────────────────
   const columns = useSaleColumns(updateMutation.mutate, handleOpenProducts, sales);

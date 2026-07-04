@@ -2,7 +2,9 @@
 
 import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from "@tanstack/react-query";
 import { useState } from "react";
-import { ToastProvider, triggerGlobalToast, ToastType } from "./ui/Toast";
+import { ToastProvider, triggerGlobalToast } from "./ui/Toast";
+import { ConfirmProvider } from "./ui/Confirm";
+import { MessageType } from "@/lib/constants/messageType";
 
 function makeQueryClient() {
   return new QueryClient({
@@ -17,7 +19,7 @@ function makeQueryClient() {
         const meta = query.meta as { errorMessage?: string; silent?: boolean } | undefined;
         if (meta?.silent) return;
         const message = meta?.errorMessage || err.message || "Error al cargar datos";
-        triggerGlobalToast(message, ToastType.ERROR);
+        triggerGlobalToast(message, MessageType.DANGER);
       },
     }),
     mutationCache: new MutationCache({
@@ -25,14 +27,14 @@ function makeQueryClient() {
         const meta = mutation.meta as { successMessage?: string; silent?: boolean } | undefined;
         if (meta?.silent) return;
         if (meta?.successMessage) {
-          triggerGlobalToast(meta.successMessage, ToastType.SUCCESS);
+          triggerGlobalToast(meta.successMessage, MessageType.SUCCESS);
         }
       },
       onError: (err: any, variables, context, mutation) => {
         const meta = mutation.meta as { errorMessage?: string; silent?: boolean } | undefined;
         if (meta?.silent) return;
         const message = meta?.errorMessage || err.message || "Ha ocurrido un error";
-        triggerGlobalToast(message, ToastType.ERROR);
+        triggerGlobalToast(message, MessageType.DANGER);
       },
     }),
   });
@@ -54,7 +56,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
-        {children}
+        <ConfirmProvider>
+          {children}
+        </ConfirmProvider>
       </ToastProvider>
     </QueryClientProvider>
   );
