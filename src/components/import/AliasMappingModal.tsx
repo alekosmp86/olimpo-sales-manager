@@ -55,6 +55,10 @@ export function AliasMappingModal({
       onSuccess();
       onClose();
     },
+    meta: {
+      successMessage: "Alias guardados con éxito",
+      errorMessage: "Error al guardar los alias",
+    },
   });
 
   function handleSave() {

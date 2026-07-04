@@ -32,6 +32,10 @@ export function useSales(search: string) {
         }),
       }).then((r) => r.json()),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sales"] }),
+    meta: {
+      successMessage: "Venta creada con éxito",
+      errorMessage: "Error al crear la venta",
+    },
   });
 
   const updateMutation = useMutation({
@@ -42,12 +46,20 @@ export function useSales(search: string) {
         body: JSON.stringify(data),
       }).then((r) => r.json()),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sales"] }),
+    meta: {
+      successMessage: "Venta guardada con éxito",
+      errorMessage: "Error al guardar la venta",
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (ids: string[]) =>
       Promise.all(ids.map((id) => fetch(`/api/sales/${id}`, { method: "DELETE" }))),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sales"] }),
+    meta: {
+      successMessage: "Venta(s) eliminada(s) con éxito",
+      errorMessage: "Error al eliminar la(s) venta(s)",
+    },
   });
 
   return { sales, isLoading, createMutation, updateMutation, deleteMutation };

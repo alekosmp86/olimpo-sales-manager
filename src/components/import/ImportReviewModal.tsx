@@ -49,6 +49,10 @@ export function ImportReviewModal({ isOpen, onClose, result }: Props) {
       queryClient.invalidateQueries({ queryKey: ["sales"] });
       setSuccess(true);
     },
+    meta: {
+      successMessage: "Ventas importadas con éxito",
+      errorMessage: "Error al confirmar la importación",
+    },
   });
 
   function handleConfirm() {

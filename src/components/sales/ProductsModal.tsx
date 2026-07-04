@@ -52,6 +52,10 @@ export function ProductsModal({ isOpen, onClose, saleId, items }: ProductsModalP
       setIsDirty(false);
       onClose();
     },
+    meta: {
+      successMessage: "Productos actualizados con éxito",
+      errorMessage: "Error al actualizar los productos",
+    },
   });
 
   const productMap = useMemo(

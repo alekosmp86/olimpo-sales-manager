@@ -1,7 +1,8 @@
 "use client";
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from "@tanstack/react-query";
 import { useState } from "react";
+import { ToastProvider, triggerGlobalToast, ToastType } from "./ui/Toast";
 
 function makeQueryClient() {
   return new QueryClient({
@@ -11,6 +12,29 @@ function makeQueryClient() {
         retry: 1,
       },
     },
+    queryCache: new QueryCache({
+      onError: (err: any, query) => {
+        const meta = query.meta as { errorMessage?: string; silent?: boolean } | undefined;
+        if (meta?.silent) return;
+        const message = meta?.errorMessage || err.message || "Error al cargar datos";
+        triggerGlobalToast(message, ToastType.ERROR);
+      },
+    }),
+    mutationCache: new MutationCache({
+      onSuccess: (data, variables, context, mutation) => {
+        const meta = mutation.meta as { successMessage?: string; silent?: boolean } | undefined;
+        if (meta?.silent) return;
+        if (meta?.successMessage) {
+          triggerGlobalToast(meta.successMessage, ToastType.SUCCESS);
+        }
+      },
+      onError: (err: any, variables, context, mutation) => {
+        const meta = mutation.meta as { errorMessage?: string; silent?: boolean } | undefined;
+        if (meta?.silent) return;
+        const message = meta?.errorMessage || err.message || "Ha ocurrido un error";
+        triggerGlobalToast(message, ToastType.ERROR);
+      },
+    }),
   });
 }
 
@@ -29,7 +53,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <ToastProvider>
+        {children}
+      </ToastProvider>
     </QueryClientProvider>
   );
 }

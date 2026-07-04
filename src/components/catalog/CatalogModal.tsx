@@ -79,6 +79,10 @@ function ProductsTab() {
       setError("");
     },
     onError: (e: Error) => setError(e.message),
+    meta: {
+      successMessage: "Producto creado con éxito",
+      errorMessage: "Error al crear el producto",
+    },
   });
 
   const updateMutation = useMutation({
@@ -92,6 +96,10 @@ function ProductsTab() {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       setEditId(null);
     },
+    meta: {
+      successMessage: "Precio de producto actualizado",
+      errorMessage: "Error al actualizar el precio",
+    },
   });
 
   const deleteMutation = useMutation({
@@ -101,6 +109,10 @@ function ProductsTab() {
       }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["products"] }),
     onError: (e: Error) => setError(e.message),
+    meta: {
+      successMessage: "Producto eliminado con éxito",
+      errorMessage: "Error al eliminar el producto",
+    },
   });
 
   function handleCreate() {
@@ -258,6 +270,10 @@ function DimensionsTab() {
       setError("");
     },
     onError: (e: Error) => setError(e.message),
+    meta: {
+      successMessage: "Dimensión creada con éxito",
+      errorMessage: "Error al crear la dimensión",
+    },
   });
 
   const updateMutation = useMutation({
@@ -272,6 +288,10 @@ function DimensionsTab() {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       setEditId(null);
     },
+    meta: {
+      successMessage: "Dimensión actualizada con éxito",
+      errorMessage: "Error al actualizar la dimensión",
+    },
   });
 
   const deleteMutation = useMutation({
@@ -283,6 +303,10 @@ function DimensionsTab() {
       queryClient.invalidateQueries({ queryKey: ["dimensions"] });
     },
     onError: (e: Error) => setError(e.message),
+    meta: {
+      successMessage: "Dimensión eliminada con éxito",
+      errorMessage: "Error al eliminar la dimensión",
+    },
   });
 
   return (
