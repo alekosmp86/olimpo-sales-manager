@@ -6,8 +6,8 @@ import { formatReviewDate } from "@/lib/dateUtils";
 
 interface DuplicatesTabProps {
   pairs: ImportDuplicatePair[];
-  decisions: Record<number, boolean>;
-  onDecision: (i: number, val: boolean) => void;
+  decisions: Record<number, string>;
+  onDecision: (i: number, val: string) => void;
 }
 
 export function DuplicatesTab({
@@ -27,6 +27,14 @@ export function DuplicatesTab({
             <div className={styles.dupCol}>
               <h4 className={styles.dupColTitle}>Existente en DB</h4>
               <p className={styles.dupName}>{pair.existingClientName}</p>
+              <p className={styles.dupMeta}>
+                {formatReviewDate(pair.existingSaleDate)} · {pair.existingSaleProduct}
+              </p>
+              {(pair.existingPhone || pair.existingAddress) && (
+                <p className={styles.dupMeta}>
+                  {[pair.existingPhone, pair.existingAddress].filter(Boolean).join(" · ")}
+                </p>
+              )}
             </div>
             <div className={styles.dupArrow}>↔</div>
             <div className={styles.dupCol}>
@@ -36,28 +44,59 @@ export function DuplicatesTab({
                 {formatReviewDate(pair.incoming.date)} · {pair.incoming.product}{" "}
                 {pair.incoming.dimension}
               </p>
+              {(pair.incoming.phone || pair.incoming.address) && (
+                <p className={styles.dupMeta}>
+                  {[pair.incoming.phone, pair.incoming.address].filter(Boolean).join(" · ")}
+                </p>
+              )}
             </div>
           </div>
           <div className={styles.dupActions}>
-            <button
-              className={[
-                styles.dupBtn,
-                decisions[i] === false ? styles.dupBtnActive : "",
-              ].join(" ")}
-              onClick={() => onDecision(i, false)}
-            >
-              Misma persona — ignorar
-            </button>
-            <button
-              className={[
-                styles.dupBtn,
-                styles.dupBtnGreen,
-                decisions[i] === true ? styles.dupBtnActive : "",
-              ].join(" ")}
-              onClick={() => onDecision(i, true)}
-            >
-              Persona diferente — agregar ambos
-            </button>
+            {pair.type === "exact_duplicate" ? (
+              <>
+                <button
+                  className={[
+                    styles.dupBtn,
+                    decisions[i] === "skip" ? styles.dupBtnActive : "",
+                  ].join(" ")}
+                  onClick={() => onDecision(i, "skip")}
+                >
+                  Misma venta — ignorar
+                </button>
+                <button
+                  className={[
+                    styles.dupBtn,
+                    styles.dupBtnGreen,
+                    decisions[i] === "add" ? styles.dupBtnActive : "",
+                  ].join(" ")}
+                  onClick={() => onDecision(i, "add")}
+                >
+                  Nueva venta — agregar
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  className={[
+                    styles.dupBtn,
+                    decisions[i] === "same_person" ? styles.dupBtnActive : "",
+                  ].join(" ")}
+                  onClick={() => onDecision(i, "same_person")}
+                >
+                  Misma persona — usar datos existentes
+                </button>
+                <button
+                  className={[
+                    styles.dupBtn,
+                    styles.dupBtnGreen,
+                    decisions[i] === "different_person" ? styles.dupBtnActive : "",
+                  ].join(" ")}
+                  onClick={() => onDecision(i, "different_person")}
+                >
+                  Persona diferente — agregar como nuevo
+                </button>
+              </>
+            )}
           </div>
         </div>
       ))}

@@ -24,9 +24,14 @@ type Tab = "valid" | "invalid" | "duplicates";
 export function ImportReviewModal({ isOpen, onClose, result }: Props) {
   const queryClient = useQueryClient();
   const [tab, setTab] = useState<Tab>("valid");
-  // For duplicates: track user decisions — true = different person (add both), false = same person (skip)
-  const [duplicateDecisions, setDuplicateDecisions] = useState<Record<number, boolean>>(
-    () => Object.fromEntries(result.duplicates.map((_, i) => [i, false]))
+  // For duplicates: track user decisions — "same_person" | "different_person" | "add" | "skip"
+  const [duplicateDecisions, setDuplicateDecisions] = useState<Record<number, string>>(() =>
+    Object.fromEntries(
+      result.duplicates.map((d, i) => [
+        i,
+        d.type === "exact_duplicate" ? "skip" : "same_person",
+      ])
+    )
   );
   const [success, setSuccess] = useState(false);
 
@@ -47,12 +52,35 @@ export function ImportReviewModal({ isOpen, onClose, result }: Props) {
   });
 
   function handleConfirm() {
-    const rows: ImportValidRow[] = [
-      ...result.valid,
-      ...result.duplicates
-        .filter((_, i) => duplicateDecisions[i] === true)
-        .map((d) => d.incoming),
-    ];
+    const rows: ImportValidRow[] = [...result.valid];
+
+    result.duplicates.forEach((d, i) => {
+      const decision = duplicateDecisions[i];
+      if (d.type === "exact_duplicate") {
+        if (decision === "add") {
+          // If they force-add a duplicate sale, it's still the same person, so link & copy details
+          rows.push({
+            ...d.incoming,
+            phone: d.existingPhone || undefined,
+            address: d.existingAddress || d.incoming.address,
+          });
+        }
+      } else {
+        // Name conflict
+        if (decision === "same_person") {
+          // Link to existing person: copy their phone and address
+          rows.push({
+            ...d.incoming,
+            phone: d.existingPhone || undefined,
+            address: d.existingAddress || d.incoming.address,
+          });
+        } else if (decision === "different_person") {
+          // Different person: use CSV address and phone
+          rows.push(d.incoming);
+        }
+      }
+    });
+
     confirmMutation.mutate(rows);
   }
 
@@ -64,7 +92,10 @@ export function ImportReviewModal({ isOpen, onClose, result }: Props) {
 
   const totalToImport =
     result.valid.length +
-    Object.values(duplicateDecisions).filter(Boolean).length;
+    result.duplicates.filter((d, i) => {
+      const dec = duplicateDecisions[i];
+      return dec !== "skip";
+    }).length;
 
   if (success) {
     return (

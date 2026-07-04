@@ -88,8 +88,13 @@ export interface ImportInvalidRow {
 }
 
 export interface ImportDuplicatePair {
+  type: "exact_duplicate" | "name_conflict";
   incoming: ImportValidRow;
   existingClientName: string;
+  existingSaleDate: string;
+  existingSaleProduct: string;
+  existingPhone?: string | null;
+  existingAddress?: string | null;
   existingSaleId: string;
 }
 

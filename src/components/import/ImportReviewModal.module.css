@@ -234,8 +234,20 @@
 }
 
 .dupBtnActive {
-  border-width: 2px;
   font-weight: var(--weight-semibold);
+  box-shadow: 0 0 0 1px currentColor;
+}
+
+.dupBtnActive:not(.dupBtnGreen) {
+  background-color: var(--color-primary-subtle);
+  border-color: var(--color-primary);
+  color: var(--color-primary-dark);
+}
+
+.dupBtnGreen.dupBtnActive {
+  background-color: var(--color-green-bg);
+  border-color: var(--color-green-text);
+  color: var(--color-green-text);
 }
 
 .successBox {

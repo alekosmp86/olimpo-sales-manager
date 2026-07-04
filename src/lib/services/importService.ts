@@ -16,7 +16,10 @@ import type {
 function parseCsvDate(str: string): Date | null {
   if (!str) return null;
   const parsed = Date.parse(str);
-  if (!isNaN(parsed)) return new Date(parsed);
+  if (!isNaN(parsed)) {
+    const d = new Date(parsed);
+    return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  }
 
   const parts = str.split(/[-/]/);
   if (parts.length === 3) {
@@ -41,10 +44,17 @@ function parseCsvDate(str: string): Date | null {
 
     const month = months[monthStr.substring(0, 3)];
     if (month !== undefined && !isNaN(day) && !isNaN(year)) {
-      return new Date(year, month, day);
+      return new Date(Date.UTC(year, month, day));
     }
   }
   return null;
+}
+
+function getUtcDateStr(d: Date): string {
+  const year = d.getUTCFullYear();
+  const month = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 function parseDeliveryStatus(raw: string | null | undefined): DeliveryStatus {
@@ -115,13 +125,40 @@ export async function validateAndClassifyRows(
   const invalid: ImportInvalidRow[] = [];
   const duplicates: ImportDuplicatePair[] = [];
 
-  // Fetch all existing client names once for duplicate checking
+  // Fetch existing sales with items (products), dates, phones, addresses
   const existingSales = await prisma.sale.findMany({
-    select: { id: true, clientName: true },
+    select: {
+      id: true,
+      clientName: true,
+      phone: true,
+      address: true,
+      date: true,
+      items: {
+        select: {
+          product: {
+            select: {
+              name: true,
+              dimension: {
+                select: {
+                  label: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   });
-  const existingNameMap = new Map(
-    existingSales.map((s) => [s.clientName.toLowerCase(), s])
-  );
+
+  // Group existing sales by lowercase client name
+  const existingSalesByName = new Map<string, typeof existingSales>();
+  for (const sale of existingSales) {
+    const key = sale.clientName.toLowerCase();
+    if (!existingSalesByName.has(key)) {
+      existingSalesByName.set(key, []);
+    }
+    existingSalesByName.get(key)!.push(sale);
+  }
 
   for (const row of rows) {
     const errors: string[] = [];
@@ -186,14 +223,52 @@ export async function validateAndClassifyRows(
       comments,
     };
 
-    // Duplicate check by clientName (case-insensitive)
-    const existingSale = existingNameMap.get(clientName!.toLowerCase());
-    if (existingSale) {
-      duplicates.push({
-        incoming: validRow,
-        existingClientName: existingSale.clientName,
-        existingSaleId: existingSale.id,
+    // Duplicate check
+    const nameKey = clientName!.toLowerCase();
+    const matchSales = existingSalesByName.get(nameKey);
+
+    if (matchSales && matchSales.length > 0) {
+      const incomingDateStr = getUtcDateStr(dateObj!);
+      
+      const exactDuplicateSale = matchSales.find((s) => {
+        const existingDateStr = getUtcDateStr(s.date);
+        const isSameDate = existingDateStr === incomingDateStr;
+        const hasSameProduct = s.items.some((item) => {
+          const nameMatches =
+            item.product.name.toLowerCase() === resolvedProduct.toLowerCase();
+          const dimensionMatches =
+            item.product.dimension.label.toLowerCase() === resolvedDimension.toLowerCase();
+          return nameMatches && dimensionMatches;
+        });
+        return isSameDate && hasSameProduct;
       });
+
+      // Use the last sale (likely most recent) as representative for details
+      const representativeSale = matchSales[matchSales.length - 1];
+
+      if (exactDuplicateSale) {
+        duplicates.push({
+          type: "exact_duplicate",
+          incoming: validRow,
+          existingClientName: exactDuplicateSale.clientName,
+          existingSaleDate: getUtcDateStr(exactDuplicateSale.date),
+          existingSaleProduct: exactDuplicateSale.items.map((item) => `${item.product.name} ${item.product.dimension.label}`).join(', '),
+          existingPhone: exactDuplicateSale.phone,
+          existingAddress: exactDuplicateSale.address,
+          existingSaleId: exactDuplicateSale.id,
+        });
+      } else {
+        duplicates.push({
+          type: "name_conflict",
+          incoming: validRow,
+          existingClientName: representativeSale.clientName,
+          existingSaleDate: getUtcDateStr(representativeSale.date),
+          existingSaleProduct: representativeSale.items.map((item) => `${item.product.name} ${item.product.dimension.label}`).join(', '),
+          existingPhone: representativeSale.phone,
+          existingAddress: representativeSale.address,
+          existingSaleId: representativeSale.id,
+        });
+      }
     } else {
       valid.push(validRow);
     }
