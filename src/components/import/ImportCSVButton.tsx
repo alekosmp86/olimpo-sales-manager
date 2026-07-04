@@ -106,7 +106,7 @@ export function ImportCSVButton() {
       <input
         ref={fileRef}
         type="file"
-        accept=".csv"
+        accept=".csv, text/csv, application/csv, text/comma-separated-values"
         style={{ display: "none" }}
         onChange={handleFile}
         id="csv-file-input"
