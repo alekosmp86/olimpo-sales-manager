@@ -1,6 +1,7 @@
 "use client";
 
 import { type Table, flexRender } from "@tanstack/react-table";
+import { useEffect, useRef } from "react";
 import type { Sale } from "@/lib/types";
 import styles from "./SalesTable.module.css";
 
@@ -19,6 +20,15 @@ export function SalesGrid({
   newRowId,
   hasSearch,
 }: SalesGridProps) {
+  const newRowRef = useRef<HTMLTableRowElement>(null);
+
+  // Smoothly scroll the new row into view when it is rendered
+  useEffect(() => {
+    if (newRowId && newRowRef.current) {
+      newRowRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [newRowId, table.getRowModel().rows]);
+
   if (isLoading) {
     return (
       <div className={styles.tableContainer}>
@@ -63,6 +73,7 @@ export function SalesGrid({
               table.getRowModel().rows.map((row) => (
                 <tr
                   key={row.id}
+                  ref={newRowRef}
                   className={[
                     styles.row,
                     row.getIsSelected() ? styles.selectedRow : "",
