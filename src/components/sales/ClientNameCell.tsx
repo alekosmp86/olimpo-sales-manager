@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { Sale } from "@/lib/types";
 import styles from "./ClientNameCell.module.css";
@@ -45,6 +45,8 @@ export function ClientNameCell({ saleId, initialValue, sales, onUpdate }: Client
   const [suggestions, setSuggestions] = useState<ClientSuggestion[]>([]);
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
+  const [showUpward, setShowUpward] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   // Debounce the typed value before running the suggestion lookup
   const debouncedValue = useDebounce(value, 200);
@@ -56,6 +58,18 @@ export function ClientNameCell({ saleId, initialValue, sales, onUpdate }: Client
     setSuggestions(results);
     setOpen(results.length > 0);
   }, [debouncedValue, sales, saleId, focused]);
+
+  // Dynamic upward dropdown detection
+  useEffect(() => {
+    if (!open || !wrapperRef.current) {
+      setShowUpward(false);
+      return;
+    }
+    const rect = wrapperRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    // Suggestion dropdown max height is ~240px (5 items * 46px + padding)
+    setShowUpward(spaceBelow < 240);
+  }, [open]);
 
   // Sync external value changes (e.g. after a server update) when not focused
   useEffect(() => {
@@ -96,7 +110,7 @@ export function ClientNameCell({ saleId, initialValue, sales, onUpdate }: Client
   }
 
   return (
-    <div className={styles.wrapper}>
+    <div ref={wrapperRef} className={styles.wrapper}>
       <input
         type="text"
         className={cellStyles.cellInput}
@@ -108,7 +122,7 @@ export function ClientNameCell({ saleId, initialValue, sales, onUpdate }: Client
       />
 
       {open && suggestions.length > 0 && (
-        <ul className={styles.list} role="listbox">
+        <ul className={`${styles.list} ${showUpward ? styles.listUpward : ""}`} role="listbox">
           {suggestions.map((s, i) => (
             <li
               key={i}

@@ -23,6 +23,11 @@
   overflow: hidden;
 }
 
+.listUpward {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+
 /* Each suggestion row */
 .item {
   display: flex;
