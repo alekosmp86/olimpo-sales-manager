@@ -20,12 +20,14 @@ export function CatalogModal({ isOpen, onClose }: CatalogModalProps) {
     <Modal isOpen={isOpen} onClose={onClose} title="Catálogo de productos" size="lg">
       <div className={styles.tabs}>
         <button
+          type="button"
           className={[styles.tab, tab === "products" ? styles.activeTab : ""].join(" ")}
           onClick={() => setTab("products")}
         >
           Productos
         </button>
         <button
+          type="button"
           className={[styles.tab, tab === "dimensions" ? styles.activeTab : ""].join(" ")}
           onClick={() => setTab("dimensions")}
         >

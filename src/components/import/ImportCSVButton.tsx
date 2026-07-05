@@ -63,14 +63,19 @@ export function ImportCSVButton() {
         if (rawRows.length === 0) return;
 
         // No header row — data always starts at index 0
-        const formattedRows: CsvRow[] = rawRows
-          .slice(0)
-          .map((row, index) => ({
+        const formattedRows: CsvRow[] = rawRows.flatMap((row, index) => {
+          const date = row[0] ?? "";
+          const clientName = row[1] ?? "";
+          const product = row[3] ?? "";
+          // Pre-filter completely blank rows (all fields empty) client-side
+          if (!date && !clientName && !product) return [];
+
+          return [{
             rowNumber: index + 1,
-            date: row[0] ?? "",
-            clientName: row[1] ?? "",
+            date,
+            clientName,
             address: row[2] ?? "",
-            product: row[3] ?? "",
+            product,
             dimension: row[4] ?? "",
             quantity: row[5] ?? "",
             totalPrice: row[6] ?? "",
@@ -78,11 +83,8 @@ export function ImportCSVButton() {
             paymentStatus: row[8] ?? "",
             comments: row[9] ?? "",
             phone: row[10] ?? "",
-          }))
-          // Pre-filter completely blank rows (all fields empty) client-side
-          .filter((r) =>
-            r.date || r.clientName || r.product
-          );
+          }];
+        });
 
         if (formattedRows.length === 0) {
           setError("El archivo CSV no contiene filas válidas.");
@@ -110,6 +112,7 @@ export function ImportCSVButton() {
         style={{ display: "none" }}
         onChange={handleFile}
         id="csv-file-input"
+        aria-label="Subir archivo CSV de ventas"
       />
       <Button
         id="import-csv-btn"

@@ -6,6 +6,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import styles from "./ProductsModal.module.css";
 import type { SaleItem, Product } from "@/lib/types";
+import { formatPrice } from "@/lib/utils/priceUtils";
 
 interface ProductsModalProps {
   isOpen: boolean;
@@ -15,22 +16,15 @@ interface ProductsModalProps {
 }
 
 interface EditableItem {
+  keyId: string;
   productId: string;
   quantity: number;
-}
-
-function formatPrice(n: number) {
-  return new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    maximumFractionDigits: 2,
-  }).format(n);
 }
 
 export function ProductsModal({ isOpen, onClose, saleId, items }: ProductsModalProps) {
   const queryClient = useQueryClient();
   const [editableItems, setEditableItems] = useState<EditableItem[]>(() =>
-    items.map((i) => ({ productId: i.productId, quantity: i.quantity }))
+    items.map((i, index) => ({ keyId: `${i.productId}-${index}`, productId: i.productId, quantity: i.quantity }))
   );
   const [isDirty, setIsDirty] = useState(false);
 
@@ -41,7 +35,7 @@ export function ProductsModal({ isOpen, onClose, saleId, items }: ProductsModalP
   });
 
   const updateMutation = useMutation({
-    mutationFn: (items: EditableItem[]) =>
+    mutationFn: (items: Omit<EditableItem, "keyId">[]) =>
       fetch(`/api/sales/${saleId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -65,7 +59,10 @@ export function ProductsModal({ isOpen, onClose, saleId, items }: ProductsModalP
 
   function addItem() {
     if (products.length === 0) return;
-    setEditableItems((prev) => [...prev, { productId: products[0].id, quantity: 1 }]);
+    setEditableItems((prev) => [
+      ...prev,
+      { keyId: `new-${Date.now()}-${prev.length}`, productId: products[0].id, quantity: 1 }
+    ]);
     setIsDirty(true);
   }
 
@@ -82,7 +79,9 @@ export function ProductsModal({ isOpen, onClose, saleId, items }: ProductsModalP
   }
 
   function handleSave() {
-    const valid = editableItems.filter((i) => i.productId && i.quantity > 0);
+    const valid = editableItems.flatMap((i) =>
+      i.productId && i.quantity > 0 ? [{ productId: i.productId, quantity: i.quantity }] : []
+    );
     updateMutation.mutate(valid);
   }
 
@@ -123,10 +122,11 @@ export function ProductsModal({ isOpen, onClose, saleId, items }: ProductsModalP
           const lineTotal = product ? product.unitPrice * item.quantity : 0;
 
           return (
-            <div key={index} className={styles.row}>
+            <div key={item.keyId} className={styles.row}>
               <div className={styles.selectWrapper}>
-                <label className={styles.label}>Producto</label>
+                <label htmlFor={`product-select-${item.keyId}`} className={styles.label}>Producto</label>
                 <select
+                  id={`product-select-${item.keyId}`}
                   className={styles.select}
                   value={item.productId}
                   onChange={(e) => updateItem(index, "productId", e.target.value)}
@@ -140,8 +140,9 @@ export function ProductsModal({ isOpen, onClose, saleId, items }: ProductsModalP
               </div>
 
               <div className={styles.qtyWrapper}>
-                <label className={styles.label}>Cantidad</label>
+                <label htmlFor={`quantity-input-${item.keyId}`} className={styles.label}>Cantidad</label>
                 <input
+                  id={`quantity-input-${item.keyId}`}
                   className={styles.qtyInput}
                   type="number"
                   min="1"
@@ -149,11 +150,12 @@ export function ProductsModal({ isOpen, onClose, saleId, items }: ProductsModalP
                   onChange={(e) =>
                     updateItem(index, "quantity", parseInt(e.target.value, 10) || 1)
                   }
+                  aria-label="Cantidad"
                 />
               </div>
 
               <div className={styles.priceWrapper}>
-                <label className={styles.label}>Total</label>
+                <span className={styles.label}>Total</span>
                 <span className={styles.price}>{formatPrice(lineTotal)}</span>
               </div>
 

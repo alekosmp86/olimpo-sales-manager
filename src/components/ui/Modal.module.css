@@ -9,6 +9,12 @@
   z-index: var(--z-modal);
   padding: var(--space-4);
   animation: fadeIn var(--transition-base);
+  border: none;
+  margin: 0;
+  max-width: none;
+  max-height: none;
+  width: 100vw;
+  height: 100vh;
 }
 
 .modal {

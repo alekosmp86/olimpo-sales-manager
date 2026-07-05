@@ -44,7 +44,7 @@ export function MonthSheetBar({
       <div className={styles.sheetsScrollContainer}>
         {MONTH_ABBRS.map((name, index) => (
           <button
-            key={index}
+            key={name}
             type="button"
             className={[
               styles.sheetTab,

@@ -1,12 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 
-export async function getProductAliases() {
-  return prisma.productAlias.findMany({
-    orderBy: { alias: "asc" },
-  });
-}
-
 export async function createProductAlias(alias: string, name: string) {
   const cleanAlias = alias.trim().toLowerCase();
   const cleanName = name.trim();

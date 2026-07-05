@@ -24,7 +24,7 @@ export function InvalidTab({ rows }: InvalidTabProps) {
   return (
     <div className={styles.invalidList}>
       {rows.map((item, i) => (
-        <div key={i} className={styles.invalidItem}>
+        <div key={item.row.rowNumber} className={styles.invalidItem}>
           <div className={styles.invalidHeader}>
             <span className={styles.invalidLabel}>Línea {item.row.rowNumber}</span>
             <span className={styles.invalidClient}>

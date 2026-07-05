@@ -136,6 +136,7 @@ export function ImportReviewModal({ isOpen, onClose, result }: Props) {
       <div className={styles.tabs}>
         {(["valid", "invalid", "duplicates"] as Tab[]).map((t) => (
           <button
+            type="button"
             key={t}
             className={[styles.tab, tab === t ? styles.activeTab : ""].join(" ")}
             onClick={() => setTab(t)}

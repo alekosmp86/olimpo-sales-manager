@@ -21,12 +21,14 @@ export function Modal({
   footer,
   size = "md",
 }: ModalProps) {
-  const backdropRef = useRef<HTMLDivElement>(null);
+  const backdropRef = useRef<HTMLDialogElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     if (!isOpen) return;
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onCloseRef.current();
     };
     document.addEventListener("keydown", handleKey);
     document.body.style.overflow = "hidden";
@@ -34,25 +36,34 @@ export function Modal({
       document.removeEventListener("keydown", handleKey);
       document.body.style.overflow = "";
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
+
+  useEffect(() => {
+    const dialog = backdropRef.current;
+    if (!dialog) return;
+    const handleClick = (e: MouseEvent) => {
+      if (e.target === dialog) onCloseRef.current();
+    };
+    dialog.addEventListener("click", handleClick);
+    return () => {
+      dialog.removeEventListener("click", handleClick);
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   return createPortal(
-    <div
+    <dialog
       className={styles.backdrop}
       ref={backdropRef}
-      onClick={(e) => {
-        if (e.target === backdropRef.current) onClose();
-      }}
-      role="dialog"
-      aria-modal="true"
       aria-label={title}
+      open
     >
       <div className={[styles.modal, styles[size]].join(" ")}>
         <div className={styles.header}>
           <h2 className={styles.title}>{title}</h2>
           <button
+            type="button"
             className={styles.closeBtn}
             onClick={onClose}
             aria-label="Cerrar"
@@ -63,7 +74,7 @@ export function Modal({
         <div className={styles.body}>{children}</div>
         {footer && <div className={styles.footer}>{footer}</div>}
       </div>
-    </div>,
+    </dialog>,
     document.body
   );
 }

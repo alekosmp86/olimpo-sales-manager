@@ -18,9 +18,9 @@
  *   "2.4 mg"  → "2.4 mg"
  *   "7,5 mg"  → "7.5 mg"
  *   "5, mg"   → "5 mg"
- *   "1"       → "1 u"   (bare number — assumes units)
- *   "7"       → "7 u"
- *   "14"      → "14 u"
+ *   "1"       → "1 mg"   (bare number — assumes mg)
+ *   "7"       → "7 mg"
+ *   "14"      → "14 mg"
  *   "G+T+M"   → "G+T+M"  (non-numeric code — returned as-is)
  */
 export function standardizeDimension(raw: string | null | undefined): string {
@@ -43,10 +43,10 @@ export function standardizeDimension(raw: string | null | undefined): string {
     return `${num} ${unit}`;
   }
 
-  // 5. Bare number only — default to "u"
+  // 5. Bare number only — default to "mg"
   const bareNumber = s.match(/^(\d+(?:\.\d+)?)$/);
   if (bareNumber) {
-    return `${bareNumber[1]} u`;
+    return `${bareNumber[1]} mg`;
   }
 
   // 6. Fallback: non-numeric code (e.g. "G+T+M") — return as-is

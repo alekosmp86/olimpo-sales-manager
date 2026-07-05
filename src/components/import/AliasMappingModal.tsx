@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import type { Product } from "@/lib/types";
@@ -23,6 +23,7 @@ export function AliasMappingModal({
   onSuccess,
 }: AliasMappingModalProps) {
   const confirm = useConfirm();
+  const queryClient = useQueryClient();
   const { data: products = [] } = useQuery<Product[]>({
     queryKey: ["products"],
     queryFn: () => fetch("/api/products").then((r) => r.json()),
@@ -55,6 +56,7 @@ export function AliasMappingModal({
         return r.json();
       }),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
       onSuccess();
       onClose();
     },
@@ -157,6 +159,7 @@ export function AliasMappingModal({
                     type="text"
                     value={sel.customName}
                     onChange={(e) => handleCustomChange(alias, e.target.value)}
+                    aria-label="Nombre del nuevo producto"
                   />
                 )}
               </div>

@@ -1,9 +1,10 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, { createContext, use, useState, useEffect, useCallback, useMemo } from "react";
 import { CheckCircle, AlertCircle, AlertTriangle, Info, X } from "lucide-react";
 import { MessageType, MessageTypeValue } from "@/lib/constants/messageType";
 import styles from "./Toast.module.css";
+import { setGlobalToast } from "@/lib/utils/toastTrigger";
 
 export interface Toast {
   id: string;
@@ -20,32 +21,7 @@ interface ToastContextType {
   warn: (message: string, duration?: number) => void;
 }
 
-// Global references for triggering toasts outside React tree (e.g. in QueryClient global config)
-let globalToast: {
-  success: (msg: string, duration?: number) => void;
-  error: (msg: string, duration?: number) => void;
-  info: (msg: string, duration?: number) => void;
-  warn: (msg: string, duration?: number) => void;
-} | null = null;
-
-export const triggerGlobalToast = (message: string, type: MessageTypeValue, duration?: number) => {
-  if (globalToast) {
-    if (type === MessageType.SUCCESS) globalToast.success(message, duration);
-    else if (type === MessageType.DANGER) globalToast.error(message, duration);
-    else if (type === MessageType.WARNING) globalToast.warn(message, duration);
-    else globalToast.info(message, duration);
-  }
-};
-
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
-
-export const useToast = () => {
-  const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error("useToast must be used within a ToastProvider");
-  }
-  return context;
-};
 
 // 2. Individual Toast Item component with progress bar
 function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
@@ -74,7 +50,7 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
     <div className={`${styles.toast} ${styles[type]}`}>
       <div className={styles.iconWrapper}>{getIcon()}</div>
       <div className={styles.content}>{message}</div>
-      <button className={styles.closeButton} onClick={onClose} aria-label="Close notification">
+      <button type="button" className={styles.closeButton} onClick={onClose} aria-label="Close notification">
         <X size={16} />
       </button>
       <div
@@ -118,14 +94,22 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
   // Sync global Toast functions reference
   useEffect(() => {
-    globalToast = { success, error, info, warn };
+    setGlobalToast({ success, error, info, warn });
     return () => {
-      globalToast = null;
+      setGlobalToast(null);
     };
   }, [success, error, info, warn]);
 
+  const contextValue = useMemo(() => ({ showToast, success, error, info, warn }), [
+    showToast,
+    success,
+    error,
+    info,
+    warn,
+  ]);
+
   return (
-    <ToastContext.Provider value={{ showToast, success, error, info, warn }}>
+    <ToastContext.Provider value={contextValue}>
       {children}
       <div className={styles.container}>
         {toasts.map((toast) => (

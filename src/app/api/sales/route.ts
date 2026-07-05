@@ -4,7 +4,7 @@ import { getSales, createSale } from "@/lib/services/saleService";
 import { validateSession } from "@/lib/session";
 
 const CreateSaleSchema = z.object({
-  date: z.string().datetime({ offset: true }).or(z.string().date()),
+  date: z.iso.datetime({ offset: true }).or(z.iso.date()),
   clientName: z.string(),
   phone: z.string().optional(),
   address: z.string().optional(),

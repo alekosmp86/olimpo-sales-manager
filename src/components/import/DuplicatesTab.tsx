@@ -22,7 +22,7 @@ export function DuplicatesTab({
   return (
     <div className={styles.duplicateList}>
       {pairs.map((pair, i) => (
-        <div key={i} className={styles.duplicateCard}>
+        <div key={pair.incoming.rowNumber} className={styles.duplicateCard}>
           <div className={styles.dupColumns}>
             <div className={styles.dupCol}>
               <h4 className={styles.dupColTitle}>Existente en DB</h4>
@@ -55,6 +55,7 @@ export function DuplicatesTab({
             {pair.type === "exact_duplicate" ? (
               <>
                 <button
+                  type="button"
                   className={[
                     styles.dupBtn,
                     decisions[i] === "skip" ? styles.dupBtnActive : "",
@@ -64,6 +65,7 @@ export function DuplicatesTab({
                   Misma venta — ignorar
                 </button>
                 <button
+                  type="button"
                   className={[
                     styles.dupBtn,
                     styles.dupBtnGreen,
@@ -77,6 +79,7 @@ export function DuplicatesTab({
             ) : (
               <>
                 <button
+                  type="button"
                   className={[
                     styles.dupBtn,
                     decisions[i] === "same_person" ? styles.dupBtnActive : "",
@@ -86,6 +89,7 @@ export function DuplicatesTab({
                   Misma persona — usar datos existentes
                 </button>
                 <button
+                  type="button"
                   className={[
                     styles.dupBtn,
                     styles.dupBtnGreen,

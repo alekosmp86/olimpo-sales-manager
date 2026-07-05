@@ -1,20 +1,15 @@
 import styles from "./ProductsCell.module.css";
 import type { SaleItem } from "@/lib/types";
+import { formatPrice } from "@/lib/utils/priceUtils";
 
 interface ProductsCellProps {
   items?: SaleItem[];
   onClick: () => void;
 }
 
-function formatPrice(n: number) {
-  return new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    maximumFractionDigits: 2,
-  }).format(n ?? 0);
-}
+const EMPTY_ITEMS: SaleItem[] = [];
 
-export function ProductsCell({ items = [], onClick }: ProductsCellProps) {
+export function ProductsCell({ items = EMPTY_ITEMS, onClick }: ProductsCellProps) {
   const safeItems = items ?? [];
   if (safeItems.length === 0) {
     return (

@@ -28,8 +28,8 @@ export function ValidTab({ rows }: ValidTabProps) {
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, i) => (
-            <tr key={i} className={styles.validRow}>
+          {rows.map((row) => (
+            <tr key={row.rowNumber} className={styles.validRow}>
               <td>{formatReviewDate(row.date)}</td>
               <td>{row.clientName}</td>
               <td>{row.phone || <span className={styles.emptyPhone}>—</span>}</td>

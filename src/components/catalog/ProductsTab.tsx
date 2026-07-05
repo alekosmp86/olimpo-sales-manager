@@ -103,6 +103,7 @@ export function ProductsTab() {
             placeholder="Nombre (ej: Ozempic)"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
+            aria-label="Nombre del nuevo producto"
           />
           <select
             className={styles.select}
@@ -122,6 +123,7 @@ export function ProductsTab() {
             step="0.01"
             value={newPrice}
             onChange={(e) => setNewPrice(e.target.value)}
+            aria-label="Precio unitario del nuevo producto"
           />
           <Button
             variant="primary"
@@ -155,7 +157,7 @@ export function ProductsTab() {
                     step="0.01"
                     value={editPrice}
                     onChange={(e) => setEditPrice(e.target.value)}
-                    autoFocus
+                    aria-label="Editar precio unitario del producto"
                   />
                   <Button
                     size="sm"

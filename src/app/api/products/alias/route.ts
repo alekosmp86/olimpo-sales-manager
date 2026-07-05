@@ -28,9 +28,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    for (const mapping of parsed.data.mappings) {
-      await createProductAlias(mapping.alias, mapping.name);
-    }
+    await Promise.all(
+      parsed.data.mappings.map((mapping) =>
+        createProductAlias(mapping.alias, mapping.name)
+      )
+    );
 
     return NextResponse.json({ ok: true });
   } catch (err) {

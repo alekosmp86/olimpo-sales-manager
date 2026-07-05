@@ -96,16 +96,20 @@ export async function validateAndClassifyRows(
 ): Promise<ImportClassificationResult | { unmatched: string[] }> {
   // Get all unique product names in the CSV
   const csvProductNames = Array.from(
-    new Set(rows.map((r) => r.product?.trim()).filter(Boolean))
+    new Set(
+      rows.flatMap((r) => {
+        const p = r.product?.trim();
+        return p ? [p] : [];
+      })
+    )
   );
 
-  // Resolve against db aliases
-  const aliasMap = await resolveProductAliases(csvProductNames);
+  // Resolve against db aliases and get standard names concurrently
+  const [aliasMap, existingProducts] = await Promise.all([
+    resolveProductAliases(csvProductNames),
+    prisma.product.findMany({ select: { name: true } }),
+  ]);
 
-  // Get standard names
-  const existingProducts = await prisma.product.findMany({
-    select: { name: true },
-  });
   const standardNames = new Set(existingProducts.map((p) => p.name.toLowerCase()));
 
   // Find unmatched product names
@@ -209,6 +213,7 @@ export async function validateAndClassifyRows(
     const resolvedDimension = standardizeDimension(dimensionRaw!);
 
     const validRow: ImportValidRow = {
+      rowNumber: row.rowNumber,
       date: dateObj!.toISOString(),
       clientName: clientName!,
       phone: phone || undefined,
@@ -278,28 +283,69 @@ export async function validateAndClassifyRows(
 }
 
 export async function insertConfirmedRows(rows: ImportValidRow[]) {
-  for (const row of rows) {
-    const sale = await prisma.sale.create({
-      data: {
-        date: new Date(row.date),
-        clientName: row.clientName,
-        phone: row.phone || null,
-        address: row.address || null,
-        deliveryStatus: row.deliveryStatus,
-        paymentStatus: row.paymentStatus,
-        comments: row.comments || null,
-      },
-    });
-
-    const dim = await findOrCreateDimension(row.dimension);
-    const product = await findOrCreateProduct(row.product, dim.id, row.unitPrice);
-
-    await prisma.saleItem.create({
-      data: {
-        saleId: sale.id,
-        productId: product.id,
-        quantity: row.quantity,
-      },
-    });
+  // Pre-resolve all unique dimensions concurrently to avoid race conditions.
+  const uniqueDimensions = Array.from(new Set(rows.map((r) => r.dimension.trim())));
+  const dims = await Promise.all(
+    uniqueDimensions.map((label) => findOrCreateDimension(label))
+  );
+  const dimensionMap = new Map<string, string>(); // label -> id
+  for (const dim of dims) {
+    dimensionMap.set(dim.label, dim.id);
   }
+
+  // Pre-resolve all unique products concurrently to avoid race conditions.
+  const uniqueProductKeys = new Map<string, { name: string; dimensionId: string; unitPrice: number }>();
+  for (const row of rows) {
+    const dimId = dimensionMap.get(row.dimension);
+    if (!dimId) continue;
+    const key = `${row.product.trim().toLowerCase()}|${dimId}`;
+    if (!uniqueProductKeys.has(key)) {
+      uniqueProductKeys.set(key, {
+        name: row.product,
+        dimensionId: dimId,
+        unitPrice: row.unitPrice,
+      });
+    }
+  }
+
+  const products = await Promise.all(
+    Array.from(uniqueProductKeys.values()).map((p) =>
+      findOrCreateProduct(p.name, p.dimensionId, p.unitPrice)
+    )
+  );
+
+  const productMap = new Map<string, string>(); // name.toLowerCase()|dimensionId -> id
+  for (const prod of products) {
+    productMap.set(`${prod.name.toLowerCase()}|${prod.dimensionId}`, prod.id);
+  }
+
+  // Create sales and items concurrently using Promise.all (one sale record per CSV row)
+  await Promise.all(
+    rows.map(async (row) => {
+      const sale = await prisma.sale.create({
+        data: {
+          date: new Date(row.date),
+          clientName: row.clientName,
+          phone: row.phone || null,
+          address: row.address || null,
+          deliveryStatus: row.deliveryStatus,
+          paymentStatus: row.paymentStatus,
+          comments: row.comments || null,
+        },
+      });
+
+      const dimId = dimensionMap.get(row.dimension);
+      if (!dimId) return;
+      const prodId = productMap.get(`${row.product.trim().toLowerCase()}|${dimId}`);
+      if (!prodId) return;
+
+      await prisma.saleItem.create({
+        data: {
+          saleId: sale.id,
+          productId: prodId,
+          quantity: row.quantity,
+        },
+      });
+    })
+  );
 }

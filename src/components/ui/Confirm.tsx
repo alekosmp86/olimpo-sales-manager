@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, use, useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { AlertTriangle, HelpCircle, Info, CheckCircle } from "lucide-react";
 import styles from "./Confirm.module.css";
@@ -22,11 +22,25 @@ interface ConfirmContextType {
 const ConfirmContext = createContext<ConfirmContextType | undefined>(undefined);
 
 export const useConfirm = () => {
-  const context = useContext(ConfirmContext);
+  const context = use(ConfirmContext);
   if (!context) {
     throw new Error("useConfirm must be used within a ConfirmProvider");
   }
   return context.confirm;
+};
+
+const getIcon = (type?: MessageTypeValue) => {
+  switch (type) {
+    case MessageType.DANGER:
+      return <AlertTriangle size={24} />;
+    case MessageType.SUCCESS:
+      return <CheckCircle size={24} />;
+    case MessageType.INFO:
+      return <Info size={24} />;
+    case MessageType.WARNING:
+    default:
+      return <HelpCircle size={24} />;
+  }
 };
 
 export function ConfirmProvider({ children }: { children: React.ReactNode }) {
@@ -60,52 +74,58 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
     setDialogState({ isOpen: false, options: null, resolve: null });
   }, [dialogState]);
 
-  // Keyboard navigation inside modal
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
-      if (!dialogState.options?.onlyConfirm) {
-        handleCancel();
-      }
-    } else if (e.key === "Enter") {
-      handleConfirm();
-    }
-  };
-
-  const getIcon = (type?: MessageTypeValue) => {
-    switch (type) {
-      case MessageType.DANGER:
-        return <AlertTriangle size={24} />;
-      case MessageType.SUCCESS:
-        return <CheckCircle size={24} />;
-      case MessageType.INFO:
-        return <Info size={24} />;
-      case MessageType.WARNING:
-      default:
-        return <HelpCircle size={24} />;
-    }
-  };
-
   const { isOpen, options } = dialogState;
 
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const handleCancelRef = useRef(handleCancel);
+  const handleConfirmRef = useRef(handleConfirm);
+
+  handleCancelRef.current = handleCancel;
+  handleConfirmRef.current = handleConfirm;
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    dialog.focus();
+
+    const handleClick = (e: MouseEvent) => {
+      if (e.target === dialog && !options?.onlyConfirm) {
+        handleCancelRef.current();
+      }
+    };
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (!options?.onlyConfirm) {
+          handleCancelRef.current();
+        }
+      } else if (e.key === "Enter") {
+        handleConfirmRef.current();
+      }
+    };
+
+    dialog.addEventListener("click", handleClick);
+    document.addEventListener("keydown", handleKey);
+
+    return () => {
+      dialog.removeEventListener("click", handleClick);
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [isOpen, options]);
+
+  const contextValue = useMemo(() => ({ confirm }), [confirm]);
+
   return (
-    <ConfirmContext.Provider value={{ confirm }}>
+    <ConfirmContext.Provider value={contextValue}>
       {children}
       {isOpen && options && typeof window !== "undefined" &&
         createPortal(
-          <div
+          <dialog
+            ref={dialogRef}
             className={styles.backdrop}
-            onClick={() => {
-              // Clicking backdrop cancels unless it is an alert dialog
-              if (!options.onlyConfirm) {
-                handleCancel();
-              }
-            }}
-            onKeyDown={handleKeyDown}
             tabIndex={-1}
-            ref={(el) => el?.focus()} // auto focus backdrop to trap keyboard events
-            role="dialog"
-            aria-modal="true"
             aria-labelledby="confirm-title"
+            open
           >
             <div className={styles.dialog} onClick={(e) => e.stopPropagation()}>
               <div className={styles.header}>
@@ -121,11 +141,12 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
               </div>
               <div className={styles.footer}>
                 {!options.onlyConfirm && (
-                  <button className={styles.cancelBtn} onClick={handleCancel}>
+                  <button type="button" className={styles.cancelBtn} onClick={handleCancel}>
                     {options.cancelText || "Cancelar"}
                   </button>
                 )}
                 <button
+                  type="button"
                   className={`${styles.confirmBtn} ${styles[options.type || MessageType.WARNING]}`}
                   onClick={handleConfirm}
                 >
@@ -133,7 +154,7 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
                 </button>
               </div>
             </div>
-          </div>,
+          </dialog>,
           document.body
         )}
     </ConfirmContext.Provider>

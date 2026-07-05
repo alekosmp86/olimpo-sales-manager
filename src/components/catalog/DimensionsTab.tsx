@@ -88,6 +88,7 @@ export function DimensionsTab() {
             value={newLabel}
             onChange={(e) => setNewLabel(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && createMutation.mutate(newLabel)}
+            aria-label="Etiqueta de la nueva dimensión"
           />
           <Button
             variant="primary"
@@ -114,7 +115,7 @@ export function DimensionsTab() {
                     className={styles.input}
                     value={editLabel}
                     onChange={(e) => setEditLabel(e.target.value)}
-                    autoFocus
+                    aria-label="Editar etiqueta de dimensión"
                   />
                   <Button
                     size="sm"

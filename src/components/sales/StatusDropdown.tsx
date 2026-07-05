@@ -99,9 +99,9 @@ function StatusSelect({ value, options, labelMap, colorMap, onChange, disabled }
       </button>
 
       {open && (
-        <ul className={styles.dropdown} role="listbox">
+        <div className={styles.dropdown} role="listbox">
           {options.map((opt) => (
-            <li
+            <div
               key={opt}
               className={[
                 styles.option,
@@ -109,16 +109,24 @@ function StatusSelect({ value, options, labelMap, colorMap, onChange, disabled }
                 styles[colorMap[opt] ?? "gray"],
               ].join(" ")}
               role="option"
+              tabIndex={-1}
               aria-selected={opt === value}
               onClick={() => {
                 onChange(opt);
                 setOpen(false);
               }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onChange(opt);
+                  setOpen(false);
+                }
+              }}
             >
               {labelMap[opt] ?? opt}
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

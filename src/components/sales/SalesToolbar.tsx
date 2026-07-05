@@ -38,6 +38,7 @@ export function SalesToolbar({
             placeholder="Buscar por cliente o dirección..."
             value={search}
             onChange={(e) => onSearch(e.target.value)}
+            aria-label="Buscar ventas"
           />
         </div>
       </div>

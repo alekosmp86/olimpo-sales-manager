@@ -68,6 +68,7 @@ export interface CsvRow {
 }
 
 export interface ImportValidRow {
+  rowNumber: number;
   date: string;
   clientName: string;
   phone?: string;

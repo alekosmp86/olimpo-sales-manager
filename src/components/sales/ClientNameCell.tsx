@@ -68,26 +68,24 @@ export function ClientNameCell({ saleId, initialValue, sales, onUpdate }: Client
     return getSuggestions(debouncedValue, sales, saleId);
   }, [debouncedValue, sales, saleId, focused]);
 
-  // Dynamic upward dropdown detection
-  useEffect(() => {
-    if (!open || !wrapperRef.current) {
-      setShowUpward(false);
-      return;
+  function updateDropdownDirection() {
+    if (wrapperRef.current) {
+      const rect = wrapperRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      setShowUpward(spaceBelow < 240);
     }
-    const rect = wrapperRef.current.getBoundingClientRect();
-    const spaceBelow = window.innerHeight - rect.bottom;
-    // Suggestion dropdown max height is ~240px (5 items * 46px + padding)
-    setShowUpward(spaceBelow < 240);
-  }, [open]);
+  }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setValue(e.target.value);
     setOpen(true);
+    updateDropdownDirection();
   }
 
   function handleFocus() {
     setFocused(true);
     setOpen(true);
+    updateDropdownDirection();
   }
 
   function handleBlur() {
@@ -125,14 +123,16 @@ export function ClientNameCell({ saleId, initialValue, sales, onUpdate }: Client
         onChange={handleChange}
         onFocus={handleFocus}
         onBlur={handleBlur}
+        aria-label="Nombre del cliente"
       />
 
       {open && suggestions.length > 0 && (
-        <ul className={`${styles.list} ${showUpward ? styles.listUpward : ""}`} role="listbox">
-          {suggestions.map((s, i) => (
-            <li
-              key={i}
+        <div className={`${styles.list} ${showUpward ? styles.listUpward : ""}`} role="listbox">
+          {suggestions.map((s) => (
+            <div
+              key={s.clientName}
               role="option"
+              tabIndex={-1}
               aria-selected={value === s.clientName}
               className={styles.item}
               // mousedown fires before blur — e.preventDefault() keeps the input focused
@@ -148,9 +148,9 @@ export function ClientNameCell({ saleId, initialValue, sales, onUpdate }: Client
                   {[s.phone, s.address].filter(Boolean).join(" · ")}
                 </span>
               )}
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

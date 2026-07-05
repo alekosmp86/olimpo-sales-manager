@@ -2,7 +2,8 @@
 
 import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from "@tanstack/react-query";
 import { useState } from "react";
-import { ToastProvider, triggerGlobalToast } from "./ui/Toast";
+import { ToastProvider } from "./ui/Toast";
+import { triggerGlobalToast } from "@/lib/utils/toastTrigger";
 import { ConfirmProvider } from "./ui/Confirm";
 import { MessageType } from "@/lib/constants/messageType";
 

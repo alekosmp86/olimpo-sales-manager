@@ -75,6 +75,7 @@ export function useSaleColumns(
                     onUpdate({ id: row.original.id, data: { date: e.target.value } });
                   }
                 }}
+                aria-label="Fecha de la venta"
               />
             </div>
           );
@@ -109,6 +110,7 @@ export function useSaleColumns(
               if (e.target.value !== (getValue() ?? ""))
                 onUpdate({ id: row.original.id, data: { phone: e.target.value || null } });
             }}
+            aria-label="Teléfono del cliente"
           />
         ),
         size: 160,
@@ -127,6 +129,7 @@ export function useSaleColumns(
               if (e.target.value !== (getValue() ?? ""))
                 onUpdate({ id: row.original.id, data: { address: e.target.value || null } });
             }}
+            aria-label="Dirección de entrega"
           />
         ),
         size: 400,
@@ -185,6 +188,7 @@ export function useSaleColumns(
               if (e.target.value !== (getValue() ?? ""))
                 onUpdate({ id: row.original.id, data: { comments: e.target.value || null } });
             }}
+            aria-label="Comentarios de la venta"
           />
         ),
         size: 350,
