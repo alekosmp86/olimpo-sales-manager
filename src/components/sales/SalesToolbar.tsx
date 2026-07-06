@@ -1,8 +1,9 @@
 "use client";
 
-import { Search, Package, Trash2, Plus } from "lucide-react";
+import { Package, Trash2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { ImportCSVButton } from "@/components/import/ImportCSVButton";
+import { SearchInput } from "@/components/ui/SearchInput";
 import styles from "./SalesTable.module.css";
 
 interface SalesToolbarProps {
@@ -29,18 +30,14 @@ export function SalesToolbar({
   return (
     <div className={styles.toolbar}>
       <div className={styles.toolbarLeft}>
-        <div className={styles.searchWrapper}>
-          <Search className={styles.searchIcon} size={16} />
-          <input
-            id="search-input"
-            type="search"
-            className={styles.searchInput}
-            placeholder="Buscar por cliente o dirección..."
-            value={search}
-            onChange={(e) => onSearch(e.target.value)}
-            aria-label="Buscar ventas"
-          />
-        </div>
+        <SearchInput
+          id="search-input"
+          value={search}
+          onChange={onSearch}
+          placeholder="Buscar por cliente o dirección..."
+          ariaLabel="Buscar ventas"
+          showIcon
+        />
       </div>
 
       <div className={styles.toolbarRight}>

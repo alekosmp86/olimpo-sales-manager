@@ -137,3 +137,12 @@
   text-align: center;
   padding: var(--space-8);
 }
+
+
+
+.emptySearch {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  text-align: center;
+  padding: var(--space-8);
+}

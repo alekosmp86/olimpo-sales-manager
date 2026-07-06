@@ -5,6 +5,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/Button";
 import { Trash2 } from "lucide-react";
 import { useConfirm } from "@/components/ui/Confirm";
+import { SearchInput } from "@/components/ui/SearchInput";
+import { useFilter } from "@/hooks/useFilter";
 import { MessageType } from "@/lib/constants/messageType";
 import type { Dimension } from "@/lib/types";
 import styles from "./DimensionsTab.module.css";
@@ -77,6 +79,11 @@ export function DimensionsTab() {
     },
   });
 
+  const { filter, setFilter, filteredItems: filteredDimensions } = useFilter(
+    dimensions,
+    (dimension, query) => dimension.label.toLowerCase().includes(query.toLowerCase())
+  );
+
   return (
     <div className={styles.section}>
       <div className={styles.createForm}>
@@ -102,69 +109,89 @@ export function DimensionsTab() {
         {error && <p className={styles.error}>{error}</p>}
       </div>
 
+      {/* Filter Input */}
+      {!isLoading && dimensions.length > 0 && (
+        <SearchInput
+          value={filter}
+          onChange={setFilter}
+          placeholder="Buscar dimensión por etiqueta..."
+          ariaLabel="Filtrar dimensiones por etiqueta"
+        />
+      )}
+
+      {/* List */}
       {isLoading ? (
         <p className={styles.loading}>Cargando...</p>
+      ) : dimensions.length === 0 ? (
+        <p className={styles.loading}>No hay dimensiones creadas.</p>
       ) : (
-        <ul className={styles.list}>
-          {dimensions.map((d) => (
-            <li key={d.id} className={styles.listItem}>
-              {editId !== d.id && <span className={styles.dimLabel}>{d.label}</span>}
-              {editId === d.id ? (
-                <div className={styles.editRow}>
-                  <input
-                    className={styles.input}
-                    value={editLabel}
-                    onChange={(e) => setEditLabel(e.target.value)}
-                    aria-label="Editar etiqueta de dimensión"
-                  />
-                  <Button
-                    size="sm"
-                    variant="primary"
-                    onClick={() => updateMutation.mutate({ id: d.id, label: editLabel })}
-                    loading={updateMutation.isPending}
-                  >
-                    Guardar
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => setEditId(null)}>
-                    Cancelar
-                  </Button>
-                </div>
-              ) : (
-                <div className={styles.itemActions}>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => {
-                      setEditId(d.id);
-                      setEditLabel(d.label);
-                    }}
-                  >
-                    Editar
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="danger"
-                    onClick={async () => {
-                      if (await confirm({
-                        title: "¿Eliminar dimensión?",
-                        message: `¿Está seguro de que desea eliminar "${d.label}"? Esto podría afectar a los productos asociados. Esta acción no se puede deshacer.`,
-                        confirmText: "Eliminar",
-                        cancelText: "Cancelar",
-                        type: MessageType.DANGER,
-                      })) {
-                        deleteMutation.mutate(d.id);
-                      }
-                    }}
-                    loading={deleteMutation.isPending}
-                    aria-label="Eliminar dimensión"
-                  >
-                    <Trash2 size={14} />
-                  </Button>
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
+        (() => {
+          if (filteredDimensions.length === 0) {
+            return <p className={styles.emptySearch}>No se encontraron dimensiones.</p>;
+          }
+          return (
+            <ul className={styles.list}>
+              {filteredDimensions.map((d) => (
+                <li key={d.id} className={styles.listItem}>
+                  {editId !== d.id && <span className={styles.dimLabel}>{d.label}</span>}
+                  {editId === d.id ? (
+                    <div className={styles.editRow}>
+                      <input
+                        className={styles.input}
+                        value={editLabel}
+                        onChange={(e) => setEditLabel(e.target.value)}
+                        aria-label="Editar etiqueta de dimensión"
+                      />
+                      <Button
+                        size="sm"
+                        variant="primary"
+                        onClick={() => updateMutation.mutate({ id: d.id, label: editLabel })}
+                        loading={updateMutation.isPending}
+                      >
+                        Guardar
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => setEditId(null)}>
+                        Cancelar
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className={styles.itemActions}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setEditId(d.id);
+                          setEditLabel(d.label);
+                        }}
+                      >
+                        Editar
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        onClick={async () => {
+                          if (await confirm({
+                            title: "¿Eliminar dimensión?",
+                            message: `¿Está seguro de que desea eliminar "${d.label}"? Esto podría afectar a los productos asociados. Esta acción no se puede deshacer.`,
+                            confirmText: "Eliminar",
+                            cancelText: "Cancelar",
+                            type: MessageType.DANGER,
+                          })) {
+                            deleteMutation.mutate(d.id);
+                          }
+                        }}
+                        loading={deleteMutation.isPending}
+                        aria-label="Eliminar dimensión"
+                      >
+                        <Trash2 size={14} />
+                      </Button>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          );
+        })()
       )}
     </div>
   );
