@@ -62,5 +62,20 @@ export function useSales(search: string) {
     },
   });
 
-  return { sales, isLoading, createMutation, updateMutation, deleteMutation };
+  const duplicateMutation = useMutation<Sale, Error, string>({
+    mutationFn: (id) =>
+      fetch(`/api/sales/${id}/duplicate`, {
+        method: "POST",
+      }).then((r) => {
+        if (!r.ok) throw new Error("Error al duplicar venta");
+        return r.json();
+      }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sales"] }),
+    meta: {
+      successMessage: "Venta duplicada con éxito",
+      errorMessage: "Error al duplicar la venta",
+    },
+  });
+
+  return { sales, isLoading, createMutation, updateMutation, deleteMutation, duplicateMutation };
 }

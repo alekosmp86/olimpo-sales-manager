@@ -136,7 +136,7 @@
 
 /* Column sizes */
 .th[data-col="select"], .td[data-col="select"] { width: 48px; min-width: 48px; }
-.th[data-col="copy"], .td[data-col="copy"] { width: 60px; min-width: 60px; }
+.th[data-col="actions"], .td[data-col="actions"] { width: 80px; min-width: 80px; }
 .th[data-col="date"], .td[data-col="date"] { width: 170px; min-width: 170px; }
 .th[data-col="clientName"], .td[data-col="clientName"] { width: 240px; min-width: 240px; }
 .th[data-col="phone"], .td[data-col="phone"] { width: 160px; min-width: 160px; }
@@ -397,19 +397,20 @@
   }
 }
 
-.copyCell {
+.actionsCell {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: var(--space-1);
   width: 100%;
 }
 
-.copyButton {
+.actionButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: var(--radius-sm);
   background: transparent;
   border: 1px solid transparent;
@@ -418,13 +419,13 @@
   transition: all var(--transition-fast);
 }
 
-.copyButton:hover {
+.actionButton:hover {
   background-color: var(--color-primary-subtle);
   border-color: var(--color-primary-light);
   color: var(--color-primary);
 }
 
-.copyButton:active {
+.actionButton:active {
   transform: scale(0.95);
 }
 

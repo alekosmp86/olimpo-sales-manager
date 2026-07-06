@@ -104,6 +104,44 @@ export async function deleteSales(ids: string[]) {
   await prisma.sale.deleteMany({ where: { id: { in: ids } } });
 }
 
+export async function duplicateSale(id: string) {
+  const original = await prisma.sale.findUniqueOrThrow({
+    where: { id },
+    include: { items: true },
+  });
+
+  const duplicated = await prisma.$transaction(async (tx) => {
+    const newSale = await tx.sale.create({
+      data: {
+        date: original.date,
+        clientName: original.clientName,
+        phone: original.phone,
+        address: original.address,
+        comments: original.comments,
+        deliveryStatus: DeliveryStatus.NOT_DELIVERED,
+        paymentStatus: PaymentStatus.NOT_PAID,
+      },
+    });
+
+    if (original.items.length > 0) {
+      await tx.saleItem.createMany({
+        data: original.items.map((item) => ({
+          saleId: newSale.id,
+          productId: item.productId,
+          quantity: item.quantity,
+        })),
+      });
+    }
+
+    return tx.sale.findUniqueOrThrow({
+      where: { id: newSale.id },
+      include: saleInclude,
+    });
+  });
+
+  return serializeSale(duplicated);
+}
+
 // ─── Serialization ────────────────────────────────────────────────────────────
 
 type SaleWithItems = Awaited<ReturnType<typeof prisma.sale.findFirstOrThrow>> & {

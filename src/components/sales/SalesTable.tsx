@@ -33,10 +33,11 @@ export function SalesTable() {
   const confirm = useConfirm();
 
   // ── Data + mutations ──────────────────────────────────────────────────────
-  const { sales, isLoading, createMutation, updateMutation, deleteMutation } =
+  const { sales, isLoading, createMutation, updateMutation, deleteMutation, duplicateMutation } =
     useSales(debouncedSearch);
   const { mutate: createSale } = createMutation;
   const { mutate: deleteSales } = deleteMutation;
+  const { mutate: duplicateSale } = duplicateMutation;
 
   // ── Sheet navigation ──────────────────────────────────────────────────────
   const { selectedYear, selectedMonth, goToPrevYear, goToNextYear, selectMonth } =
@@ -56,6 +57,15 @@ export function SalesTable() {
       },
     });
   }, [selectedYear, selectedMonth, createSale]);
+
+  const handleDuplicate = useCallback((saleId: string) => {
+    duplicateSale(saleId, {
+      onSuccess: (newSale: Sale) => {
+        setNewRowId(newSale.id);
+        setTimeout(() => setNewRowId(null), 1000);
+      },
+    });
+  }, [duplicateSale]);
 
   const handleDelete = useCallback(async () => {
     const ids = Object.keys(rowSelection).filter((k) => rowSelection[k]);
@@ -77,7 +87,7 @@ export function SalesTable() {
   }, [rowSelection, deleteSales, confirm]);
 
   // ── Table ─────────────────────────────────────────────────────────────────
-  const columns = useSaleColumns(updateMutation.mutate, handleOpenProducts, sales);
+  const columns = useSaleColumns(updateMutation.mutate, handleOpenProducts, sales, handleDuplicate);
 
   const filteredSales = useMemo(
     () =>

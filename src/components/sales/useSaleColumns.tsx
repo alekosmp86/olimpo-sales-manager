@@ -7,7 +7,7 @@ import { ProductsCell } from "./ProductsCell";
 import { ClientNameCell } from "./ClientNameCell";
 import type { Sale } from "@/lib/types";
 import { formatReviewDate } from "@/lib/dateUtils";
-import { Calendar, MessageSquareText } from "lucide-react";
+import { Calendar, MessageSquareText, Copy } from "lucide-react";
 import { triggerGlobalToast } from "@/lib/utils/toastTrigger";
 import { MessageType } from "@/lib/constants/messageType";
 import { formatPrice } from "@/lib/utils/priceUtils";
@@ -25,7 +25,8 @@ type UpdatePayload = { id: string; data: Record<string, unknown> };
 export function useSaleColumns(
   onUpdate: (payload: UpdatePayload) => void,
   onOpenProducts: (saleId: string) => void,
-  sales: Sale[]
+  sales: Sale[],
+  onDuplicate: (saleId: string) => void
 ) {
   return useMemo(
     () => [
@@ -53,9 +54,9 @@ export function useSaleColumns(
         size: 48,
       }),
 
-      // ── Copy details ────────────────────────────────────────────────────────
+      // ── Actions ─────────────────────────────────────────────────────────────
       columnHelper.display({
-        id: "copy",
+        id: "actions",
         header: "",
         cell: ({ row }) => {
           const handleCopy = async () => {
@@ -88,21 +89,34 @@ export function useSaleColumns(
             }
           };
 
+          const handleDuplicateRow = () => {
+            onDuplicate(row.original.id);
+          };
+
           return (
-            <div className={styles.copyCell}>
+            <div className={styles.actionsCell}>
               <button
                 type="button"
-                className={styles.copyButton}
+                className={styles.actionButton}
                 onClick={handleCopy}
                 title="Copiar detalles"
                 aria-label="Copiar detalles"
               >
                 <MessageSquareText size={16} />
               </button>
+              <button
+                type="button"
+                className={styles.actionButton}
+                onClick={handleDuplicateRow}
+                title="Duplicar venta"
+                aria-label="Duplicar venta"
+              >
+                <Copy size={16} />
+              </button>
             </div>
           );
         },
-        size: 60,
+        size: 80,
       }),
 
       // ── Date ────────────────────────────────────────────────────────────────
@@ -249,6 +263,6 @@ export function useSaleColumns(
         size: 350,
       }),
     ],
-    [onUpdate, onOpenProducts, sales]
+    [onUpdate, onOpenProducts, sales, onDuplicate]
   );
 }
