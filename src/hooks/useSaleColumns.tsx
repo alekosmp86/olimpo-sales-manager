@@ -2,16 +2,16 @@
 
 import { useMemo } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
-import { DeliveryDropdown, PaymentDropdown } from "./StatusDropdown";
-import { ProductsCell } from "./ProductsCell";
-import { ClientNameCell } from "./ClientNameCell";
+import { DeliveryDropdown, PaymentDropdown } from "../components/sales/StatusDropdown";
+import { ProductsCell } from "../components/sales/ProductsCell";
+import { ClientNameCell } from "../components/sales/ClientNameCell";
 import type { Sale } from "@/lib/types";
 import { formatReviewDate } from "@/lib/dateUtils";
 import { Calendar, MessageSquareText, Copy } from "lucide-react";
 import { triggerGlobalToast } from "@/lib/utils/toastTrigger";
 import { MessageType } from "@/lib/constants/messageType";
 import { formatPrice } from "@/lib/utils/priceUtils";
-import styles from "./SalesTable.module.css";
+import styles from "../components/sales/SalesTable.module.css";
 
 const columnHelper = createColumnHelper<Sale>();
 
