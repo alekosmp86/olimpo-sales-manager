@@ -30,6 +30,8 @@ export async function getSales(search?: string) {
     include: saleInclude,
     orderBy: [
       { date: "asc" },
+      { clientName: "asc" },
+      { createdAt: "asc" },
       { id: "asc" },
     ],
   });
