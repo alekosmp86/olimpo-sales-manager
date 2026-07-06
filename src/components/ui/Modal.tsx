@@ -11,6 +11,7 @@ interface ModalProps {
   children: ReactNode;
   footer?: ReactNode;
   size?: "sm" | "md" | "lg" | "xl";
+  bodyClassName?: string;
 }
 
 export function Modal({
@@ -20,6 +21,7 @@ export function Modal({
   children,
   footer,
   size = "md",
+  bodyClassName,
 }: ModalProps) {
   const backdropRef = useRef<HTMLDialogElement>(null);
   const onCloseRef = useRef(onClose);
@@ -71,7 +73,7 @@ export function Modal({
             ✕
           </button>
         </div>
-        <div className={styles.body}>{children}</div>
+        <div className={[styles.body, bodyClassName].filter(Boolean).join(" ")}>{children}</div>
         {footer && <div className={styles.footer}>{footer}</div>}
       </div>
     </dialog>,

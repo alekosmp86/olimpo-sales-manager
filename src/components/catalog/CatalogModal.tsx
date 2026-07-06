@@ -17,7 +17,13 @@ export function CatalogModal({ isOpen, onClose }: CatalogModalProps) {
   const [tab, setTab] = useState<Tab>("products");
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Catálogo de productos" size="lg">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Catálogo de productos"
+      size="lg"
+      bodyClassName={styles.modalBody}
+    >
       <div className={styles.tabs}>
         <button
           type="button"

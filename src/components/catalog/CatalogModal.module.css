@@ -28,3 +28,11 @@
   border-bottom-color: var(--color-primary);
   font-weight: var(--weight-semibold);
 }
+
+.modalBody {
+  display: flex;
+  flex-direction: column;
+  height: 520px;
+  max-height: 70dvh;
+  overflow: hidden;
+}
