@@ -183,6 +183,7 @@ export function useSaleColumns(
           />
         ),
         size: 160,
+        enableSorting: false,
       }),
 
       // ── Address ─────────────────────────────────────────────────────────────
@@ -202,6 +203,7 @@ export function useSaleColumns(
           />
         ),
         size: 400,
+        enableSorting: false,
       }),
 
       // ── Products ────────────────────────────────────────────────────────────
@@ -261,6 +263,7 @@ export function useSaleColumns(
           />
         ),
         size: 350,
+        enableSorting: false,
       }),
     ],
     [onUpdate, onOpenProducts, sales, onDuplicate]

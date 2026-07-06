@@ -4,7 +4,9 @@ import { useState, useCallback, useMemo } from "react";
 import {
   useReactTable,
   getCoreRowModel,
+  getSortedRowModel,
   type RowSelectionState,
+  type SortingState,
 } from "@tanstack/react-table";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useSales } from "@/hooks/useSales";
@@ -26,6 +28,9 @@ export function SalesTable() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "date", desc: false }
+  ]);
   const [newRowId, setNewRowId] = useState<string | null>(null);
   const [productsModal, setProductsModal] = useState<{ saleId: string } | null>(null);
   const [catalogOpen, setCatalogOpen] = useState(false);
@@ -105,9 +110,11 @@ export function SalesTable() {
   const table = useReactTable({
     data: filteredSales,
     columns,
-    getCoreRowModel: getCoreRowModel(),
-    state: { rowSelection },
+    state: { rowSelection, sorting },
     onRowSelectionChange: setRowSelection,
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     enableRowSelection: true,
     getRowId: (row) => row.id,
   });

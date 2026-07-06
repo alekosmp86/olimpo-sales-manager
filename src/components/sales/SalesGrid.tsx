@@ -2,6 +2,7 @@
 
 import { type Table, flexRender } from "@tanstack/react-table";
 import { useEffect, useRef } from "react";
+import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import type { Sale } from "@/lib/types";
 import styles from "./SalesTable.module.css";
 
@@ -51,10 +52,38 @@ export function SalesGrid({
                  {hg.headers.map((header) => (
                   <th
                     key={header.id}
-                    className={styles.th}
+                    className={[
+                      styles.th,
+                      header.column.getCanSort() ? styles.sortableHeader : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
                     data-col={header.column.id}
+                    onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
+                    aria-sort={
+                      header.column.getIsSorted() === "asc"
+                        ? "ascending"
+                        : header.column.getIsSorted() === "desc"
+                        ? "descending"
+                        : undefined
+                    }
                   >
-                    {flexRender(header.column.columnDef.header, header.getContext())}
+                    <div className={styles.headerContent}>
+                      <span className={styles.headerLabel}>
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                      </span>
+                      {header.column.getCanSort() && (
+                        <span className={styles.sortIconWrapper}>
+                          {header.column.getIsSorted() === "asc" ? (
+                            <ArrowUp size={14} className={styles.sortIconActive} />
+                          ) : header.column.getIsSorted() === "desc" ? (
+                            <ArrowDown size={14} className={styles.sortIconActive} />
+                          ) : (
+                            <ArrowUpDown size={14} className={styles.sortIconInactive} />
+                          )}
+                        </span>
+                      )}
+                    </div>
                   </th>
                 ))}
               </tr>
