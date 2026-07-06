@@ -56,8 +56,8 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
       <div
         className={styles.progressBar}
         style={{
-          animation: `${styles.progressShrink} ${duration}ms linear forwards`,
-        }}
+          "--toast-duration": `${duration}ms`,
+        } as React.CSSProperties}
       />
     </div>
   );

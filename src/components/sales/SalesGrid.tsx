@@ -52,7 +52,7 @@ export function SalesGrid({
                   <th
                     key={header.id}
                     className={styles.th}
-                    style={{ "--col-width": `${header.getSize()}px` } as React.CSSProperties}
+                    data-col={header.column.id}
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}
                   </th>
@@ -87,7 +87,7 @@ export function SalesGrid({
                     <td
                       key={cell.id}
                       className={styles.td}
-                      style={{ "--col-width": `${cell.column.getSize()}px` } as React.CSSProperties}
+                      data-col={cell.column.id}
                     >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>

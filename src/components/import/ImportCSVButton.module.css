@@ -4,3 +4,7 @@
   margin-top: var(--space-1);
   display: block;
 }
+
+.hiddenInput {
+  display: none;
+}

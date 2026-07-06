@@ -109,8 +109,6 @@
   white-space: nowrap;
   border-bottom: 2px solid var(--color-border);
   user-select: none;
-  width: var(--col-width);
-  min-width: var(--col-width);
 }
 
 /* ─── Rows ────────────────────────────────────────────────────────────────── */
@@ -134,9 +132,20 @@
 .td {
   padding: var(--space-2) var(--space-3);
   vertical-align: middle;
-  width: var(--col-width);
-  min-width: var(--col-width);
 }
+
+/* Column sizes */
+.th[data-col="select"], .td[data-col="select"] { width: 48px; min-width: 48px; }
+.th[data-col="copy"], .td[data-col="copy"] { width: 60px; min-width: 60px; }
+.th[data-col="date"], .td[data-col="date"] { width: 170px; min-width: 170px; }
+.th[data-col="clientName"], .td[data-col="clientName"] { width: 240px; min-width: 240px; }
+.th[data-col="phone"], .td[data-col="phone"] { width: 160px; min-width: 160px; }
+.th[data-col="address"], .td[data-col="address"] { width: 400px; min-width: 400px; }
+.th[data-col="items"], .td[data-col="items"] { width: 250px; min-width: 250px; }
+.th[data-col="deliveryStatus"], .td[data-col="deliveryStatus"] { width: 150px; min-width: 150px; }
+.th[data-col="paymentStatus"], .td[data-col="paymentStatus"] { width: 170px; min-width: 170px; }
+.th[data-col="comments"], .td[data-col="comments"] { width: 350px; min-width: 350px; }
+
 
 /* ─── Cell inputs ─────────────────────────────────────────────────────────── */
 .cellInput {
@@ -387,5 +396,37 @@
     padding-left: var(--space-16);
   }
 }
+
+.copyCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.copyButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.copyButton:hover {
+  background-color: var(--color-primary-subtle);
+  border-color: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.copyButton:active {
+  transform: scale(0.95);
+}
+
 
 

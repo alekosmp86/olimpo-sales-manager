@@ -7,7 +7,10 @@ import { ProductsCell } from "./ProductsCell";
 import { ClientNameCell } from "./ClientNameCell";
 import type { Sale } from "@/lib/types";
 import { formatReviewDate } from "@/lib/dateUtils";
-import { Calendar } from "lucide-react";
+import { Calendar, MessageSquareText } from "lucide-react";
+import { triggerGlobalToast } from "@/lib/utils/toastTrigger";
+import { MessageType } from "@/lib/constants/messageType";
+import { formatPrice } from "@/lib/utils/priceUtils";
 import styles from "./SalesTable.module.css";
 
 const columnHelper = createColumnHelper<Sale>();
@@ -48,6 +51,58 @@ export function useSaleColumns(
           />
         ),
         size: 48,
+      }),
+
+      // ── Copy details ────────────────────────────────────────────────────────
+      columnHelper.display({
+        id: "copy",
+        header: "",
+        cell: ({ row }) => {
+          const handleCopy = async () => {
+            const sale = row.original;
+            const itemsText = (sale.items ?? []).reduce<string[]>((acc, item) => {
+              if (item && item.product) {
+                const pName = item.product.name;
+                const dimLabel = item.product.dimension?.label ? ` (${item.product.dimension.label})` : "";
+                const qty = item.quantity;
+                const price = formatPrice(item.totalPrice ?? (qty * (item.product.unitPrice ?? 0)));
+                acc.push(`- ${pName}${dimLabel}: ${qty} u. · ${price}`);
+              }
+              return acc;
+            }, []).join("\n");
+
+            const text = [
+              `Nombre: ${sale.clientName}`,
+              `Teléfono: ${sale.phone ?? "No especificado"}`,
+              `Dirección: ${sale.address ?? "No especificada"}`,
+              `Productos:`,
+              itemsText || "- Sin productos",
+            ].join("\n");
+
+            try {
+              await navigator.clipboard.writeText(text);
+              triggerGlobalToast("Detalles copiados al portapapeles", MessageType.SUCCESS);
+            } catch (err) {
+              console.error("Error al copiar al portapapeles:", err);
+              triggerGlobalToast("Error al copiar al portapapeles", MessageType.DANGER);
+            }
+          };
+
+          return (
+            <div className={styles.copyCell}>
+              <button
+                type="button"
+                className={styles.copyButton}
+                onClick={handleCopy}
+                title="Copiar detalles"
+                aria-label="Copiar detalles"
+              >
+                <MessageSquareText size={16} />
+              </button>
+            </div>
+          );
+        },
+        size: 60,
       }),
 
       // ── Date ────────────────────────────────────────────────────────────────

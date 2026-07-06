@@ -109,7 +109,7 @@ export function ImportCSVButton() {
         ref={fileRef}
         type="file"
         accept=".csv, text/csv, application/csv, text/comma-separated-values"
-        style={{ display: "none" }}
+        className={styles.hiddenInput}
         onChange={handleFile}
         id="csv-file-input"
         aria-label="Subir archivo CSV de ventas"
