@@ -1,10 +1,13 @@
 "use client";
 
-import { Package, Trash2, Plus } from "lucide-react";
+import { useState } from "react";
+import { Package, Trash2, Plus, ZoomIn, ZoomOut } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { ImportCSVButton } from "@/components/import/ImportCSVButton";
 import { SearchInput } from "@/components/ui/SearchInput";
+import { CatalogModal } from "@/components/catalog/CatalogModal";
 import styles from "./SalesTable.module.css";
+import { MIN_ZOOM, MAX_ZOOM } from "./constants";
 
 interface SalesToolbarProps {
   search: string;
@@ -14,7 +17,10 @@ interface SalesToolbarProps {
   isCreatePending: boolean;
   onDelete: () => void;
   onCreate: () => void;
-  onOpenCatalog: () => void;
+  zoomLevel: number;
+  onZoomIn: () => void;
+  onZoomOut: () => void;
+  onZoomReset: () => void;
 }
 
 export function SalesToolbar({
@@ -25,8 +31,13 @@ export function SalesToolbar({
   isCreatePending,
   onDelete,
   onCreate,
-  onOpenCatalog,
+  zoomLevel,
+  onZoomIn,
+  onZoomOut,
+  onZoomReset,
 }: SalesToolbarProps) {
+  const [catalogOpen, setCatalogOpen] = useState(false);
+
   return (
     <div className={styles.toolbar}>
       <div className={styles.toolbarLeft}>
@@ -38,10 +49,42 @@ export function SalesToolbar({
           ariaLabel="Buscar ventas"
           showIcon
         />
+        
+        <div className={styles.zoomControls}>
+          <button
+            type="button"
+            className={styles.zoomBtn}
+            onClick={onZoomOut}
+            disabled={zoomLevel <= MIN_ZOOM}
+            title="Alejar cuadrícula"
+            aria-label="Alejar cuadrícula"
+          >
+            <ZoomOut size={15} />
+          </button>
+          <button
+            type="button"
+            className={styles.zoomResetBtn}
+            onClick={onZoomReset}
+            title="Restaurar zoom"
+            aria-label="Restaurar zoom al 100%"
+          >
+            {Math.round(zoomLevel * 100)}%
+          </button>
+          <button
+            type="button"
+            className={styles.zoomBtn}
+            onClick={onZoomIn}
+            disabled={zoomLevel >= MAX_ZOOM}
+            title="Acercar cuadrícula"
+            aria-label="Acercar cuadrícula"
+          >
+            <ZoomIn size={15} />
+          </button>
+        </div>
       </div>
 
       <div className={styles.toolbarRight}>
-        <Button id="catalog-btn" variant="ghost" size="sm" onClick={onOpenCatalog}>
+        <Button id="catalog-btn" variant="ghost" size="sm" onClick={() => setCatalogOpen(true)}>
           <Package size={16} /> Catálogo
         </Button>
 
@@ -68,6 +111,8 @@ export function SalesToolbar({
           <Plus size={16} /> Nueva venta
         </Button>
       </div>
+
+      <CatalogModal isOpen={catalogOpen} onClose={() => setCatalogOpen(false)} />
     </div>
   );
 }

@@ -5,10 +5,10 @@
   border: none;
   cursor: pointer;
   text-align: left;
-  padding: var(--space-2);
+  padding: calc(var(--space-2) * var(--grid-zoom, 1));
   border-radius: var(--radius-sm);
   transition: background-color var(--transition-fast);
-  min-height: var(--touch-target);
+  min-height: calc(var(--touch-target) * var(--grid-zoom, 1));
 }
 
 .cell:hover,
@@ -17,7 +17,7 @@
 }
 
 .emptyLabel {
-  font-size: var(--text-sm);
+  font-size: calc(var(--text-sm) * var(--grid-zoom, 1));
   color: var(--color-primary);
   font-weight: var(--weight-medium);
 }
@@ -26,31 +26,31 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: calc(4px * var(--grid-zoom, 1));
 }
 
 .item {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: calc(2px * var(--grid-zoom, 1));
 }
 
 .name {
-  font-size: var(--text-sm);
+  font-size: calc(var(--text-sm) * var(--grid-zoom, 1));
   font-weight: var(--weight-medium);
   color: var(--color-text);
   display: flex;
   align-items: baseline;
-  gap: var(--space-1);
+  gap: calc(var(--space-1) * var(--grid-zoom, 1));
 }
 
 .dim {
-  font-size: var(--text-xs);
+  font-size: calc(var(--text-xs) * var(--grid-zoom, 1));
   color: var(--color-text-muted);
   font-weight: var(--weight-normal);
 }
 
 .meta {
-  font-size: var(--text-xs);
+  font-size: calc(var(--text-xs) * var(--grid-zoom, 1));
   color: var(--color-text-secondary);
 }

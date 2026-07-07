@@ -12,7 +12,9 @@ import {
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import type { Sale } from "@/lib/types";
 import { useSaleColumns } from "../../hooks/useSaleColumns";
+import { usePinchToZoom } from "@/hooks/usePinchToZoom";
 import styles from "./SalesTable.module.css";
+import { MIN_ZOOM, MAX_ZOOM } from "./constants";
 
 interface SalesGridProps {
   sales: Sale[];
@@ -24,6 +26,8 @@ interface SalesGridProps {
   onUpdate: (payload: { id: string; data: Record<string, unknown> }) => void;
   onDuplicate: (saleId: string) => void;
   onOpenProducts: (saleId: string) => void;
+  zoomLevel: number;
+  onZoomChange: (zoom: number) => void;
 }
 
 export const SalesGrid = React.memo(function SalesGrid({
@@ -36,11 +40,16 @@ export const SalesGrid = React.memo(function SalesGrid({
   onUpdate,
   onDuplicate,
   onOpenProducts,
+  zoomLevel,
+  onZoomChange,
 }: SalesGridProps) {
   const [sorting, setSorting] = useState<SortingState>([
     { id: "date", desc: false }
   ]);
   const newRowRef = useRef<HTMLTableRowElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  usePinchToZoom(containerRef, { zoomLevel, onZoomChange, minZoom: MIN_ZOOM, maxZoom: MAX_ZOOM });
 
   const columns = useSaleColumns(onUpdate, onOpenProducts, sales, onDuplicate);
 
@@ -67,7 +76,11 @@ export const SalesGrid = React.memo(function SalesGrid({
 
   if (isLoading && rows.length === 0) {
     return (
-      <div className={styles.tableContainer}>
+      <div
+        ref={containerRef}
+        className={styles.tableContainer}
+        style={{ "--grid-zoom": zoomLevel } as React.CSSProperties}
+      >
         <div className={styles.loading}>
           <span className={styles.spinner} />
           <span>Cargando ventas...</span>
@@ -77,7 +90,11 @@ export const SalesGrid = React.memo(function SalesGrid({
   }
 
   return (
-    <div className={[styles.tableContainer, isLoading ? styles.tableLoading : ""].filter(Boolean).join(" ")}>
+    <div
+      ref={containerRef}
+      className={[styles.tableContainer, isLoading ? styles.tableLoading : ""].filter(Boolean).join(" ")}
+      style={{ "--grid-zoom": zoomLevel } as React.CSSProperties}
+    >
       <div className={styles.tableCard}>
         <table className={styles.table}>
           <thead>

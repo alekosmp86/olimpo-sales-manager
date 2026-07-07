@@ -21,10 +21,71 @@
 .toolbarLeft {
   flex: 1;
   min-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
 }
 
-.toolbarLeft > div {
+.toolbarLeft > div:first-child {
   max-width: 360px;
+  flex: 1;
+}
+
+.zoomControls {
+  display: flex;
+  align-items: center;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 2px;
+  flex-shrink: 0;
+}
+
+.zoomBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.zoomBtn:hover:not(:disabled) {
+  background-color: var(--color-surface-3);
+  color: var(--color-text);
+}
+
+.zoomBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.zoomResetBtn {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-secondary);
+  border: none;
+  background: transparent;
+  padding: 0 var(--space-2);
+  cursor: pointer;
+  min-width: 48px;
+  text-align: center;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.zoomResetBtn:hover {
+  background-color: var(--color-surface-3);
+  color: var(--color-text);
 }
 
 .toolbarRight {
@@ -70,9 +131,9 @@
 
 .th {
   background: var(--color-surface-2);
-  padding: var(--space-3) var(--space-3);
+  padding: calc(var(--space-3) * var(--grid-zoom, 1)) calc(var(--space-3) * var(--grid-zoom, 1));
   text-align: left;
-  font-size: var(--text-xs);
+  font-size: calc(var(--text-xs) * var(--grid-zoom, 1));
   font-weight: var(--weight-semibold);
   color: var(--color-text-secondary);
   text-transform: uppercase;
@@ -83,7 +144,7 @@
 }
 
 .th:not([data-col="select"]):not([data-col="actions"]) {
-  padding-left: calc(var(--space-3) + var(--space-2) + 1.5px);
+  padding-left: calc((var(--space-3) + var(--space-2) + 1.5px) * var(--grid-zoom, 1));
 }
 
 /* ─── Rows ────────────────────────────────────────────────────────────────── */
@@ -105,33 +166,34 @@
 }
 
 .td {
-  padding: var(--space-2) var(--space-3);
+  padding: calc(var(--space-2) * var(--grid-zoom, 1)) calc(var(--space-3) * var(--grid-zoom, 1));
   vertical-align: middle;
+  font-size: calc(var(--text-sm) * var(--grid-zoom, 1));
 }
 
 /* Column sizes */
-.th[data-col="select"], .td[data-col="select"] { width: 48px; min-width: 48px; }
-.th[data-col="actions"], .td[data-col="actions"] { width: 80px; min-width: 80px; }
-.th[data-col="date"], .td[data-col="date"] { width: 170px; min-width: 170px; }
-.th[data-col="clientName"], .td[data-col="clientName"] { width: 240px; min-width: 240px; }
-.th[data-col="phone"], .td[data-col="phone"] { width: 160px; min-width: 160px; }
-.th[data-col="address"], .td[data-col="address"] { width: 400px; min-width: 400px; }
-.th[data-col="items"], .td[data-col="items"] { width: 250px; min-width: 250px; }
-.th[data-col="deliveryStatus"], .td[data-col="deliveryStatus"] { width: 150px; min-width: 150px; }
-.th[data-col="paymentStatus"], .td[data-col="paymentStatus"] { width: 170px; min-width: 170px; }
-.th[data-col="comments"], .td[data-col="comments"] { width: 350px; min-width: 350px; }
+.th[data-col="select"], .td[data-col="select"] { width: calc(48px * var(--grid-zoom, 1)); min-width: calc(48px * var(--grid-zoom, 1)); }
+.th[data-col="actions"], .td[data-col="actions"] { width: calc(80px * var(--grid-zoom, 1)); min-width: calc(80px * var(--grid-zoom, 1)); }
+.th[data-col="date"], .td[data-col="date"] { width: calc(170px * var(--grid-zoom, 1)); min-width: calc(170px * var(--grid-zoom, 1)); }
+.th[data-col="clientName"], .td[data-col="clientName"] { width: calc(240px * var(--grid-zoom, 1)); min-width: calc(240px * var(--grid-zoom, 1)); }
+.th[data-col="phone"], .td[data-col="phone"] { width: calc(160px * var(--grid-zoom, 1)); min-width: calc(160px * var(--grid-zoom, 1)); }
+.th[data-col="address"], .td[data-col="address"] { width: calc(400px * var(--grid-zoom, 1)); min-width: calc(400px * var(--grid-zoom, 1)); }
+.th[data-col="items"], .td[data-col="items"] { width: calc(250px * var(--grid-zoom, 1)); min-width: calc(250px * var(--grid-zoom, 1)); }
+.th[data-col="deliveryStatus"], .td[data-col="deliveryStatus"] { width: calc(150px * var(--grid-zoom, 1)); min-width: calc(150px * var(--grid-zoom, 1)); }
+.th[data-col="paymentStatus"], .td[data-col="paymentStatus"] { width: calc(170px * var(--grid-zoom, 1)); min-width: calc(170px * var(--grid-zoom, 1)); }
+.th[data-col="comments"], .td[data-col="comments"] { width: calc(350px * var(--grid-zoom, 1)); min-width: calc(350px * var(--grid-zoom, 1)); }
 
 
 /* ─── Cell inputs ─────────────────────────────────────────────────────────── */
 .cellInput {
   width: 100%;
-  padding: var(--space-2) var(--space-2);
+  padding: calc(var(--space-2) * var(--grid-zoom, 1)) calc(var(--space-2) * var(--grid-zoom, 1));
   border: 1.5px solid transparent;
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--color-text);
-  font-size: var(--text-sm);
-  min-height: var(--touch-target);
+  font-size: calc(var(--text-sm) * var(--grid-zoom, 1));
+  min-height: calc(var(--touch-target) * var(--grid-zoom, 1));
   transition: border-color var(--transition-fast), background-color var(--transition-fast);
 }
 
@@ -149,8 +211,8 @@
 
 /* ─── Checkbox ────────────────────────────────────────────────────────────── */
 .checkbox {
-  width: 18px;
-  height: 18px;
+  width: calc(18px * var(--grid-zoom, 1));
+  height: calc(18px * var(--grid-zoom, 1));
   cursor: pointer;
   accent-color: var(--color-primary);
   border-radius: 4px;
@@ -160,8 +222,8 @@
 .emptyState {
   text-align: start;
   color: var(--color-text-muted);
-  font-size: var(--text-sm);
-  padding: var(--space-12);
+  font-size: calc(var(--text-sm) * var(--grid-zoom, 1));
+  padding: calc(var(--space-12) * var(--grid-zoom, 1));
 }
 
 /* ─── Loading ─────────────────────────────────────────────────────────────── */
