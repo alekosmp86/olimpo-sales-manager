@@ -1,17 +1,10 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
-import {
-  useReactTable,
-  getCoreRowModel,
-  getSortedRowModel,
-  type RowSelectionState,
-  type SortingState,
-} from "@tanstack/react-table";
+import { useState, useCallback, useMemo, useRef } from "react";
+import type { RowSelectionState } from "@tanstack/react-table";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useSales } from "@/hooks/useSales";
 import { useMonthSheet } from "@/hooks/useMonthSheet";
-import { useSaleColumns } from "../../hooks/useSaleColumns";
 import { SalesToolbar } from "./SalesToolbar";
 import { SalesGrid } from "./SalesGrid";
 import { MonthSheetBar } from "./MonthSheetBar";
@@ -28,9 +21,6 @@ export function SalesTable() {
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [sorting, setSorting] = useState<SortingState>([
-    { id: "date", desc: false }
-  ]);
   const [newRowId, setNewRowId] = useState<string | null>(null);
   const [productsModal, setProductsModal] = useState<{ saleId: string } | null>(null);
   const [catalogOpen, setCatalogOpen] = useState(false);
@@ -42,13 +32,32 @@ export function SalesTable() {
     useSales(debouncedSearch);
   const { mutate: createSale } = createMutation;
   const { mutate: deleteSales } = deleteMutation;
-  const { mutate: duplicateSale } = duplicateMutation;
 
   // ── Sheet navigation ──────────────────────────────────────────────────────
   const { selectedYear, selectedMonth, goToPrevYear, goToNextYear, selectMonth } =
     useMonthSheet(sales, isLoading);
 
-  // ── Stable callbacks ──────────────────────────────────────────────────────
+  // ── Stable callbacks using refs to prevent child re-renders on mutation changes ──
+  const updateMutationRef = useRef(updateMutation);
+  updateMutationRef.current = updateMutation;
+  const handleUpdate = useCallback(
+    (payload: { id: string; data: Record<string, unknown> }) => {
+      updateMutationRef.current.mutate(payload);
+    },
+    []
+  );
+
+  const duplicateMutationRef = useRef(duplicateMutation);
+  duplicateMutationRef.current = duplicateMutation;
+  const handleDuplicate = useCallback((saleId: string) => {
+    duplicateMutationRef.current.mutate(saleId, {
+      onSuccess: (newSale: Sale) => {
+        setNewRowId(newSale.id);
+        setTimeout(() => setNewRowId(null), 1000);
+      },
+    });
+  }, []);
+
   const handleOpenProducts = useCallback(
     (saleId: string) => setProductsModal({ saleId }),
     []
@@ -62,15 +71,6 @@ export function SalesTable() {
       },
     });
   }, [selectedYear, selectedMonth, createSale]);
-
-  const handleDuplicate = useCallback((saleId: string) => {
-    duplicateSale(saleId, {
-      onSuccess: (newSale: Sale) => {
-        setNewRowId(newSale.id);
-        setTimeout(() => setNewRowId(null), 1000);
-      },
-    });
-  }, [duplicateSale]);
 
   const handleDelete = useCallback(async () => {
     const ids = Object.keys(rowSelection).filter((k) => rowSelection[k]);
@@ -91,9 +91,6 @@ export function SalesTable() {
     });
   }, [rowSelection, deleteSales, confirm]);
 
-  // ── Table ─────────────────────────────────────────────────────────────────
-  const columns = useSaleColumns(updateMutation.mutate, handleOpenProducts, sales, handleDuplicate);
-
   const filteredSales = useMemo(
     () =>
       sales.filter((sale) => {
@@ -106,18 +103,6 @@ export function SalesTable() {
       }),
     [sales, selectedYear, selectedMonth]
   );
-
-  const table = useReactTable({
-    data: filteredSales,
-    columns,
-    state: { rowSelection, sorting },
-    onRowSelectionChange: setRowSelection,
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    enableRowSelection: true,
-    getRowId: (row) => row.id,
-  });
 
   const selectedIds = useMemo(
     () => Object.keys(rowSelection).filter((k) => rowSelection[k]),
@@ -143,11 +128,15 @@ export function SalesTable() {
       />
 
       <SalesGrid
-        table={table}
+        sales={filteredSales}
         isLoading={isLoading}
-        colCount={columns.length}
         newRowId={newRowId}
         hasSearch={!!debouncedSearch}
+        rowSelection={rowSelection}
+        onRowSelectionChange={setRowSelection}
+        onUpdate={handleUpdate}
+        onDuplicate={handleDuplicate}
+        onOpenProducts={handleOpenProducts}
       />
 
       <MonthSheetBar

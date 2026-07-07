@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Sale } from "@/lib/types";
+import { handleResponse } from "@/lib/utils/apiUtils";
 
 /**
  * Encapsulates all data-fetching and mutation logic for the sales list.
@@ -13,10 +14,11 @@ export function useSales(search: string) {
 
   const { data: sales = [], isLoading } = useQuery<Sale[]>({
     queryKey: ["sales", search],
-    queryFn: () =>
+    queryFn: ({ signal }) =>
       fetch(
-        `/api/sales${search ? `?search=${encodeURIComponent(search)}` : ""}`
-      ).then((r) => r.json()),
+        `/api/sales${search ? `?search=${encodeURIComponent(search)}` : ""}`,
+        { signal }
+      ).then((response) => handleResponse<Sale[]>(response)),
   });
 
   const createMutation = useMutation<Sale, Error, string>({
@@ -30,7 +32,7 @@ export function useSales(search: string) {
           address: "",
           comments: "",
         }),
-      }).then((r) => r.json()),
+      }).then((response) => handleResponse<Sale>(response)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sales"] }),
     meta: {
       successMessage: "Venta creada con éxito",
@@ -44,7 +46,7 @@ export function useSales(search: string) {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-      }).then((r) => r.json()),
+      }).then((response) => handleResponse<Sale>(response)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sales"] }),
     meta: {
       successMessage: "Venta guardada con éxito",
@@ -54,7 +56,11 @@ export function useSales(search: string) {
 
   const deleteMutation = useMutation({
     mutationFn: (ids: string[]) =>
-      Promise.all(ids.map((id) => fetch(`/api/sales/${id}`, { method: "DELETE" }))),
+      fetch("/api/sales", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids }),
+      }).then((response) => handleResponse<void>(response)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sales"] }),
     meta: {
       successMessage: "Venta(s) eliminada(s) con éxito",
@@ -66,10 +72,7 @@ export function useSales(search: string) {
     mutationFn: (id) =>
       fetch(`/api/sales/${id}/duplicate`, {
         method: "POST",
-      }).then((r) => {
-        if (!r.ok) throw new Error("Error al duplicar venta");
-        return r.json();
-      }),
+      }).then((response) => handleResponse<Sale>(response)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sales"] }),
     meta: {
       successMessage: "Venta duplicada con éxito",

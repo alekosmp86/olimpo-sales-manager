@@ -1,27 +1,61 @@
 "use client";
 
-import { type Table, flexRender } from "@tanstack/react-table";
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  flexRender,
+  type RowSelectionState,
+  type SortingState,
+} from "@tanstack/react-table";
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import type { Sale } from "@/lib/types";
+import { useSaleColumns } from "../../hooks/useSaleColumns";
 import styles from "./SalesTable.module.css";
 
 interface SalesGridProps {
-  table: Table<Sale>;
+  sales: Sale[];
   isLoading: boolean;
-  colCount: number;
   newRowId: string | null;
   hasSearch: boolean;
+  rowSelection: RowSelectionState;
+  onRowSelectionChange: React.Dispatch<React.SetStateAction<RowSelectionState>>;
+  onUpdate: (payload: { id: string; data: Record<string, unknown> }) => void;
+  onDuplicate: (saleId: string) => void;
+  onOpenProducts: (saleId: string) => void;
 }
 
-export function SalesGrid({
-  table,
+export const SalesGrid = React.memo(function SalesGrid({
+  sales,
   isLoading,
-  colCount,
   newRowId,
   hasSearch,
+  rowSelection,
+  onRowSelectionChange,
+  onUpdate,
+  onDuplicate,
+  onOpenProducts,
 }: SalesGridProps) {
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "date", desc: false }
+  ]);
   const newRowRef = useRef<HTMLTableRowElement>(null);
+
+  const columns = useSaleColumns(onUpdate, onOpenProducts, sales, onDuplicate);
+
+  const table = useReactTable({
+    data: sales,
+    columns,
+    state: { rowSelection, sorting },
+    onRowSelectionChange,
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    enableRowSelection: true,
+    getRowId: (row) => row.id,
+  });
+
   const rows = table.getRowModel().rows;
 
   // Smoothly scroll the new row into view when it is rendered
@@ -31,7 +65,7 @@ export function SalesGrid({
     }
   }, [newRowId, rows]);
 
-  if (isLoading) {
+  if (isLoading && rows.length === 0) {
     return (
       <div className={styles.tableContainer}>
         <div className={styles.loading}>
@@ -43,13 +77,13 @@ export function SalesGrid({
   }
 
   return (
-    <div className={styles.tableContainer}>
+    <div className={[styles.tableContainer, isLoading ? styles.tableLoading : ""].filter(Boolean).join(" ")}>
       <div className={styles.tableCard}>
         <table className={styles.table}>
           <thead>
             {table.getHeaderGroups().map((hg) => (
               <tr key={hg.id} className={styles.headerRow}>
-                 {hg.headers.map((header) => (
+                {hg.headers.map((header) => (
                   <th
                     key={header.id}
                     className={[
@@ -91,19 +125,19 @@ export function SalesGrid({
           </thead>
 
           <tbody>
-            {table.getRowModel().rows.length === 0 ? (
+            {rows.length === 0 ? (
               <tr>
-                <td colSpan={colCount} className={styles.emptyState}>
+                <td colSpan={columns.length} className={styles.emptyState}>
                   {hasSearch
                     ? "No se encontraron resultados."
                     : "No hay ventas en este mes. Cree una o importe un CSV."}
                 </td>
               </tr>
             ) : (
-              table.getRowModel().rows.map((row) => (
+              rows.map((row) => (
                 <tr
                   key={row.id}
-                  ref={newRowRef}
+                  ref={row.original.id === newRowId ? newRowRef : undefined}
                   className={[
                     styles.row,
                     row.getIsSelected() ? styles.selectedRow : "",
@@ -129,4 +163,4 @@ export function SalesGrid({
       </div>
     </div>
   );
-}
+});

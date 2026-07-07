@@ -80,8 +80,10 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
   const handleCancelRef = useRef(handleCancel);
   const handleConfirmRef = useRef(handleConfirm);
 
-  handleCancelRef.current = handleCancel;
-  handleConfirmRef.current = handleConfirm;
+  useEffect(() => {
+    handleCancelRef.current = handleCancel;
+    handleConfirmRef.current = handleConfirm;
+  }, [handleCancel, handleConfirm]);
 
   useEffect(() => {
     const dialog = dialogRef.current;

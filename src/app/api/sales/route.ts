@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getSales, createSale } from "@/lib/services/saleService";
+import { getSales, createSale, deleteSales } from "@/lib/services/saleService";
 import { validateSession } from "@/lib/session";
 
 const CreateSaleSchema = z.object({
@@ -54,5 +54,29 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     console.error("[POST /api/sales]", err);
     return NextResponse.json({ error: "Error al crear venta." }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const session = await validateSession();
+    if (!session) {
+      return NextResponse.json({ error: "No autorizado." }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { ids } = body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return NextResponse.json(
+        { error: "IDs no válidos o vacíos." },
+        { status: 400 }
+      );
+    }
+
+    await deleteSales(ids);
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[DELETE /api/sales]", err);
+    return NextResponse.json({ error: "Error al eliminar ventas." }, { status: 500 });
   }
 }

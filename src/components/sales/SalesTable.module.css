@@ -190,6 +190,12 @@
   to { transform: rotate(360deg); }
 }
 
+.tableLoading {
+  opacity: 0.7;
+  pointer-events: none;
+  transition: opacity var(--transition-normal);
+}
+
 /* ─── Status bar ──────────────────────────────────────────────────────────── */
 .statusBar {
   display: flex;
