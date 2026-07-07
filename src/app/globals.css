@@ -193,3 +193,66 @@ a {
   white-space: nowrap;
   border-width: 0;
 }
+
+/* ─── Mobile Landscape Orientation Warning ─── */
+.orientation-warning {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--color-surface-2);
+  color: var(--color-text);
+  z-index: 99999;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  text-align: center;
+}
+
+@media (max-height: 480px) and (orientation: landscape) {
+  .orientation-warning {
+    display: flex;
+  }
+}
+
+.orientation-content {
+  max-width: 320px;
+  animation: scaleIn 0.3s ease-out;
+}
+
+.phone-icon-wrapper {
+  margin-bottom: var(--space-4);
+  display: flex;
+  justify-content: center;
+}
+
+.phone-icon {
+  width: 48px;
+  height: 48px;
+  color: var(--color-primary);
+  animation: rotatePhone 2s ease-in-out infinite;
+}
+
+@keyframes rotatePhone {
+  0%, 100% {
+    transform: rotate(90deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+}
+
+.orientation-content h2 {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-semibold);
+  margin-bottom: var(--space-2);
+}
+
+.orientation-content p {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
