@@ -214,3 +214,41 @@
     width: 100%;
   }
 }
+
+.formHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: color var(--transition-fast);
+  text-align: left;
+}
+
+.formHeader:hover {
+  color: var(--color-text);
+}
+
+.formHeader .sectionTitle {
+  margin-bottom: 0;
+}
+
+.formContent {
+  margin-top: var(--space-4);
+  animation: slideDown var(--transition-fast);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
