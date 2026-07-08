@@ -76,6 +76,7 @@ export default function LoginPage() {
             </label>
             <input
               id="username"
+              data-testid="username"
               name="username"
               type="text"
               className={styles.input}
@@ -93,6 +94,7 @@ export default function LoginPage() {
             </label>
             <input
               id="password"
+              data-testid="password"
               name="password"
               type="password"
               className={styles.input}
@@ -111,6 +113,7 @@ export default function LoginPage() {
               </label>
               <input
                 id="confirmPassword"
+                data-testid="confirmPassword"
                 name="confirmPassword"
                 type="password"
                 className={styles.input}
@@ -128,7 +131,8 @@ export default function LoginPage() {
           )}
 
           <button
-            id="login-btn"
+            id="loginBtn"
+            data-testid="loginBtn"
             type="submit"
             className={styles.submitBtn}
             disabled={pending}

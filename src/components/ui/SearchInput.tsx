@@ -10,6 +10,7 @@ interface SearchInputProps {
   ariaLabel?: string;
   showIcon?: boolean;
   id?: string;
+  testid?: string;
 }
 
 export function SearchInput({
@@ -19,12 +20,14 @@ export function SearchInput({
   ariaLabel,
   showIcon = false,
   id,
+  testid,
 }: SearchInputProps) {
   return (
     <div className={styles.searchWrapper}>
       {showIcon && <Search className={styles.searchIcon} size={16} />}
       <input
         id={id}
+        data-testid={testid}
         type="text"
         className={[
           styles.searchInput,
@@ -40,6 +43,7 @@ export function SearchInput({
       {value && (
         <button
           type="button"
+          data-testid={`${testid}-clearBtn`}
           className={styles.clearSearchBtn}
           onClick={() => onChange("")}
           aria-label="Limpiar búsqueda"

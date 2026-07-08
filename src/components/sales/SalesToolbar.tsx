@@ -43,6 +43,7 @@ export function SalesToolbar({
       <div className={styles.toolbarLeft}>
         <SearchInput
           id="search-input"
+          testid="salesFilter"
           value={search}
           onChange={onSearch}
           placeholder="Buscar por cliente o dirección..."
