@@ -47,6 +47,7 @@ CLAUDE.md
 playwright-report/
 playwright-videos/
 test-results/
+.next-test/
 
 #data
 dataset/*

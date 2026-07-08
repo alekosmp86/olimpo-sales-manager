@@ -18,11 +18,14 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run dev",
+    command: "npx next dev -p 3001",
     url: "http://localhost:3001",
     reuseExistingServer: !process.env.CI,
     stdout: "ignore",
     stderr: "pipe",
     timeout: 120 * 1000,
+    env: {
+      NEXT_DIST_DIR: ".next-test",
+    },
   },
 });
