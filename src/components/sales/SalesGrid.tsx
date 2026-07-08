@@ -134,6 +134,18 @@ export const SalesGrid = React.memo(function SalesGrid({
                       .join(" ")}
                     data-col={header.column.id}
                     onClick={header.column.getCanSort() ? header.column.getToggleSortingHandler() : undefined}
+                    role={header.column.getCanSort() ? "button" : undefined}
+                    tabIndex={header.column.getCanSort() ? 0 : undefined}
+                    onKeyDown={
+                      header.column.getCanSort()
+                        ? (e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              header.column.getToggleSortingHandler()?.(e);
+                            }
+                          }
+                        : undefined
+                    }
                     aria-sort={
                       header.column.getIsSorted() === "asc"
                         ? "ascending"

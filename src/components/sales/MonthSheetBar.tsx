@@ -27,6 +27,7 @@ export function MonthSheetBar({
           className={styles.yearBtn}
           onClick={onPrevYear}
           title="Año anterior"
+          aria-label="Año anterior"
         >
           <ChevronLeft size={14} />
         </button>
@@ -36,6 +37,7 @@ export function MonthSheetBar({
           className={styles.yearBtn}
           onClick={onNextYear}
           title="Año siguiente"
+          aria-label="Año siguiente"
         >
           <ChevronRight size={14} />
         </button>
