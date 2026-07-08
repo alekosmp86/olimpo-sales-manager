@@ -43,4 +43,10 @@ next-env.d.ts
 AGENTS.md
 CLAUDE.md
 
+#playwright
+playwright-report/
+playwright-videos/
+test-results/
+
+#data
 dataset/*
