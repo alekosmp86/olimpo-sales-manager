@@ -124,12 +124,13 @@
 
 /* ─── Header ──────────────────────────────────────────────────────────────── */
 .headerRow {
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  position: relative;
 }
 
 .th {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   background: var(--color-surface-2);
   padding: calc(var(--space-3) * var(--grid-zoom, 1)) calc(var(--space-3) * var(--grid-zoom, 1));
   text-align: left;
@@ -141,6 +142,93 @@
   white-space: nowrap;
   border-bottom: 2px solid var(--color-border-strong);
   user-select: none;
+}
+
+/* Sticky column for small screens (< 768px) */
+@media (max-width: 767px) {
+  .th[data-col="clientName"],
+  .td[data-col="clientName"] {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background-color: var(--color-surface);
+    border-right: 2px solid var(--color-border-strong);
+  }
+
+  .th[data-col="clientName"] {
+    z-index: 12;
+  }
+
+  .row:nth-child(even) .td[data-col="clientName"] {
+    background-color: var(--color-surface-2);
+  }
+
+  .row:hover .td[data-col="clientName"] {
+    background-color: var(--color-primary-subtle);
+  }
+
+  .selectedRow .td[data-col="clientName"] {
+    background-color: var(--color-primary-light) !important;
+  }
+}
+
+/* Sticky columns for tablet & desktop screens (>= 768px) */
+@media (min-width: 768px) {
+  .th[data-col="select"],
+  .td[data-col="select"] {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+  }
+  .th[data-col="select"] {
+    z-index: 12;
+  }
+
+  .th[data-col="actions"],
+  .td[data-col="actions"] {
+    position: sticky;
+    left: calc(48px * var(--grid-zoom, 1));
+    z-index: 2;
+  }
+  .th[data-col="actions"] {
+    z-index: 12;
+  }
+
+  .th[data-col="clientName"],
+  .td[data-col="clientName"] {
+    position: sticky;
+    left: calc(128px * var(--grid-zoom, 1));
+    z-index: 2;
+    border-right: 2px solid var(--color-border-strong);
+  }
+  .th[data-col="clientName"] {
+    z-index: 12;
+  }
+
+  /* Make sure sticky td elements have an opaque background that matches row state */
+  .td[data-col="select"],
+  .td[data-col="actions"],
+  .td[data-col="clientName"] {
+    background-color: var(--color-surface);
+  }
+
+  .row:nth-child(even) .td[data-col="select"],
+  .row:nth-child(even) .td[data-col="actions"],
+  .row:nth-child(even) .td[data-col="clientName"] {
+    background-color: var(--color-surface-2);
+  }
+
+  .row:hover .td[data-col="select"],
+  .row:hover .td[data-col="actions"],
+  .row:hover .td[data-col="clientName"] {
+    background-color: var(--color-primary-subtle);
+  }
+
+  .selectedRow .td[data-col="select"],
+  .selectedRow .td[data-col="actions"],
+  .selectedRow .td[data-col="clientName"] {
+    background-color: var(--color-primary-light) !important;
+  }
 }
 
 .th:not([data-col="select"]):not([data-col="actions"]) {
