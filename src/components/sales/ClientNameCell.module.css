@@ -64,3 +64,50 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+.nameInput {
+  padding-right: calc(32px * var(--grid-zoom, 1)) !important;
+}
+
+.highlightBtn {
+  position: absolute;
+  right: calc(6px * var(--grid-zoom, 1));
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(32px * var(--grid-zoom, 1));
+  height: calc(32px * var(--grid-zoom, 1));
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  opacity: 0;
+  transition: opacity var(--transition-fast), background-color var(--transition-fast), color var(--transition-fast);
+  z-index: 5;
+}
+
+.wrapper:hover .highlightBtn,
+.highlightBtn:focus-visible {
+  opacity: 1;
+}
+
+.highlightBtn:hover {
+  background: var(--color-surface-3);
+  color: var(--color-text);
+}
+
+.highlightBtnActive {
+  opacity: 1 !important;
+  color: var(--color-primary) !important;
+}
+
+.highlightBtn_yellow { opacity: 1 !important; color: var(--color-amber-text) !important; background-color: var(--color-amber-border) !important; }
+.highlightBtn_blue { opacity: 1 !important; color: var(--color-blue-text) !important; background-color: var(--color-blue-border) !important; }
+.highlightBtn_green { opacity: 1 !important; color: var(--color-green-text) !important; background-color: var(--color-green-border) !important; }
+.highlightBtn_magenta { opacity: 1 !important; color: var(--color-magenta-text) !important; background-color: var(--color-magenta-border) !important; }
+.highlightBtn_orange { opacity: 1 !important; color: var(--color-orange-text) !important; background-color: var(--color-orange-border) !important; }
+
+

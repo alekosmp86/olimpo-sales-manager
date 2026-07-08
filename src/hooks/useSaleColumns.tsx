@@ -11,6 +11,7 @@ import { Calendar, MessageSquareText, Copy } from "lucide-react";
 import { triggerGlobalToast } from "@/lib/utils/toastTrigger";
 import { MessageType } from "@/lib/constants/messageType";
 import { formatPrice } from "@/lib/utils/priceUtils";
+import { HighlightColor } from "@/lib/constants/colors";
 import styles from "../components/sales/SalesTable.module.css";
 
 const columnHelper = createColumnHelper<Sale>();
@@ -26,7 +27,9 @@ export function useSaleColumns(
   onUpdate: (payload: UpdatePayload) => void,
   onOpenProducts: (saleId: string) => void,
   sales: Sale[],
-  onDuplicate: (saleId: string) => void
+  onDuplicate: (saleId: string) => void,
+  highlights: Record<string, HighlightColor>,
+  onHighlight: (saleId: string, color: HighlightColor | null) => void
 ) {
   return useMemo(
     () => [
@@ -161,6 +164,8 @@ export function useSaleColumns(
             initialValue={getValue()}
             sales={sales}
             onUpdate={onUpdate}
+            highlightColor={highlights[row.original.id] || null}
+            onHighlight={(color) => onHighlight(row.original.id, color)}
           />
         ),
         size: 240,
@@ -266,6 +271,6 @@ export function useSaleColumns(
         enableSorting: false,
       }),
     ],
-    [onUpdate, onOpenProducts, sales, onDuplicate]
+    [onUpdate, onOpenProducts, sales, onDuplicate, highlights, onHighlight]
   );
 }

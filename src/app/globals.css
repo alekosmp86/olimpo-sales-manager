@@ -38,6 +38,30 @@
   --color-red-bg: #fee2e2;
   --color-red-text: #b91c1c;
 
+  --color-magenta-bg: #fae8ff;
+  --color-magenta-text: #86198f;
+  --color-magenta-border: #f5d0fe;
+
+  --color-orange-bg: #ffedd5;
+  --color-orange-text: #9a3412;
+  --color-orange-border: #fed7aa;
+
+  /* Highlight cell background and hover/selection color variables */
+  --highlight-yellow-bg: #fef08a;
+  --highlight-yellow-hover: #fde047;
+
+  --highlight-blue-bg: #bfdbfe;
+  --highlight-blue-hover: #93c5fd;
+
+  --highlight-green-bg: #bbf7d0;
+  --highlight-green-hover: #86efac;
+
+  --highlight-magenta-bg: #f5d0fe;
+  --highlight-magenta-hover: #f0abfc;
+
+  --highlight-orange-bg: #fed7aa;
+  --highlight-orange-hover: #fdba74;
+
   /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'SF Mono', 'Fira Code', monospace;

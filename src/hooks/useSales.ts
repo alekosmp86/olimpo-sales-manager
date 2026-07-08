@@ -136,8 +136,9 @@ export function useSales(search: string) {
       await queryClient.cancelQueries({ queryKey });
       const previousSales = queryClient.getQueryData<Sale[]>(queryKey);
 
+      const idSet = new Set(ids);
       queryClient.setQueryData<Sale[]>(queryKey, (old) =>
-        old?.filter((sale) => !ids.includes(sale.id))
+        old?.filter((sale) => !idSet.has(sale.id))
       );
 
       return { previousSales };

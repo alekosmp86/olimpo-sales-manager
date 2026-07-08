@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
@@ -29,7 +29,8 @@ export function AliasMappingModal({
     queryFn: () => fetch("/api/products").then((r) => r.json()),
   });
 
-  const standardNames = Array.from(new Set(products.map((p) => p.name)));
+  const standardNamesSet = useMemo(() => new Set(products.map((p) => p.name)), [products]);
+  const standardNames = useMemo(() => Array.from(standardNamesSet), [standardNamesSet]);
 
   // State mapping of each unmatched alias to either a standard name or custom brand name
   const [selections, setSelections] = useState<
@@ -68,7 +69,7 @@ export function AliasMappingModal({
 
   async function handleSave() {
     const mappings = Object.entries(selections).map(([alias, sel]) => {
-      const isNew = sel.value === "__NEW__" || !standardNames.includes(sel.value);
+      const isNew = sel.value === "__NEW__" || !standardNamesSet.has(sel.value);
       const name = isNew ? sel.customName.trim() : sel.value;
       return { alias, name };
     });
@@ -132,7 +133,7 @@ export function AliasMappingModal({
 
         {unmatched.map((alias) => {
           const sel = selections[alias] || { value: "", customName: "" };
-          const showCustomInput = sel.value === "__NEW__" || !standardNames.includes(sel.value);
+          const showCustomInput = sel.value === "__NEW__" || !standardNamesSet.has(sel.value);
 
           return (
             <div key={alias} className={styles.row}>
@@ -143,6 +144,7 @@ export function AliasMappingModal({
                   className={styles.select}
                   value={sel.value}
                   onChange={(e) => handleSelectChange(alias, e.target.value)}
+                  aria-label={`Asociar alias: ${alias}`}
                 >
                   {standardNames.map((name) => (
                     <option key={name} value={name}>

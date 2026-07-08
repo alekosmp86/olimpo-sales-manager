@@ -3,6 +3,9 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { Sale } from "@/lib/types";
+import { Paintbrush } from "lucide-react";
+import { HighlightColor } from "@/lib/constants/colors";
+import { ColorPicker } from "./ColorPicker";
 import styles from "./ClientNameCell.module.css";
 import cellStyles from "./SalesTable.module.css";
 
@@ -17,6 +20,8 @@ interface ClientNameCellProps {
   initialValue: string;
   sales: Sale[];
   onUpdate: (payload: { id: string; data: Record<string, unknown> }) => void;
+  highlightColor: HighlightColor | null;
+  onHighlight: (color: HighlightColor | null) => void;
 }
 
 /** Builds deduplicated top-5 suggestions from in-memory sales. */
@@ -40,12 +45,33 @@ function getSuggestions(query: string, sales: Sale[], excludeId: string): Client
   return Array.from(seen.values()).slice(0, 5);
 }
 
-export function ClientNameCell({ saleId, initialValue, sales, onUpdate }: ClientNameCellProps) {
+export function ClientNameCell({ 
+  saleId, 
+  initialValue, 
+  sales, 
+  onUpdate,
+  highlightColor,
+  onHighlight
+}: ClientNameCellProps) {
   const [value, setValue] = useState(initialValue);
   const [open, setOpen] = useState(false);
   const [focused, setFocused] = useState(false);
   const [showUpward, setShowUpward] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const pickerRef = useRef<HTMLDivElement>(null);
+
+  // Close color picker on click outside
+  useEffect(() => {
+    if (!showPicker) return;
+    function handleOutsideClick(e: MouseEvent) {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+        setShowPicker(false);
+      }
+    }
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [showPicker]);
 
   // Sync state with props/focus changes directly in render to prevent post-effect cascading renders
   const [prevInitialValue, setPrevInitialValue] = useState(initialValue);
@@ -117,7 +143,7 @@ export function ClientNameCell({ saleId, initialValue, sales, onUpdate }: Client
     <div ref={wrapperRef} className={styles.wrapper}>
       <input
         type="text"
-        className={cellStyles.cellInput}
+        className={`${cellStyles.cellInput} ${styles.nameInput}`}
         value={value}
         placeholder="Cliente"
         onChange={handleChange}
@@ -125,6 +151,35 @@ export function ClientNameCell({ saleId, initialValue, sales, onUpdate }: Client
         onBlur={handleBlur}
         aria-label="Nombre del cliente"
       />
+
+      <button
+        type="button"
+        className={[
+          styles.highlightBtn,
+          highlightColor ? styles[`highlightBtn_${highlightColor}`] || styles.highlightBtnActive : ""
+        ].filter(Boolean).join(" ")}
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          setOpen(false); // Close autocomplete
+          updateDropdownDirection();
+          setShowPicker(!showPicker);
+        }}
+        title="Pintar celda"
+        aria-label="Pintar celda"
+      >
+        <Paintbrush size={14} />
+      </button>
+
+      {showPicker && (
+        <ColorPicker
+          ref={pickerRef}
+          onSelectColor={(color) => {
+            onHighlight(color);
+            setShowPicker(false);
+          }}
+        />
+      )}
 
       {open && suggestions.length > 0 && (
         <div className={`${styles.list} ${showUpward ? styles.listUpward : ""}`} role="listbox">
