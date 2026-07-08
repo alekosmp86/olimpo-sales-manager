@@ -40,6 +40,12 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+#playwright
+playwright-report/
+playwright-videos/
+test-results/
+.next-test/
+
 AGENTS.md
 CLAUDE.md
 
