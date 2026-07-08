@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   height: 100dvh;
-  background: var(--color-surface-2);
+  background: var(--color-surface-3);
 }
 
 /* ─── Toolbar ─────────────────────────────────────────────────────────────── */
@@ -151,6 +151,10 @@
 .row {
   border-bottom: 1px solid var(--color-border);
   transition: background-color var(--transition-fast);
+}
+
+.row:nth-child(even) {
+  background-color: var(--color-surface-2);
 }
 
 .row:hover {
