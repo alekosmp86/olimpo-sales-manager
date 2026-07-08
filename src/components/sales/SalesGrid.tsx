@@ -74,12 +74,19 @@ export const SalesGrid = React.memo(function SalesGrid({
     }
   }, [newRowId, rows]);
 
+  const columnScale = zoomLevel < 1.0 
+    ? Number((1.0 - (1.0 - zoomLevel) * 1.4).toFixed(2))
+    : zoomLevel;
+
   if (isLoading && rows.length === 0) {
     return (
       <div
         ref={containerRef}
         className={styles.tableContainer}
-        style={{ "--grid-zoom": zoomLevel } as React.CSSProperties}
+        style={{ 
+          "--grid-zoom": zoomLevel,
+          "--column-scale": columnScale
+        } as React.CSSProperties}
       >
         <div className={styles.loading}>
           <span className={styles.spinner} />
@@ -93,7 +100,10 @@ export const SalesGrid = React.memo(function SalesGrid({
     <div
       ref={containerRef}
       className={[styles.tableContainer, isLoading ? styles.tableLoading : ""].filter(Boolean).join(" ")}
-      style={{ "--grid-zoom": zoomLevel } as React.CSSProperties}
+      style={{ 
+        "--grid-zoom": zoomLevel,
+        "--column-scale": columnScale
+      } as React.CSSProperties}
     >
       <div className={styles.tableCard}>
         <table className={styles.table}>

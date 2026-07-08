@@ -118,7 +118,7 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1200px;
+  min-width: calc(1200px * var(--column-scale, var(--grid-zoom, 1)));
   table-layout: fixed;
 }
 
@@ -187,7 +187,7 @@
   .th[data-col="actions"],
   .td[data-col="actions"] {
     position: sticky;
-    left: calc(48px * var(--grid-zoom, 1));
+    left: calc(48px * var(--column-scale, var(--grid-zoom, 1)));
     z-index: 2;
   }
   .th[data-col="actions"] {
@@ -197,7 +197,7 @@
   .th[data-col="clientName"],
   .td[data-col="clientName"] {
     position: sticky;
-    left: calc(128px * var(--grid-zoom, 1));
+    left: calc(128px * var(--column-scale, var(--grid-zoom, 1)));
     z-index: 2;
     border-right: 2px solid var(--color-border-strong);
   }
@@ -264,16 +264,16 @@
 }
 
 /* Column sizes */
-.th[data-col="select"], .td[data-col="select"] { width: calc(48px * var(--grid-zoom, 1)); min-width: calc(48px * var(--grid-zoom, 1)); }
-.th[data-col="actions"], .td[data-col="actions"] { width: calc(80px * var(--grid-zoom, 1)); min-width: calc(80px * var(--grid-zoom, 1)); }
-.th[data-col="date"], .td[data-col="date"] { width: calc(170px * var(--grid-zoom, 1)); min-width: calc(170px * var(--grid-zoom, 1)); }
-.th[data-col="clientName"], .td[data-col="clientName"] { width: calc(240px * var(--grid-zoom, 1)); min-width: calc(240px * var(--grid-zoom, 1)); }
-.th[data-col="phone"], .td[data-col="phone"] { width: calc(160px * var(--grid-zoom, 1)); min-width: calc(160px * var(--grid-zoom, 1)); }
-.th[data-col="address"], .td[data-col="address"] { width: calc(400px * var(--grid-zoom, 1)); min-width: calc(400px * var(--grid-zoom, 1)); }
-.th[data-col="items"], .td[data-col="items"] { width: calc(250px * var(--grid-zoom, 1)); min-width: calc(250px * var(--grid-zoom, 1)); }
-.th[data-col="deliveryStatus"], .td[data-col="deliveryStatus"] { width: calc(150px * var(--grid-zoom, 1)); min-width: calc(150px * var(--grid-zoom, 1)); }
-.th[data-col="paymentStatus"], .td[data-col="paymentStatus"] { width: calc(170px * var(--grid-zoom, 1)); min-width: calc(170px * var(--grid-zoom, 1)); }
-.th[data-col="comments"], .td[data-col="comments"] { width: calc(350px * var(--grid-zoom, 1)); min-width: calc(350px * var(--grid-zoom, 1)); }
+.th[data-col="select"], .td[data-col="select"] { width: calc(48px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(48px * var(--column-scale, var(--grid-zoom, 1))); }
+.th[data-col="actions"], .td[data-col="actions"] { width: calc(80px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(80px * var(--column-scale, var(--grid-zoom, 1))); }
+.th[data-col="date"], .td[data-col="date"] { width: calc(170px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(170px * var(--column-scale, var(--grid-zoom, 1))); }
+.th[data-col="clientName"], .td[data-col="clientName"] { width: calc(240px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(240px * var(--column-scale, var(--grid-zoom, 1))); }
+.th[data-col="phone"], .td[data-col="phone"] { width: calc(160px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(160px * var(--column-scale, var(--grid-zoom, 1))); }
+.th[data-col="address"], .td[data-col="address"] { width: calc(400px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(400px * var(--column-scale, var(--grid-zoom, 1))); }
+.th[data-col="items"], .td[data-col="items"] { width: calc(250px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(250px * var(--column-scale, var(--grid-zoom, 1))); }
+.th[data-col="deliveryStatus"], .td[data-col="deliveryStatus"] { width: calc(150px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(150px * var(--column-scale, var(--grid-zoom, 1))); }
+.th[data-col="paymentStatus"], .td[data-col="paymentStatus"] { width: calc(170px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(170px * var(--column-scale, var(--grid-zoom, 1))); }
+.th[data-col="comments"], .td[data-col="comments"] { width: calc(350px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(350px * var(--column-scale, var(--grid-zoom, 1))); }
 
 
 /* ─── Cell inputs ─────────────────────────────────────────────────────────── */
