@@ -13,6 +13,7 @@ import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import type { Sale } from "@/lib/types";
 import { useSaleColumns } from "../../hooks/useSaleColumns";
 import { usePinchToZoom } from "@/hooks/usePinchToZoom";
+import { HighlightColor } from "@/lib/constants/colors";
 import styles from "./SalesTable.module.css";
 import { MIN_ZOOM, MAX_ZOOM } from "./constants";
 
@@ -28,7 +29,17 @@ interface SalesGridProps {
   onOpenProducts: (saleId: string) => void;
   zoomLevel: number;
   onZoomChange: (zoom: number) => void;
+  highlights: Record<string, HighlightColor>;
+  onHighlight: (saleId: string, color: HighlightColor | null) => void;
 }
+
+const highlightClassMap: Record<HighlightColor, string> = {
+  [HighlightColor.YELLOW]: styles.highlightedYellow,
+  [HighlightColor.BLUE]: styles.highlightedBlue,
+  [HighlightColor.GREEN]: styles.highlightedGreen,
+  [HighlightColor.MAGENTA]: styles.highlightedMagenta,
+  [HighlightColor.ORANGE]: styles.highlightedOrange,
+};
 
 export const SalesGrid = React.memo(function SalesGrid({
   sales,
@@ -42,6 +53,8 @@ export const SalesGrid = React.memo(function SalesGrid({
   onOpenProducts,
   zoomLevel,
   onZoomChange,
+  highlights,
+  onHighlight,
 }: SalesGridProps) {
   const [sorting, setSorting] = useState<SortingState>([
     { id: "date", desc: false }
@@ -51,7 +64,7 @@ export const SalesGrid = React.memo(function SalesGrid({
 
   usePinchToZoom(containerRef, { zoomLevel, onZoomChange, minZoom: MIN_ZOOM, maxZoom: MAX_ZOOM });
 
-  const columns = useSaleColumns(onUpdate, onOpenProducts, sales, onDuplicate);
+  const columns = useSaleColumns(onUpdate, onOpenProducts, sales, onDuplicate, highlights, onHighlight);
 
   const table = useReactTable({
     data: sales,
@@ -173,15 +186,20 @@ export const SalesGrid = React.memo(function SalesGrid({
                     .filter(Boolean)
                     .join(" ")}
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <td
-                      key={cell.id}
-                      className={styles.td}
-                      data-col={cell.column.id}
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
+                  {row.getVisibleCells().map((cell) => {
+                    const cellColor = cell.column.id === "clientName" ? highlights[row.original.id] : null;
+                    const highlightedClass = cellColor ? highlightClassMap[cellColor] : "";
+
+                    return (
+                      <td
+                        key={cell.id}
+                        className={[styles.td, highlightedClass].filter(Boolean).join(" ")}
+                        data-col={cell.column.id}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))
             )}

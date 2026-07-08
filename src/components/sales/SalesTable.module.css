@@ -117,7 +117,8 @@
 
 .table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   min-width: calc(1200px * var(--column-scale, var(--grid-zoom, 1)));
   table-layout: fixed;
 }
@@ -237,7 +238,6 @@
 
 /* ─── Rows ────────────────────────────────────────────────────────────────── */
 .row {
-  border-bottom: 1px solid var(--color-border);
   transition: background-color var(--transition-fast);
 }
 
@@ -261,6 +261,7 @@
   padding: calc(var(--space-2) * var(--grid-zoom, 1)) calc(var(--space-3) * var(--grid-zoom, 1));
   vertical-align: middle;
   font-size: calc(var(--text-sm) * var(--grid-zoom, 1));
+  border-bottom: 1px solid var(--color-border);
 }
 
 /* Column sizes */
@@ -614,6 +615,37 @@
 .sortableHeader:hover .sortIconInactive {
   opacity: 0.7;
 }
+
+/* Stacking Context elevation for active Color Pickers */
+.td:has(.colorPicker) {
+  z-index: 50 !important;
+}
+@media (max-width: 767px) {
+  .td:has(.colorPicker) {
+    position: relative !important;
+  }
+}
+
+/* Highlighted Cells (Paint) */
+.highlightedYellow { background-color: var(--highlight-yellow-bg) !important; }
+.row:hover .highlightedYellow { background-color: var(--highlight-yellow-hover) !important; }
+.selectedRow .highlightedYellow { background-color: var(--highlight-yellow-hover) !important; }
+
+.highlightedBlue { background-color: var(--highlight-blue-bg) !important; }
+.row:hover .highlightedBlue { background-color: var(--highlight-blue-hover) !important; }
+.selectedRow .highlightedBlue { background-color: var(--highlight-blue-hover) !important; }
+
+.highlightedGreen { background-color: var(--highlight-green-bg) !important; }
+.row:hover .highlightedGreen { background-color: var(--highlight-green-hover) !important; }
+.selectedRow .highlightedGreen { background-color: var(--highlight-green-hover) !important; }
+
+.highlightedMagenta { background-color: var(--highlight-magenta-bg) !important; }
+.row:hover .highlightedMagenta { background-color: var(--highlight-magenta-hover) !important; }
+.selectedRow .highlightedMagenta { background-color: var(--highlight-magenta-hover) !important; }
+
+.highlightedOrange { background-color: var(--highlight-orange-bg) !important; }
+.row:hover .highlightedOrange { background-color: var(--highlight-orange-hover) !important; }
+.selectedRow .highlightedOrange { background-color: var(--highlight-orange-hover) !important; }
 
 
 

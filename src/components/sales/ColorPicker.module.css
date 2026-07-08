@@ -1,0 +1,57 @@
+.colorPicker {
+  position: absolute;
+  right: calc(34px * var(--grid-zoom, 1));
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 110;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: calc(4px * var(--grid-zoom, 1)) calc(8px * var(--grid-zoom, 1));
+  display: flex;
+  gap: calc(8px * var(--grid-zoom, 1));
+  align-items: center;
+  height: calc(32px * var(--grid-zoom, 1));
+  white-space: nowrap;
+}
+
+.colorDot {
+  width: calc(20px * var(--grid-zoom, 1));
+  height: calc(20px * var(--grid-zoom, 1));
+  border-radius: 50%;
+  border: 1px solid var(--color-border-strong);
+  cursor: pointer;
+  padding: 0;
+  transition: transform var(--transition-fast);
+}
+
+.colorDot:hover {
+  transform: scale(1.15);
+}
+
+.dotYellow { background-color: var(--color-amber-border); }
+.dotBlue { background-color: var(--color-blue-border); }
+.dotGreen { background-color: var(--color-green-border); }
+.dotMagenta { background-color: var(--color-magenta-border); }
+.dotOrange { background-color: var(--color-orange-border); }
+
+.clearBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(20px * var(--grid-zoom, 1));
+  height: calc(20px * var(--grid-zoom, 1));
+  color: var(--color-text-muted);
+  border-radius: var(--radius-sm);
+  padding: 0;
+  transition: transform var(--transition-fast), color var(--transition-fast);
+}
+
+.clearBtn:hover {
+  transform: scale(1.15);
+  color: var(--color-text);
+}

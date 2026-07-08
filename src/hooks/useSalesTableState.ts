@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import type { RowSelectionState } from "@tanstack/react-table";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useSales } from "@/hooks/useSales";
@@ -7,6 +7,7 @@ import { useConfirm } from "@/components/ui/Confirm";
 import { MessageType } from "@/lib/constants/messageType";
 import { buildSheetDate } from "@/lib/dateUtils";
 import { MIN_ZOOM, MAX_ZOOM } from "@/components/sales/constants";
+import { HighlightColor } from "@/lib/constants/colors";
 import type { Sale } from "@/lib/types";
 
 export function useSalesTableState() {
@@ -17,6 +18,31 @@ export function useSalesTableState() {
   const [newRowId, setNewRowId] = useState<string | null>(null);
   const [productsModal, setProductsModal] = useState<{ saleId: string } | null>(null);
   const [zoomLevel, setZoomLevel] = useState(1.0);
+  const [highlights, setHighlights] = useState<Record<string, HighlightColor>>({});
+
+  useEffect(() => {
+    const stored = localStorage.getItem("sale-name-highlights");
+    if (stored) {
+      try {
+        setHighlights(JSON.parse(stored));
+      } catch (e) {
+        console.error("Error parsing highlights:", e);
+      }
+    }
+  }, []);
+
+  const handleHighlight = useCallback((saleId: string, color: HighlightColor | null) => {
+    setHighlights((prev) => {
+      const next = { ...prev };
+      if (color) {
+        next[saleId] = color;
+      } else {
+        delete next[saleId];
+      }
+      localStorage.setItem("sale-name-highlights", JSON.stringify(next));
+      return next;
+    });
+  }, []);
 
   const confirm = useConfirm();
 
@@ -149,5 +175,7 @@ export function useSalesTableState() {
     filteredSales,
     selectedIds,
     openProductsModalSale,
+    highlights,
+    handleHighlight,
   };
 }

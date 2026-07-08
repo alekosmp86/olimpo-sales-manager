@@ -44,6 +44,8 @@ export function SalesTable() {
     filteredSales,
     selectedIds,
     openProductsModalSale,
+    highlights,
+    handleHighlight,
   } = useSalesTableState();
 
   return (
@@ -74,6 +76,8 @@ export function SalesTable() {
         onOpenProducts={handleOpenProducts}
         zoomLevel={zoomLevel}
         onZoomChange={setZoomLevel}
+        highlights={highlights}
+        onHighlight={handleHighlight}
       />
 
       <MonthSheetBar
