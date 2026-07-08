@@ -3,17 +3,19 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { Sale } from "@/lib/types";
 import { handleResponse } from "@/lib/utils/apiUtils";
+import { DeliveryStatus, PaymentStatus } from "@/lib/constants/statuses";
 
 /**
  * Encapsulates all data-fetching and mutation logic for the sales list.
- * Each mutation only handles server concerns (invalidation) — per-call
- * callbacks (e.g. newRowId, clearing selection) are passed at call-site.
+ * Utilizes query caching and optimistic updates to keep UI interactions
+ * instant, rolling back to the original cached snapshot on failures.
  */
 export function useSales(search: string) {
   const queryClient = useQueryClient();
+  const queryKey = ["sales", search];
 
   const { data: sales = [], isLoading } = useQuery<Sale[]>({
-    queryKey: ["sales", search],
+    queryKey,
     queryFn: ({ signal }) =>
       fetch(
         `/api/sales${search ? `?search=${encodeURIComponent(search)}` : ""}`,
@@ -21,7 +23,12 @@ export function useSales(search: string) {
       ).then((response) => handleResponse<Sale[]>(response)),
   });
 
-  const createMutation = useMutation<Sale, Error, string>({
+  const createMutation = useMutation<
+    Sale,
+    Error,
+    string,
+    { previousSales: Sale[] | undefined; tempId: string }
+  >({
     mutationFn: (dateStr) =>
       fetch("/api/sales", {
         method: "POST",
@@ -33,47 +40,173 @@ export function useSales(search: string) {
           comments: "",
         }),
       }).then((response) => handleResponse<Sale>(response)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sales"] }),
+    onMutate: async (dateStr) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousSales = queryClient.getQueryData<Sale[]>(queryKey);
+
+      const tempId = `temp-${Date.now()}`;
+      const tempSale: Sale = {
+        id: tempId,
+        date: dateStr,
+        clientName: "",
+        phone: "",
+        address: "",
+        items: [],
+        deliveryStatus: DeliveryStatus.NOT_DELIVERED,
+        paymentStatus: PaymentStatus.NOT_PAID,
+        comments: "",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      queryClient.setQueryData<Sale[]>(queryKey, (old) =>
+        old ? [...old, tempSale] : [tempSale]
+      );
+
+      return { previousSales, tempId };
+    },
+    onSuccess: (newSale, variables, context) => {
+      queryClient.setQueryData<Sale[]>(queryKey, (old) =>
+        old?.map((sale) => (sale.id === context?.tempId ? newSale : sale))
+      );
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousSales) {
+        queryClient.setQueryData(queryKey, context.previousSales);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
     meta: {
       successMessage: "Venta creada con éxito",
       errorMessage: "Error al crear la venta",
     },
   });
 
-  const updateMutation = useMutation({
+  const updateMutation = useMutation<
+    Sale,
+    Error,
+    { id: string; data: Record<string, unknown> },
+    { previousSales: Sale[] | undefined }
+  >({
     mutationFn: ({ id, data }: { id: string; data: Record<string, unknown> }) =>
       fetch(`/api/sales/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       }).then((response) => handleResponse<Sale>(response)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sales"] }),
+    onMutate: async ({ id, data }) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousSales = queryClient.getQueryData<Sale[]>(queryKey);
+
+      queryClient.setQueryData<Sale[]>(queryKey, (old) =>
+        old?.map((sale) => (sale.id === id ? { ...sale, ...data } : sale))
+      );
+
+      return { previousSales };
+    },
+    onSuccess: (updatedSale) => {
+      queryClient.setQueryData<Sale[]>(queryKey, (old) =>
+        old?.map((sale) => (sale.id === updatedSale.id ? updatedSale : sale))
+      );
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousSales) {
+        queryClient.setQueryData(queryKey, context.previousSales);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
     meta: {
       successMessage: "Venta guardada con éxito",
       errorMessage: "Error al guardar la venta",
     },
   });
 
-  const deleteMutation = useMutation({
+  const deleteMutation = useMutation<void, Error, string[], { previousSales: Sale[] | undefined }>({
     mutationFn: (ids: string[]) =>
       fetch("/api/sales", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ids }),
       }).then((response) => handleResponse<void>(response)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sales"] }),
+    onMutate: async (ids) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousSales = queryClient.getQueryData<Sale[]>(queryKey);
+
+      queryClient.setQueryData<Sale[]>(queryKey, (old) =>
+        old?.filter((sale) => !ids.includes(sale.id))
+      );
+
+      return { previousSales };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousSales) {
+        queryClient.setQueryData(queryKey, context.previousSales);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
     meta: {
       successMessage: "Venta(s) eliminada(s) con éxito",
       errorMessage: "Error al eliminar la(s) venta(s)",
     },
   });
 
-  const duplicateMutation = useMutation<Sale, Error, string>({
+  const duplicateMutation = useMutation<
+    Sale,
+    Error,
+    string,
+    { previousSales: Sale[] | undefined; tempId: string }
+  >({
     mutationFn: (id) =>
       fetch(`/api/sales/${id}/duplicate`, {
         method: "POST",
       }).then((response) => handleResponse<Sale>(response)),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["sales"] }),
+    onMutate: async (id) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previousSales = queryClient.getQueryData<Sale[]>(queryKey);
+
+      const sourceSale = previousSales?.find((s) => s.id === id);
+      const tempId = `temp-${Date.now()}`;
+      const tempSale: Sale = sourceSale
+        ? { ...sourceSale, id: tempId }
+        : {
+            id: tempId,
+            date: new Date().toISOString().split("T")[0],
+            clientName: "Duplicando...",
+            phone: "",
+            address: "",
+            items: [],
+            deliveryStatus: DeliveryStatus.NOT_DELIVERED,
+            paymentStatus: PaymentStatus.NOT_PAID,
+            comments: "",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+
+      queryClient.setQueryData<Sale[]>(queryKey, (old) =>
+        old ? [...old, tempSale] : [tempSale]
+      );
+
+      return { previousSales, tempId };
+    },
+    onSuccess: (newSale, variables, context) => {
+      queryClient.setQueryData<Sale[]>(queryKey, (old) =>
+        old?.map((sale) => (sale.id === context?.tempId ? newSale : sale))
+      );
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousSales) {
+        queryClient.setQueryData(queryKey, context.previousSales);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
     meta: {
       successMessage: "Venta duplicada con éxito",
       errorMessage: "Error al duplicar la venta",
