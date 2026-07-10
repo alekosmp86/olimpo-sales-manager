@@ -23,6 +23,7 @@ const UpdateSaleSchema = z.object({
       z.object({
         productId: z.string().min(1),
         quantity: z.number().int().positive(),
+        storageId: z.string().optional(),
       })
     )
     .optional(),

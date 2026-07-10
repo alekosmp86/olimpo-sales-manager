@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 import { DeliveryDropdown, PaymentDropdown } from "../components/sales/StatusDropdown";
+import { withStockDeliveryDropdown } from "@/modules/stock/components/extensions/withStockDeliveryDropdown";
 import { ProductsCell } from "../components/sales/ProductsCell";
 import { ClientNameCell } from "../components/sales/ClientNameCell";
 import type { Sale } from "@/lib/types";
@@ -15,6 +16,7 @@ import { HighlightColor } from "@/lib/constants/colors";
 import styles from "../components/sales/SalesTable.module.css";
 
 const columnHelper = createColumnHelper<Sale>();
+const StockDeliveryDropdown = withStockDeliveryDropdown(DeliveryDropdown);
 
 type UpdatePayload = { id: string; data: Record<string, unknown> };
 
@@ -227,8 +229,9 @@ export function useSaleColumns(
       columnHelper.accessor("deliveryStatus", {
         header: "Entrega",
         cell: ({ getValue, row }) => (
-          <DeliveryDropdown
+          <StockDeliveryDropdown
             value={getValue()}
+            sale={row.original}
             onChange={(val) =>
               onUpdate({ id: row.original.id, data: { deliveryStatus: val } })
             }

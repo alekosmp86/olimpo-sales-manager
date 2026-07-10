@@ -39,6 +39,11 @@ model Product {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
+  // Stock back-relations (additive — no schema changes to existing columns)
+  stockLines   StockLine[]
+  reservations StockReservation[]
+  stockEvents  StockEvent[]
+
   @@unique([name, dimensionId])
 }
 
@@ -54,6 +59,9 @@ model Sale {
   items          SaleItem[]
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
+
+  // Stock back-relation (additive)
+  stockEvents StockEvent[]
 }
 
 /// Each item on a sale references a Product (which carries its Dimension).
@@ -65,6 +73,9 @@ model SaleItem {
   productId String
   product   Product @relation(fields: [productId], references: [id])
   quantity  Int
+
+  // Stock back-relation (additive)
+  reservation StockReservation?
 }
 
 enum DeliveryStatus {
@@ -83,4 +94,74 @@ model ProductAlias {
   alias     String   @unique
   name      String
   createdAt DateTime @default(now())
+}
+
+// ─── Stock Module Models ──────────────────────────────────────────────────────
+
+/// A physical or virtual location that holds inventory (warehouse, person, van, etc.)
+model Storage {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  stockLines   StockLine[]
+  stockEvents  StockEvent[]
+  reservations StockReservation[]
+}
+
+/// Current quantity snapshot for a (product, storage) pair.
+/// quantity is NEVER negative. Available = quantity - SUM(reservations).
+model StockLine {
+  id        String  @id @default(cuid())
+  storageId String
+  productId String
+  quantity  Int     @default(0)
+
+  storage Storage @relation(fields: [storageId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@unique([storageId, productId])
+}
+
+/// Immutable audit log — never updated or deleted after creation.
+model StockEvent {
+  id            String         @id @default(cuid())
+  type          StockEventType
+  storageId     String
+  productId     String
+  delta         Int /// positive = increase, negative = decrease
+  quantityAfter Int /// snapshot of StockLine.quantity after this event
+  notes         String?
+  saleId        String?
+  createdAt     DateTime       @default(now())
+
+  storage Storage @relation(fields: [storageId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+  sale    Sale?   @relation(fields: [saleId], references: [id], onDelete: SetNull)
+}
+
+/// A reservation ties a SaleItem to a source storage.
+/// Lifecycle: created when item added to sale → deleted when item removed, sale deleted, or sale delivered.
+model StockReservation {
+  id         String   @id @default(cuid())
+  saleItemId String   @unique /// 1-to-1: one reservation per SaleItem
+  storageId  String
+  productId  String
+  quantity   Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  saleItem SaleItem @relation(fields: [saleItemId], references: [id], onDelete: Cascade)
+  storage  Storage  @relation(fields: [storageId], references: [id])
+  product  Product  @relation(fields: [productId], references: [id])
+}
+
+enum StockEventType {
+  COUNT /// Physical inventory count (sets absolute value)
+  TRANSFER_IN /// Goods arrived at this storage
+  TRANSFER_OUT /// Goods left this storage
+  SALE_DELIVERY /// Auto-decrease when sale marked as DELIVERED
 }

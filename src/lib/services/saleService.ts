@@ -11,6 +11,11 @@ const saleInclude = {
           dimension: true,
         },
       },
+      reservation: {
+        include: {
+          storage: true,
+        },
+      },
     },
   },
 };
@@ -79,7 +84,7 @@ export async function updateSale(
     deliveryStatus: DeliveryStatus;
     paymentStatus: PaymentStatus;
     comments: string | null;
-    items: Array<{ productId: string; quantity: number }>;
+    items: Array<{ productId: string; quantity: number; storageId?: string }>;
   }>
 ) {
   const { items, ...saleFields } = data;
@@ -92,15 +97,34 @@ export async function updateSale(
 
     // Replace items if provided
     if (items !== undefined) {
+      // First delete reservations
+      const existingItems = await tx.saleItem.findMany({ where: { saleId: id } });
+      const itemIds = existingItems.map((i) => i.id);
+      await tx.stockReservation.deleteMany({ where: { saleItemId: { in: itemIds } } });
       await tx.saleItem.deleteMany({ where: { saleId: id } });
+
       if (items.length > 0) {
-        await tx.saleItem.createMany({
-          data: items.map((item) => ({
-            saleId: id,
-            productId: item.productId,
-            quantity: item.quantity,
-          })),
-        });
+        await Promise.all(
+          items.map(async (item) => {
+            const createdItem = await tx.saleItem.create({
+              data: {
+                saleId: id,
+                productId: item.productId,
+                quantity: item.quantity,
+              },
+            });
+            if (item.storageId) {
+              await tx.stockReservation.create({
+                data: {
+                  saleItemId: createdItem.id,
+                  storageId: item.storageId,
+                  productId: item.productId,
+                  quantity: item.quantity,
+                },
+              });
+            }
+          })
+        );
       }
     }
   });
@@ -162,6 +186,17 @@ type SaleWithItems = Awaited<ReturnType<typeof prisma.sale.findFirstOrThrow>> & 
     saleId: string;
     productId: string;
     quantity: number;
+    reservation: ({
+      storage: { id: string; name: string };
+    } & {
+      id: string;
+      saleItemId: string;
+      storageId: string;
+      productId: string;
+      quantity: number;
+      createdAt: Date;
+      updatedAt: Date;
+    }) | null;
     product: {
       id: string;
       name: string;
@@ -183,6 +218,15 @@ function serializeSale(sale: SaleWithItems) {
     items: sale.items.map((item) => ({
       ...item,
       totalPrice: item.quantity * item.product.unitPrice,
+      reservation: item.reservation
+        ? {
+            id: item.reservation.id,
+            storageId: item.reservation.storageId,
+            storageName: item.reservation.storage.name,
+            productId: item.reservation.productId,
+            quantity: item.reservation.quantity,
+          }
+        : null,
       product: {
         ...item.product,
         createdAt: item.product.createdAt.toISOString(),
