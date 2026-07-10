@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { DeliveryStatus, PaymentStatus } from "@/lib/constants/statuses";
 
 const saleInclude = {
@@ -14,8 +15,8 @@ const saleInclude = {
   },
 };
 
-export async function getSales(search?: string) {
-  const where = search
+export async function getSales(year?: number, month?: number, search?: string) {
+  const where: Prisma.SaleWhereInput = search
     ? {
         OR: [
           { clientName: { contains: search, mode: "insensitive" as const } },
@@ -24,6 +25,15 @@ export async function getSales(search?: string) {
         ],
       }
     : {};
+
+  if (year !== undefined && month !== undefined) {
+    const startDate = new Date(Date.UTC(year, month - 1, 1));
+    const endDate = new Date(Date.UTC(year, month, 1));
+    where.date = {
+      gte: startDate,
+      lt: endDate,
+    };
+  }
 
   const sales = await prisma.sale.findMany({
     where,

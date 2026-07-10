@@ -92,28 +92,31 @@ export function useSalesTableState() {
     setZoomLevel(1.0);
   }, []);
 
+  // ── Sheet navigation ──────────────────────────────────────────────────────
+  const { selectedYear, selectedMonth, goToPrevYear, goToNextYear, selectMonth } =
+    useMonthSheet();
+
   // ── Data + mutations ──────────────────────────────────────────────────────
   const { sales, isLoading, createMutation, updateMutation, deleteMutation, duplicateMutation } =
-    useSales(debouncedSearch);
+    useSales(selectedYear, selectedMonth, debouncedSearch);
   const { mutate: createSale } = createMutation;
   const { mutate: deleteSales } = deleteMutation;
 
-  // ── Sheet navigation ──────────────────────────────────────────────────────
-  const { selectedYear, selectedMonth, goToPrevYear, goToNextYear, selectMonth } =
-    useMonthSheet(sales, isLoading);
-
   // ── Stable callbacks using refs to prevent child re-renders on mutation changes ──
   const updateMutationRef = useRef(updateMutation);
-  updateMutationRef.current = updateMutation;
+  const duplicateMutationRef = useRef(duplicateMutation);
+
+  useEffect(() => {
+    updateMutationRef.current = updateMutation;
+    duplicateMutationRef.current = duplicateMutation;
+  }, [updateMutation, duplicateMutation]);
+
   const handleUpdate = useCallback(
     (payload: { id: string; data: Record<string, unknown> }) => {
       updateMutationRef.current.mutate(payload);
     },
     []
   );
-
-  const duplicateMutationRef = useRef(duplicateMutation);
-  duplicateMutationRef.current = duplicateMutation;
   const handleDuplicate = useCallback((saleId: string) => {
     duplicateMutationRef.current.mutate(saleId, {
       onSuccess: (newSale: Sale) => {
@@ -156,18 +159,7 @@ export function useSalesTableState() {
     });
   }, [rowSelection, deleteSales, confirm]);
 
-  const filteredSales = useMemo(
-    () =>
-      sales.filter((sale) => {
-        if (!sale?.date) return false;
-        const [y, m] = sale.date.split("-");
-        return (
-          parseInt(y, 10) === selectedYear &&
-          parseInt(m, 10) - 1 === selectedMonth
-        );
-      }),
-    [sales, selectedYear, selectedMonth]
-  );
+  const filteredSales = sales;
 
   const selectedIds = useMemo(
     () => Object.keys(rowSelection).filter((k) => rowSelection[k]),

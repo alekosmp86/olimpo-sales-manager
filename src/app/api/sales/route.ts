@@ -19,7 +19,20 @@ export async function GET(req: NextRequest) {
     }
 
     const search = req.nextUrl.searchParams.get("search") ?? undefined;
-    const sales = await getSales(search);
+    const yearParam = req.nextUrl.searchParams.get("year");
+    const monthParam = req.nextUrl.searchParams.get("month");
+
+    const year = yearParam ? parseInt(yearParam, 10) : undefined;
+    const month = monthParam ? parseInt(monthParam, 10) : undefined;
+
+    const hasValidDateFilter =
+      year !== undefined && !isNaN(year) && month !== undefined && !isNaN(month);
+
+    const sales = await getSales(
+      hasValidDateFilter ? year : undefined,
+      hasValidDateFilter ? month : undefined,
+      search
+    );
     return NextResponse.json(sales);
   } catch (err) {
     console.error("[GET /api/sales]", err);

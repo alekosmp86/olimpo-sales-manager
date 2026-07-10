@@ -10,17 +10,23 @@ import { DeliveryStatus, PaymentStatus } from "@/lib/constants/statuses";
  * Utilizes query caching and optimistic updates to keep UI interactions
  * instant, rolling back to the original cached snapshot on failures.
  */
-export function useSales(search: string) {
+export function useSales(year: number, month: number, search: string) {
   const queryClient = useQueryClient();
-  const queryKey = ["sales", search];
+  const queryKey = ["sales", { year, month, search }];
 
   const { data: sales = [], isLoading } = useQuery<Sale[]>({
     queryKey,
-    queryFn: ({ signal }) =>
-      fetch(
-        `/api/sales${search ? `?search=${encodeURIComponent(search)}` : ""}`,
-        { signal }
-      ).then((response) => handleResponse<Sale[]>(response)),
+    queryFn: ({ signal }) => {
+      const params = new URLSearchParams();
+      params.set("year", year.toString());
+      params.set("month", (month + 1).toString());
+      if (search) {
+        params.set("search", search);
+      }
+      return fetch(`/api/sales?${params.toString()}`, { signal }).then((response) =>
+        handleResponse<Sale[]>(response)
+      );
+    },
   });
 
   const createMutation = useMutation<
@@ -76,7 +82,7 @@ export function useSales(search: string) {
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ["sales"] });
     },
     meta: {
       successMessage: "Venta creada con éxito",
@@ -117,7 +123,7 @@ export function useSales(search: string) {
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ["sales"] });
     },
     meta: {
       successMessage: "Venta guardada con éxito",
@@ -149,7 +155,7 @@ export function useSales(search: string) {
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ["sales"] });
     },
     meta: {
       successMessage: "Venta(s) eliminada(s) con éxito",
@@ -206,7 +212,7 @@ export function useSales(search: string) {
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey });
+      queryClient.invalidateQueries({ queryKey: ["sales"] });
     },
     meta: {
       successMessage: "Venta duplicada con éxito",
