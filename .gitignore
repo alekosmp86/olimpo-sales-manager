@@ -46,9 +46,6 @@ playwright-videos/
 test-results/
 .next-test/
 
-AGENTS.md
-CLAUDE.md
-
 #playwright
 playwright-report/
 playwright-videos/
