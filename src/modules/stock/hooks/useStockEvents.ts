@@ -20,8 +20,8 @@ export function useStockEvents(params?: { storageId?: string; productId?: string
   return useQuery<StockEventsResponse>({
     queryKey: ["stock", "events", { storageId, productId, limit }],
     queryFn: ({ signal }) =>
-      fetch(`/api/stock/events?${search.toString()}`, { signal }).then((r) =>
-        handleResponse<StockEventsResponse>(r)
+      fetch(`/api/stock/events?${search.toString()}`, { signal }).then((response) =>
+        handleResponse<StockEventsResponse>(response)
       ),
   });
 }

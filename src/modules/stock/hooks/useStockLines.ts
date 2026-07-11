@@ -9,8 +9,8 @@ export function useStockLines(storageId: string | null) {
   return useQuery<StockLineDTO[]>({
     queryKey: ["stock", "lines", storageId],
     queryFn: ({ signal }) =>
-      fetch(`/api/stock/stock-lines?storageId=${storageId}`, { signal }).then((r) =>
-        handleResponse<StockLineDTO[]>(r)
+      fetch(`/api/stock/stock-lines?storageId=${storageId}`, { signal }).then((response) =>
+        handleResponse<StockLineDTO[]>(response)
       ),
     enabled: !!storageId,
   });
@@ -21,8 +21,8 @@ export function useStoragesForProduct(productId: string | null) {
   return useQuery<StorageAvailability[]>({
     queryKey: ["stock", "lines", "product", productId],
     queryFn: ({ signal }) =>
-      fetch(`/api/stock/stock-lines?productId=${productId}`, { signal }).then((r) =>
-        handleResponse<StorageAvailability[]>(r)
+      fetch(`/api/stock/stock-lines?productId=${productId}`, { signal }).then((response) =>
+        handleResponse<StorageAvailability[]>(response)
       ),
     enabled: !!productId,
     staleTime: 5000, // short stale time — stock changes frequently

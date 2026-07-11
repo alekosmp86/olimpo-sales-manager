@@ -44,19 +44,19 @@ export async function getStockEvents(params: {
   const nextCursor = hasMore ? page[page.length - 1].id : null;
 
   return {
-    events: page.map((e) => ({
-      id: e.id,
-      type: e.type,
-      storageId: e.storageId,
-      storageName: e.storage.name,
-      productId: e.productId,
-      productName: e.product.name,
-      productDimension: e.product.dimension.label,
-      delta: e.delta,
-      quantityAfter: e.quantityAfter,
-      notes: e.notes,
-      saleId: e.saleId,
-      createdAt: e.createdAt.toISOString(),
+    events: page.map((event) => ({
+      id: event.id,
+      type: event.type,
+      storageId: event.storageId,
+      storageName: event.storage.name,
+      productId: event.productId,
+      productName: event.product.name,
+      productDimension: event.product.dimension.label,
+      delta: event.delta,
+      quantityAfter: event.quantityAfter,
+      notes: event.notes,
+      saleId: event.saleId,
+      createdAt: event.createdAt.toISOString(),
     })),
     nextCursor,
   };

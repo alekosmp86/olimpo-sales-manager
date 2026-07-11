@@ -10,7 +10,7 @@ export function useStorages() {
   const { data: storages = [], isLoading } = useQuery<StorageDTO[]>({
     queryKey: ["stock", "storages"],
     queryFn: ({ signal }) =>
-      fetch("/api/stock/storages", { signal }).then((r) => handleResponse<StorageDTO[]>(r)),
+      fetch("/api/stock/storages", { signal }).then((response) => handleResponse<StorageDTO[]>(response)),
   });
 
   const createMutation = useMutation({
@@ -19,7 +19,7 @@ export function useStorages() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-      }).then((r) => handleResponse<StorageDTO>(r)),
+      }).then((response) => handleResponse<StorageDTO>(response)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["stock", "storages"] }),
     meta: { successMessage: "Depósito creado", errorMessage: "Error al crear depósito" },
   });
@@ -30,15 +30,15 @@ export function useStorages() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-      }).then((r) => handleResponse<StorageDTO>(r)),
+      }).then((response) => handleResponse<StorageDTO>(response)),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["stock", "storages"] }),
     meta: { successMessage: "Depósito actualizado", errorMessage: "Error al actualizar depósito" },
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) =>
-      fetch(`/api/stock/storages/${id}`, { method: "DELETE" }).then((r) =>
-        handleResponse<{ ok: boolean }>(r)
+      fetch(`/api/stock/storages/${id}`, { method: "DELETE" }).then((response) =>
+        handleResponse<{ ok: boolean }>(response)
       ),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["stock", "storages"] }),
     meta: { successMessage: "Depósito eliminado", errorMessage: "Error al eliminar depósito" },

@@ -21,23 +21,24 @@ export interface StockLineWithDetails {
  * "available" can be negative (backorders allowed), but "quantity" (physical) is never negative.
  */
 export async function getStockLines(storageId: string): Promise<StockLineWithDetails[]> {
-  const lines = await prisma.stockLine.findMany({
-    where: { storageId },
-    include: {
-      product: { include: { dimension: true } },
-    },
-    orderBy: [{ product: { name: "asc" } }],
-  });
-
-  // Fetch reservation sums for all products in this storage in a single query
-  const reservationSums = await prisma.stockReservation.groupBy({
-    by: ["productId"],
-    where: { storageId },
-    _sum: { quantity: true },
-  });
+  // Run both queries concurrently — they are independent (neither uses the other's result)
+  const [lines, reservationSums] = await Promise.all([
+    prisma.stockLine.findMany({
+      where: { storageId },
+      include: {
+        product: { include: { dimension: true } },
+      },
+      orderBy: [{ product: { name: "asc" } }],
+    }),
+    prisma.stockReservation.groupBy({
+      by: ["productId"],
+      where: { storageId },
+      _sum: { quantity: true },
+    }),
+  ]);
 
   const reservedMap = new Map(
-    reservationSums.map((r) => [r.productId, r._sum.quantity ?? 0])
+    reservationSums.map((reservation) => [reservation.productId, reservation._sum.quantity ?? 0])
   );
 
   return lines.map((line) => {
@@ -69,19 +70,21 @@ export async function getStockLines(storageId: string): Promise<StockLineWithDet
 export async function getStoragesWithStockForProduct(productId: string): Promise<
   { storageId: string; storageName: string; quantity: number; reserved: number; available: number }[]
 > {
-  const lines = await prisma.stockLine.findMany({
-    where: { productId, quantity: { gt: 0 }, storage: { isActive: true } },
-    include: { storage: true },
-  });
-
-  const reservationSums = await prisma.stockReservation.groupBy({
-    by: ["storageId"],
-    where: { productId },
-    _sum: { quantity: true },
-  });
+  // Run both queries concurrently — they are independent (neither uses the other's result)
+  const [lines, reservationSums] = await Promise.all([
+    prisma.stockLine.findMany({
+      where: { productId, quantity: { gt: 0 }, storage: { isActive: true } },
+      include: { storage: true },
+    }),
+    prisma.stockReservation.groupBy({
+      by: ["storageId"],
+      where: { productId },
+      _sum: { quantity: true },
+    }),
+  ]);
 
   const reservedMap = new Map(
-    reservationSums.map((r) => [r.storageId, r._sum.quantity ?? 0])
+    reservationSums.map((reservation) => [reservation.storageId, reservation._sum.quantity ?? 0])
   );
 
   return lines.map((line) => {
@@ -94,33 +97,4 @@ export async function getStoragesWithStockForProduct(productId: string): Promise
       available: line.quantity - reserved,
     };
   });
-}
-
-/**
- * Atomically decrement a stock line. Guards against going negative.
- * Returns the new quantity.
- */
-export async function decrementStockLine(
-  storageId: string,
-  productId: string,
-  amount: number,
-  tx: Parameters<Parameters<typeof prisma.$transaction>[0]>[0] = prisma as any
-): Promise<number> {
-  const line = await (tx as typeof prisma).stockLine.findUnique({
-    where: { storageId_productId: { storageId, productId } },
-  });
-
-  const current = line?.quantity ?? 0;
-  if (current < amount) {
-    throw new Error(
-      `Stock insuficiente. Disponible físico: ${current}, requerido: ${amount}.`
-    );
-  }
-
-  const updated = await (tx as typeof prisma).stockLine.update({
-    where: { storageId_productId: { storageId, productId } },
-    data: { quantity: { decrement: amount } },
-  });
-
-  return updated.quantity;
 }
