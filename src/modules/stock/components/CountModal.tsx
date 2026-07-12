@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
-import { Search } from "lucide-react";
+import { SearchInput } from "@/components/ui/SearchInput";
 import type { StorageDTO, StockLineDTO } from "@/modules/stock/types";
 import type { Product } from "@/lib/types";
 import { handleResponse } from "@/lib/utils/apiUtils";
@@ -119,16 +119,12 @@ export function CountModal({ storage, currentLines, onClose }: CountModalProps) 
       }
     >
       <div className={styles.container}>
-        <div className={styles.searchContainer}>
-          <Search size={18} className={styles.searchIcon} />
-          <input
-            type="text"
-            placeholder="Buscar producto..."
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            className={styles.searchInput}
-          />
-        </div>
+        <SearchInput
+          placeholder="Buscar producto..."
+          value={searchTerm}
+          onChange={setSearchTerm}
+          showIcon={true}
+        />
 
         <div className={styles.tableContainer}>
           <table className={styles.table}>

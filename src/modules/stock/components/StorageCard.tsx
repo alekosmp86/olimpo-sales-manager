@@ -9,6 +9,7 @@ import styles from "./StorageCard.module.css";
 import { CountModal } from "./CountModal";
 import { TransferModal } from "./TransferModal";
 import { StorageFormModal } from "./StorageFormModal";
+import { StorageDetailsModal } from "./StorageDetailsModal";
 
 interface StorageCardProps {
   storage: StorageDTO;
@@ -21,6 +22,7 @@ export function StorageCard({ storage, onUpdate, onDelete }: StorageCardProps) {
   const [showCount, setShowCount] = useState(false);
   const [showTransfer, setShowTransfer] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const confirm = useConfirm();
 
@@ -81,22 +83,33 @@ export function StorageCard({ storage, onUpdate, onDelete }: StorageCardProps) {
         ) : lines.length === 0 ? (
           <p className={styles.emptyLines}>Sin stock registrado</p>
         ) : (
-          lines.map((line) => (
-            <div key={line.id} className={styles.stockRow}>
-              <span className={styles.productName}>
-                {line.product.name} {line.product.dimension.label}
-              </span>
-              <div className={styles.quantities}>
-                {line.reserved > 0 && (
-                  <span className={styles.reserved}>{line.reserved} reserv.</span>
-                )}
-                <div>
-                  <span className={styles.qty}>{line.quantity}</span>
-                  <span className={styles.qtyLabel}> un.</span>
+          <>
+            {lines.slice(0, 3).map((line) => (
+              <div key={line.id} className={styles.stockRow}>
+                <span className={styles.productName}>
+                  {line.product.name} {line.product.dimension.label}
+                </span>
+                <div className={styles.quantities}>
+                  {line.reserved > 0 && (
+                    <span className={styles.reserved}>{line.reserved} reserv.</span>
+                  )}
+                  <div>
+                    <span className={styles.qty}>{line.quantity}</span>
+                    <span className={styles.qtyLabel}> un.</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            ))}
+            {lines.length > 3 && (
+              <button
+                type="button"
+                className={styles.viewMoreBtn}
+                onClick={() => setShowDetails(true)}
+              >
+                + {lines.length - 3} producto{lines.length - 3 > 1 ? "s" : ""} más...
+              </button>
+            )}
+          </>
         )}
       </div>
 
@@ -130,6 +143,13 @@ export function StorageCard({ storage, onUpdate, onDelete }: StorageCardProps) {
             onUpdate(data);
             setShowEdit(false);
           }}
+        />
+      )}
+      {showDetails && (
+        <StorageDetailsModal
+          storage={storage}
+          lines={lines}
+          onClose={() => setShowDetails(false)}
         />
       )}
     </div>

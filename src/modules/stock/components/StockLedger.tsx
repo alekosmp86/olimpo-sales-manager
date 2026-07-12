@@ -5,6 +5,7 @@ import { useStockEvents } from "@/modules/stock/hooks/useStockEvents";
 import { useStorages } from "@/modules/stock/hooks/useStorages";
 import { STOCK_EVENT_LABELS } from "@/modules/stock/constants";
 import { MONTH_ABBRS } from "@/lib/dateUtils";
+import { SearchInput } from "@/components/ui/SearchInput";
 import styles from "./StockLedger.module.css";
 
 function formatEventDate(dateStr: string): string {
@@ -59,13 +60,11 @@ export function StockLedger() {
           <label htmlFor="ledger-product-search" className={styles.label}>
             Buscar producto
           </label>
-          <input
+          <SearchInput
             id="ledger-product-search"
-            type="text"
             placeholder="Ej: Ozempic..."
             value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            className={styles.input}
+            onChange={setSearchTerm}
           />
         </div>
       </div>
