@@ -49,10 +49,16 @@
 
 .amberText {
   color: var(--color-amber-text);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
 }
 
 .redText {
   color: var(--color-red-text);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
 }
 
 .storageSelectWrapper {

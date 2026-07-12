@@ -1,6 +1,7 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { writeStockEvent } from "./stockEventService";
+import { UnresolvedReason } from "../constants";
 
 export interface DeliveryItemOverride {
   saleItemId: string;
@@ -12,7 +13,7 @@ export interface UnresolvedItem {
   productId: string;
   productName: string;
   quantity: number;
-  reason: "no_reservation" | "insufficient_stock";
+  reason: UnresolvedReason;
 }
 
 /**
@@ -63,7 +64,7 @@ export async function processSaleDelivery(
           productId: item.productId,
           productName: `${item.product.name} ${item.product.dimension.label}`,
           quantity: item.quantity,
-          reason: "no_reservation",
+          reason: UnresolvedReason.NO_RESERVATION,
         });
         return;
       }
@@ -80,7 +81,7 @@ export async function processSaleDelivery(
           productId: item.productId,
           productName: `${item.product.name} ${item.product.dimension.label}`,
           quantity: item.quantity,
-          reason: "insufficient_stock",
+          reason: UnresolvedReason.INSUFFICIENT_STOCK,
         });
         return;
       }

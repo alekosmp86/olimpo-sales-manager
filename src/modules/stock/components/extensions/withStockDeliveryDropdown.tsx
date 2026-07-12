@@ -8,6 +8,7 @@ import type { UnresolvedDeliveryItem, DeliveryItemOverride } from "@/modules/sto
 import { DeliveryStatus } from "@/lib/constants/statuses";
 import { handleResponse } from "@/lib/utils/apiUtils";
 import { Sale } from "@/lib/types";
+import { StockErrorType } from "../../constants";
 
 interface DeliverPayload {
   saleId: string;
@@ -39,7 +40,7 @@ export function withStockDeliveryDropdown(DropdownComponent: typeof DeliveryDrop
           if (response.status === 409) {
             const errData = await response.json();
             if (errData.unresolvedItems) {
-              throw { type: "UNRESOLVED_ITEMS", unresolvedItems: errData.unresolvedItems };
+              throw { type: StockErrorType.UNRESOLVED_ITEMS, unresolvedItems: errData.unresolvedItems };
             }
             throw new Error(errData.error || "Conflict occurred");
           }
@@ -57,7 +58,7 @@ export function withStockDeliveryDropdown(DropdownComponent: typeof DeliveryDrop
         await deliverMutation.mutateAsync({ saleId: sale.id });
         return true;
       } catch (err: any) {
-        if (err.type === "UNRESOLVED_ITEMS") {
+        if (err.type === StockErrorType.UNRESOLVED_ITEMS) {
           setUnresolvedItems(err.unresolvedItems);
           return new Promise<boolean>((resolve) => {
             setResolvePromise({ resolve });

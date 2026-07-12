@@ -69,12 +69,14 @@ export interface ReservationDTO {
 
 // ─── Delivery ─────────────────────────────────────────────────────────────────
 
+import { UnresolvedReason } from "./constants";
+
 export interface UnresolvedDeliveryItem {
   saleItemId: string;
   productId: string;
   productName: string;
   quantity: number;
-  reason: "no_reservation" | "insufficient_stock";
+  reason: UnresolvedReason;
 }
 
 export interface DeliveryItemOverride {
