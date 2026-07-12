@@ -55,8 +55,8 @@ export function Modal({
     if (!isClient) return;
     const dialog = backdropRef.current;
     if (!dialog) return;
-    const handleClick = (e: MouseEvent) => {
-      if (e.target === dialog) onCloseRef.current();
+    const handleClick = (event: MouseEvent) => {
+      if (event.target === dialog) onCloseRef.current();
     };
     dialog.addEventListener("click", handleClick);
     return () => {
@@ -89,6 +89,6 @@ export function Modal({
         {footer && <div className={styles.footer}>{footer}</div>}
       </div>
     </dialog>,
-    document.body
+    typeof window !== "undefined" ? document.body : (null as any)
   );
 }

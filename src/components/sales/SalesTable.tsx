@@ -5,7 +5,10 @@ import { SalesToolbar } from "./SalesToolbar";
 import { SalesGrid } from "./SalesGrid";
 import { MonthSheetBar } from "./MonthSheetBar";
 import { ProductsModal } from "./ProductsModal";
+import { withStockProductsModal } from "@/modules/stock/components/extensions/withStockProductsModal";
 import styles from "./SalesTable.module.css";
+
+const StockProductsModal = withStockProductsModal(ProductsModal);
 
 /**
  * SalesTable represents the layout wrapper for sales management dashboard.
@@ -103,7 +106,7 @@ export function SalesTable() {
       </div>
 
       {openProductsModalSale && productsModal && (
-        <ProductsModal
+        <StockProductsModal
           isOpen
           onClose={() => setProductsModal(null)}
           saleId={productsModal.saleId}

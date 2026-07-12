@@ -1,0 +1,86 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.filters {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.filterSelectContainer {
+  min-width: 200px;
+}
+
+.label {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+.select {
+  width: 100%;
+  padding: 6px var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+}
+
+.filterSearchContainer {
+  min-width: 200px;
+  flex: 1;
+}
+
+.tableCard {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-surface);
+}
+
+.statusText {
+  padding: var(--space-8);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.tdMutedNowrap {
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.tdMedium {
+  font-weight: var(--weight-medium);
+}
+
+.tdSecondary {
+  color: var(--color-text-secondary);
+}
+
+.productDimension {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.tdRightSemibold {
+  text-align: right;
+  font-weight: var(--weight-semibold);
+}
+
+.tdRightMedium {
+  text-align: right;
+  font-weight: var(--weight-medium);
+}
+
+.tdNotes {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -31,6 +31,13 @@ export interface SaleItem {
   quantity: number;
   /** Computed field: quantity * product.unitPrice */
   totalPrice: number;
+  reservation?: {
+    id: string;
+    storageId: string;
+    storageName: string;
+    productId: string;
+    quantity: number;
+  } | null;
 }
 
 // ─── Sale ─────────────────────────────────────────────────────────────────────
