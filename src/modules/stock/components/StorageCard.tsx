@@ -43,10 +43,10 @@ export function StorageCard({ storage, onUpdate, onDelete }: StorageCardProps) {
             <p className={styles.storageDesc}>{storage.description}</p>
           )}
         </div>
-        <div style={{ position: "relative" }}>
+        <div className={styles.menuContainer}>
           <button
             className={styles.menuBtn}
-            onClick={() => setMenuOpen((o) => !o)}
+            onClick={() => setMenuOpen((openState) => !openState)}
             aria-label="Opciones"
             type="button"
           >

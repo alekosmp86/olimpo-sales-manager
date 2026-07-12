@@ -8,6 +8,7 @@ import type { StorageDTO } from "@/modules/stock/types";
 import { useStorages } from "@/modules/stock/hooks/useStorages";
 import { useStockLines } from "@/modules/stock/hooks/useStockLines";
 import { handleResponse } from "@/lib/utils/apiUtils";
+import styles from "./TransferModal.module.css";
 
 interface TransferModalProps {
   fromStorage: StorageDTO;
@@ -32,12 +33,12 @@ export function TransferModal({ fromStorage, onClose }: TransferModalProps) {
 
   // Filter out the source storage from destinations
   const destinationStorages = useMemo(() => {
-    return storages.filter((s) => s.id !== fromStorage.id && s.isActive);
+    return storages.filter((storage) => storage.id !== fromStorage.id && storage.isActive);
   }, [storages, fromStorage.id]);
 
   // Only products with physical quantity > 0 can be transferred
   const transferrableLines = useMemo(() => {
-    return stockLines.filter((l) => l.quantity > 0);
+    return stockLines.filter((line) => line.quantity > 0);
   }, [stockLines]);
 
   // Sync selected product once stockLines are loaded
@@ -55,7 +56,7 @@ export function TransferModal({ fromStorage, onClose }: TransferModalProps) {
   }, [destinationStorages, toStorageId]);
 
   const selectedLine = useMemo(() => {
-    return transferrableLines.find((l) => l.productId === productId);
+    return transferrableLines.find((line) => line.productId === productId);
   }, [transferrableLines, productId]);
 
   const transferMutation = useMutation({
@@ -71,15 +72,15 @@ export function TransferModal({ fromStorage, onClose }: TransferModalProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-      }).then(async (r) => {
-        if (r.status === 409) {
-          const errData = await r.json();
+      }).then(async (response) => {
+        if (response.status === 409) {
+          const errData = await response.json();
           if (errData.error === "RESERVATION_CONFLICT") {
             throw { type: "RESERVATION_CONFLICT", conflict: errData.conflict };
           }
           throw new Error(errData.error || "Conflict occurred");
         }
-        return handleResponse<{ ok: boolean }>(r);
+        return handleResponse<{ ok: boolean }>(response);
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stock"] });
@@ -106,8 +107,8 @@ export function TransferModal({ fromStorage, onClose }: TransferModalProps) {
     quantity <= maxQuantity &&
     !transferMutation.isPending;
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     if (!isValid) return;
 
     transferMutation.mutate({
@@ -151,8 +152,8 @@ export function TransferModal({ fromStorage, onClose }: TransferModalProps) {
           </>
         }
       >
-        <div style={{ color: "var(--color-text)", fontSize: "var(--text-sm)", display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
-          <p style={{ fontWeight: "var(--weight-semibold)" }}>
+        <div className={styles.warningContainer}>
+          <p className={styles.warningBold}>
             El depósito origen tiene reservas activas para este producto.
           </p>
           <p>
@@ -164,7 +165,7 @@ export function TransferModal({ fromStorage, onClose }: TransferModalProps) {
           <p>
             Cantidad a Transferir: <strong>{conflictWarning.transferQuantity} un.</strong>
           </p>
-          <p style={{ color: "var(--color-amber-text)" }}>
+          <p className={styles.warningAlert}>
             Si continúas, las ventas asociadas deberán resolver el depósito de origen alternativo al momento de marcarse como Entregadas.
           </p>
         </div>
@@ -194,61 +195,49 @@ export function TransferModal({ fromStorage, onClose }: TransferModalProps) {
         </>
       }
     >
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
+      <form onSubmit={handleSubmit} className={styles.form}>
         {transferrableLines.length === 0 ? (
-          <p style={{ fontSize: "var(--text-sm)", color: "var(--color-text-muted)", textAlign: "center", padding: "var(--space-4)" }}>
+          <p className={styles.emptyStateText}>
             No hay productos con stock en este depósito para transferir.
           </p>
         ) : (
           <>
             <div>
-              <label htmlFor="transfer-product" style={{ display: "block", fontSize: "var(--text-sm)", fontWeight: "var(--weight-medium)", marginBottom: "var(--space-1)" }}>
+              <label htmlFor="transfer-product" className={styles.label}>
                 Producto a transferir
               </label>
               <select
                 id="transfer-product"
                 value={productId}
-                onChange={(e) => setProductId(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "var(--space-2) var(--space-3)",
-                  border: "1px solid var(--color-border)",
-                  borderRadius: "var(--radius-sm)",
-                  fontSize: "var(--text-sm)",
-                }}
+                onChange={(event) => setProductId(event.target.value)}
+                className={styles.select}
               >
-                {transferrableLines.map((l) => (
-                  <option key={l.productId} value={l.productId}>
-                    {l.product.name} {l.product.dimension.label} (Físico: {l.quantity} un.)
+                {transferrableLines.map((line) => (
+                  <option key={line.productId} value={line.productId}>
+                    {line.product.name} {line.product.dimension.label} (Físico: {line.quantity} un.)
                   </option>
                 ))}
               </select>
             </div>
 
             <div>
-              <label htmlFor="transfer-destination" style={{ display: "block", fontSize: "var(--text-sm)", fontWeight: "var(--weight-medium)", marginBottom: "var(--space-1)" }}>
+              <label htmlFor="transfer-destination" className={styles.label}>
                 Depósito destino
               </label>
               {destinationStorages.length === 0 ? (
-                <p style={{ fontSize: "var(--text-xs)", color: "var(--color-red-text)" }}>
+                <p className={styles.errorText}>
                   No hay otros depósitos activos disponibles. Cree uno primero.
                 </p>
               ) : (
                 <select
                   id="transfer-destination"
                   value={toStorageId}
-                  onChange={(e) => setToStorageId(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "var(--space-2) var(--space-3)",
-                    border: "1px solid var(--color-border)",
-                    borderRadius: "var(--radius-sm)",
-                    fontSize: "var(--text-sm)",
-                  }}
+                  onChange={(event) => setToStorageId(event.target.value)}
+                  className={styles.select}
                 >
-                  {destinationStorages.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
+                  {destinationStorages.map((storage) => (
+                    <option key={storage.id} value={storage.id}>
+                      {storage.name}
                     </option>
                   ))}
                 </select>
@@ -256,7 +245,7 @@ export function TransferModal({ fromStorage, onClose }: TransferModalProps) {
             </div>
 
             <div>
-              <label htmlFor="transfer-quantity" style={{ display: "block", fontSize: "var(--text-sm)", fontWeight: "var(--weight-medium)", marginBottom: "var(--space-1)" }}>
+              <label htmlFor="transfer-quantity" className={styles.label}>
                 Cantidad a transferir (Máx: {maxQuantity})
               </label>
               <input
@@ -265,35 +254,21 @@ export function TransferModal({ fromStorage, onClose }: TransferModalProps) {
                 min="1"
                 max={maxQuantity}
                 value={quantityStr}
-                onChange={(e) => setQuantityStr(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "var(--space-2) var(--space-3)",
-                  border: "1px solid var(--color-border)",
-                  borderRadius: "var(--radius-sm)",
-                  fontSize: "var(--text-sm)",
-                }}
+                onChange={(event) => setQuantityStr(event.target.value)}
+                className={styles.input}
               />
             </div>
 
             <div>
-              <label htmlFor="transfer-notes" style={{ display: "block", fontSize: "var(--text-sm)", fontWeight: "var(--weight-medium)", marginBottom: "var(--space-1)" }}>
+              <label htmlFor="transfer-notes" className={styles.label}>
                 Notas / Motivo de la transferencia
               </label>
               <textarea
                 id="transfer-notes"
                 value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+                onChange={(event) => setNotes(event.target.value)}
                 placeholder="Opcional. Ej: Abastecimiento de depósito"
-                style={{
-                  width: "100%",
-                  height: "60px",
-                  padding: "var(--space-2) var(--space-3)",
-                  border: "1px solid var(--color-border)",
-                  borderRadius: "var(--radius-sm)",
-                  fontSize: "var(--text-sm)",
-                  resize: "none",
-                }}
+                className={styles.textarea}
               />
             </div>
           </>

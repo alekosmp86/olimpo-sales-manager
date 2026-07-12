@@ -8,6 +8,7 @@ import { Search } from "lucide-react";
 import type { StorageDTO, StockLineDTO } from "@/modules/stock/types";
 import type { Product } from "@/lib/types";
 import { handleResponse } from "@/lib/utils/apiUtils";
+import styles from "./CountModal.module.css";
 
 interface CountModalProps {
   storage: StorageDTO;
@@ -22,19 +23,19 @@ export function CountModal({ storage, currentLines, onClose }: CountModalProps) 
 
   const { data: products = [] } = useQuery<Product[]>({
     queryKey: ["products"],
-    queryFn: () => fetch("/api/products").then((r) => r.json()),
+    queryFn: () => fetch("/api/products").then((response) => response.json()),
   });
 
   // Map product IDs to their current physical stock quantity
   const currentStockMap = useMemo(() => {
-    return new Map(currentLines.map((l) => [l.productId, l.quantity]));
+    return new Map(currentLines.map((line) => [line.productId, line.quantity]));
   }, [currentLines]);
 
   // Track the user's manual inputs
   const [quantities, setQuantities] = useState<Record<string, number>>(() => {
     const initial: Record<string, number> = {};
-    currentLines.forEach((l) => {
-      initial[l.productId] = l.quantity;
+    currentLines.forEach((line) => {
+      initial[line.productId] = line.quantity;
     });
     return initial;
   });
@@ -49,12 +50,12 @@ export function CountModal({ storage, currentLines, onClose }: CountModalProps) 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-      }).then((r) => handleResponse<{ ok: boolean; warnings: any[] }>(r)),
+      }).then((response) => handleResponse<{ ok: boolean; warnings: any[] }>(response)),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["stock"] });
       if (data.warnings && data.warnings.length > 0) {
         const warningMsg = data.warnings
-          .map((w) => `- ${w.productName}: se fijó en ${w.newQuantity} pero hay ${w.reserved} reservadas.`)
+          .map((warning) => `- ${warning.productName}: se fijó en ${warning.newQuantity} pero hay ${warning.reserved} reservadas.`)
           .join("\n");
         alert(
           `Conteo guardado con advertencias de reservas afectadas:\n\n${warningMsg}`
@@ -69,13 +70,13 @@ export function CountModal({ storage, currentLines, onClose }: CountModalProps) 
   });
 
   const filteredProducts = useMemo(() => {
-    return products.filter((p) =>
-      p.name.toLowerCase().includes(searchTerm.toLowerCase())
+    return products.filter((product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [products, searchTerm]);
 
-  function handleQuantityChange(productId: string, val: string) {
-    const parsed = parseInt(val, 10);
+  function handleQuantityChange(productId: string, value: string) {
+    const parsed = parseInt(value, 10);
     setQuantities((prev) => ({
       ...prev,
       [productId]: isNaN(parsed) || parsed < 0 ? 0 : parsed,
@@ -117,93 +118,55 @@ export function CountModal({ storage, currentLines, onClose }: CountModalProps) 
         </>
       }
     >
-      <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
-        <div
-          style={{
-            position: "relative",
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          <Search
-            size={18}
-            style={{
-              position: "absolute",
-              left: "var(--space-3)",
-              color: "var(--color-text-muted)",
-            }}
-          />
+      <div className={styles.container}>
+        <div className={styles.searchContainer}>
+          <Search size={18} className={styles.searchIcon} />
           <input
             type="text"
             placeholder="Buscar producto..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "var(--space-2) var(--space-3) var(--space-2) var(--space-10)",
-              border: "1px solid var(--color-border)",
-              borderRadius: "var(--radius-sm)",
-              fontSize: "var(--text-sm)",
-            }}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            className={styles.searchInput}
           />
         </div>
 
-        <div
-          style={{
-            maxHeight: "350px",
-            overflowY: "auto",
-            border: "1px solid var(--color-border)",
-            borderRadius: "var(--radius-sm)",
-          }}
-        >
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: "var(--text-sm)",
-            }}
-          >
+        <div className={styles.tableContainer}>
+          <table className={styles.table}>
             <thead>
-              <tr style={{ background: "var(--color-surface-2)", borderBottom: "1px solid var(--color-border)" }}>
-                <th style={{ padding: "var(--space-2) var(--space-3)", textAlign: "left" }}>Producto</th>
-                <th style={{ padding: "var(--space-2) var(--space-3)", textAlign: "right", width: "120px" }}>Stock actual</th>
-                <th style={{ padding: "var(--space-2) var(--space-3)", textAlign: "right", width: "140px" }}>Nuevo conteo</th>
+              <tr className={styles.tableHeaderRow}>
+                <th className={styles.thProduct}>Producto</th>
+                <th className={styles.thCurrentStock}>Stock actual</th>
+                <th className={styles.thNewCount}>Nuevo conteo</th>
               </tr>
             </thead>
             <tbody>
               {filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan={3} style={{ padding: "var(--space-4)", textAlign: "center", color: "var(--color-text-muted)" }}>
+                  <td colSpan={3} className={styles.noProductsCell}>
                     No se encontraron productos
                   </td>
                 </tr>
               ) : (
-                filteredProducts.map((p) => {
-                  const currentQty = currentStockMap.get(p.id) ?? 0;
-                  const newQty = quantities[p.id] ?? 0;
+                filteredProducts.map((product) => {
+                  const currentQty = currentStockMap.get(product.id) ?? 0;
+                  const newQty = quantities[product.id] ?? 0;
 
                   return (
-                    <tr key={p.id} style={{ borderBottom: "1px solid var(--color-border)" }}>
-                      <td style={{ padding: "var(--space-2) var(--space-3)" }}>
-                        {p.name} <span style={{ color: "var(--color-text-muted)", fontSize: "var(--text-xs)" }}>{p.dimension.label}</span>
+                    <tr key={product.id} className={styles.tableRow}>
+                      <td className={styles.tdProduct}>
+                        {product.name} <span className={styles.productDimension}>{product.dimension.label}</span>
                       </td>
-                      <td style={{ padding: "var(--space-2) var(--space-3)", textAlign: "right", color: "var(--color-text-secondary)" }}>
+                      <td className={styles.tdCurrentStock}>
                         {currentQty}
                       </td>
-                      <td style={{ padding: "var(--space-2) var(--space-3)", textAlign: "right" }}>
+                      <td className={styles.tdNewCount}>
                         <input
                           type="number"
                           min="0"
                           value={newQty}
-                          onChange={(e) => handleQuantityChange(p.id, e.target.value)}
-                          aria-label={`Nuevo conteo para ${p.name} ${p.dimension.label}`}
-                          style={{
-                            width: "70px",
-                            textAlign: "right",
-                            padding: "4px",
-                            border: "1px solid var(--color-border)",
-                            borderRadius: "var(--radius-sm)",
-                          }}
+                          onChange={(event) => handleQuantityChange(product.id, event.target.value)}
+                          aria-label={`Nuevo conteo para ${product.name} ${product.dimension.label}`}
+                          className={styles.quantityInput}
                         />
                       </td>
                     </tr>
@@ -215,23 +178,15 @@ export function CountModal({ storage, currentLines, onClose }: CountModalProps) 
         </div>
 
         <div>
-          <label htmlFor="count-notes" style={{ display: "block", fontSize: "var(--text-sm)", fontWeight: "var(--weight-medium)", marginBottom: "var(--space-1)" }}>
+          <label htmlFor="count-notes" className={styles.notesLabel}>
             Notas / Motivo del conteo
           </label>
           <textarea
             id="count-notes"
             value={notes}
-            onChange={(e) => setNotes(e.target.value)}
+            onChange={(event) => setNotes(event.target.value)}
             placeholder="Opcional. Ej: Conteo mensual de inventario"
-            style={{
-              width: "100%",
-              height: "60px",
-              padding: "var(--space-2) var(--space-3)",
-              border: "1px solid var(--color-border)",
-              borderRadius: "var(--radius-sm)",
-              fontSize: "var(--text-sm)",
-              resize: "none",
-            }}
+            className={styles.notesTextarea}
           />
         </div>
       </div>

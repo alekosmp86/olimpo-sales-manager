@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, ReactNode } from "react";
+import { useEffect, useRef, useSyncExternalStore, ReactNode } from "react";
 import { createPortal } from "react-dom";
 import styles from "./Modal.module.css";
 
@@ -14,6 +14,8 @@ interface ModalProps {
   bodyClassName?: string;
 }
 
+const emptySubscribe = () => () => {};
+
 export function Modal({
   isOpen,
   onClose,
@@ -25,6 +27,11 @@ export function Modal({
 }: ModalProps) {
   const backdropRef = useRef<HTMLDialogElement>(null);
   const onCloseRef = useRef(onClose);
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 
   useEffect(() => {
     onCloseRef.current = onClose;
@@ -32,8 +39,8 @@ export function Modal({
 
   useEffect(() => {
     if (!isOpen) return;
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onCloseRef.current();
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onCloseRef.current();
     };
     document.addEventListener("keydown", handleKey);
     document.body.style.overflow = "hidden";
@@ -46,8 +53,8 @@ export function Modal({
   useEffect(() => {
     const dialog = backdropRef.current;
     if (!dialog) return;
-    const handleClick = (e: MouseEvent) => {
-      if (e.target === dialog) onCloseRef.current();
+    const handleClick = (event: MouseEvent) => {
+      if (event.target === dialog) onCloseRef.current();
     };
     dialog.addEventListener("click", handleClick);
     return () => {
@@ -55,7 +62,7 @@ export function Modal({
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   return createPortal(
     <dialog
@@ -80,6 +87,6 @@ export function Modal({
         {footer && <div className={styles.footer}>{footer}</div>}
       </div>
     </dialog>,
-    document.body
+    typeof window !== "undefined" ? document.body : (null as any)
   );
 }

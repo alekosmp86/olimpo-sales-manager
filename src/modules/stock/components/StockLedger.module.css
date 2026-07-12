@@ -1,0 +1,136 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.filters {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.filterSelectContainer {
+  min-width: 200px;
+}
+
+.label {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+.select {
+  width: 100%;
+  padding: 6px var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+}
+
+.filterSearchContainer {
+  min-width: 200px;
+  flex: 1;
+}
+
+.input {
+  width: 100%;
+  padding: 6px var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+}
+
+.tableCard {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-surface);
+}
+
+.statusText {
+  padding: var(--space-8);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  text-align: left;
+}
+
+.tableHeaderRow {
+  background: var(--color-surface-2);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+}
+
+.th {
+  padding: var(--space-3) var(--space-4);
+}
+
+.thRight {
+  padding: var(--space-3) var(--space-4);
+  text-align: right;
+}
+
+.tableRow {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tdMutedNowrap {
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.tdMedium {
+  padding: var(--space-3) var(--space-4);
+  font-weight: var(--weight-medium);
+}
+
+.tdSecondary {
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text-secondary);
+}
+
+.tdProduct {
+  padding: var(--space-3) var(--space-4);
+}
+
+.productDimension {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.tdRightSemibold {
+  padding: var(--space-3) var(--space-4);
+  text-align: right;
+  font-weight: var(--weight-semibold);
+}
+
+.tdRightMedium {
+  padding: var(--space-3) var(--space-4);
+  text-align: right;
+  font-weight: var(--weight-medium);
+}
+
+.tdNotes {
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

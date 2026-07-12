@@ -46,16 +46,16 @@ export function StoragePickerSlot({ productId, value, onChange }: StoragePickerS
         <select
           id={`picker-${productId}`}
           value={value || (availabilities[0]?.storageId ?? "")}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(event) => onChange(event.target.value)}
           className={styles.select}
         >
           {/* Ensure the currently reserved storage is in the list even if it has 0 stock now */}
-          {value && !availabilities.some((a) => a.storageId === value) && (
+          {value && !availabilities.some((availability) => availability.storageId === value) && (
             <option value={value}>Depósito actual (sin stock nuevo)</option>
           )}
-          {availabilities.map((a) => (
-            <option key={a.storageId} value={a.storageId}>
-              {a.storageName} (Disp: {a.available} un.)
+          {availabilities.map((availability) => (
+            <option key={availability.storageId} value={availability.storageId}>
+              {`${availability.storageName} (${availability.available}u)`}
             </option>
           ))}
         </select>

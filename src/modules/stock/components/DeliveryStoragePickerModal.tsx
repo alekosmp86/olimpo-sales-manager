@@ -5,6 +5,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { useStorages } from "@/modules/stock/hooks/useStorages";
 import type { UnresolvedDeliveryItem, DeliveryItemOverride } from "@/modules/stock/types";
+import styles from "./DeliveryStoragePickerModal.module.css";
 
 interface DeliveryStoragePickerModalProps {
   sale: any;
@@ -28,7 +29,7 @@ export function DeliveryStoragePickerModal({
     return initial;
   });
 
-  const activeStorages = storages.filter((s) => s.isActive);
+  const activeStorages = storages.filter((storage) => storage.isActive);
 
   function handleSelect(saleItemId: string, storageId: string) {
     setSelections((prev) => ({ ...prev, [saleItemId]: storageId }));
@@ -64,67 +65,52 @@ export function DeliveryStoragePickerModal({
         </>
       }
     >
-      <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
-        <p style={{ fontSize: "var(--text-sm)", color: "var(--color-text-secondary)" }}>
+      <div className={styles.container}>
+        <p className={styles.description}>
           Para completar la entrega de la venta a <strong>{sale.clientName}</strong>, debes indicar de qué depósito se retirarán los siguientes productos:
         </p>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-3)" }}>
+        <div className={styles.itemsList}>
           {unresolvedItems.map((item) => (
             <div
               key={item.saleItemId}
-              style={{
-                padding: "var(--space-3)",
-                border: "1px solid var(--color-border)",
-                borderRadius: "var(--radius-sm)",
-                background: "var(--color-surface-2)",
-                display: "flex",
-                flexDirection: "column",
-                gap: "var(--space-2)",
-              }}
+              className={styles.itemCard}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                <span style={{ fontSize: "var(--text-sm)", fontWeight: "var(--weight-semibold)" }}>
+              <div className={styles.itemHeader}>
+                <span className={styles.productName}>
                   {item.productName}
                 </span>
-                <span style={{ fontSize: "var(--text-sm)", fontWeight: "var(--weight-bold)", color: "var(--color-primary)" }}>
+                <span className={styles.productQty}>
                   Cant: {item.quantity} u.
                 </span>
               </div>
 
-              <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)" }}>
+              <div className={styles.reasonText}>
                 {item.reason === "no_reservation" ? (
-                  <span style={{ color: "var(--color-amber-text)" }}>
+                  <span className={styles.amberText}>
                     ⚠️ Sin depósito reservado (Venta importada)
                   </span>
                 ) : (
-                  <span style={{ color: "var(--color-red-text)" }}>
+                  <span className={styles.redText}>
                     ❌ El depósito reservado no tiene suficiente stock físico
                   </span>
                 )}
               </div>
 
-              <div style={{ marginTop: "4px" }}>
-                <label htmlFor={`select-storage-${item.saleItemId}`} style={{ display: "block", fontSize: "var(--text-xs)", marginBottom: "4px" }}>
+              <div className={styles.storageSelectWrapper}>
+                <label htmlFor={`select-storage-${item.saleItemId}`} className={styles.selectLabel}>
                   Seleccionar depósito de origen:
                 </label>
                 <select
                   id={`select-storage-${item.saleItemId}`}
                   value={selections[item.saleItemId] || ""}
-                  onChange={(e) => handleSelect(item.saleItemId, e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "6px",
-                    fontSize: "var(--text-sm)",
-                    borderRadius: "var(--radius-sm)",
-                    border: "1px solid var(--color-border)",
-                    background: "var(--color-surface)",
-                  }}
+                  onChange={(event) => handleSelect(item.saleItemId, event.target.value)}
+                  className={styles.select}
                 >
                   <option value="">-- Elegir depósito --</option>
-                  {activeStorages.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
+                  {activeStorages.map((storage) => (
+                    <option key={storage.id} value={storage.id}>
+                      {storage.name}
                     </option>
                   ))}
                 </select>

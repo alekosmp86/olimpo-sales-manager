@@ -5,6 +5,7 @@ import { useStockEvents } from "@/modules/stock/hooks/useStockEvents";
 import { useStorages } from "@/modules/stock/hooks/useStorages";
 import { STOCK_EVENT_LABELS } from "@/modules/stock/constants";
 import { MONTH_ABBRS } from "@/lib/dateUtils";
+import styles from "./StockLedger.module.css";
 
 function formatEventDate(dateStr: string): string {
   const d = new Date(dateStr);
@@ -26,44 +27,36 @@ export function StockLedger() {
     storageId: selectedStorageId || undefined,
   });
 
-  const events = data?.events;
-
   const filteredEvents = useMemo(() => {
-    return (events ?? []).filter((e) =>
-      e.productName.toLowerCase().includes(searchTerm.toLowerCase())
+    return (data?.events ?? []).filter((event) =>
+      event.productName.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [events, searchTerm]);
+  }, [data?.events, searchTerm]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
-      <div style={{ display: "flex", gap: "var(--space-3)", flexWrap: "wrap" }}>
-        <div style={{ minWidth: "200px" }}>
-          <label htmlFor="ledger-storage-filter" style={{ display: "block", fontSize: "var(--text-xs)", color: "var(--color-text-muted)", marginBottom: "4px" }}>
+    <div className={styles.container}>
+      <div className={styles.filters}>
+        <div className={styles.filterSelectContainer}>
+          <label htmlFor="ledger-storage-filter" className={styles.label}>
             Filtrar por depósito
           </label>
           <select
             id="ledger-storage-filter"
             value={selectedStorageId}
-            onChange={(e) => setSelectedStorageId(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "6px var(--space-2)",
-              border: "1px solid var(--color-border)",
-              borderRadius: "var(--radius-sm)",
-              fontSize: "var(--text-sm)",
-            }}
+            onChange={(event) => setSelectedStorageId(event.target.value)}
+            className={styles.select}
           >
             <option value="">Todos los depósitos</option>
-            {storages.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
+            {storages.map((storage) => (
+              <option key={storage.id} value={storage.id}>
+                {storage.name}
               </option>
             ))}
           </select>
         </div>
 
-        <div style={{ minWidth: "200px", flex: 1 }}>
-          <label htmlFor="ledger-product-search" style={{ display: "block", fontSize: "var(--text-xs)", color: "var(--color-text-muted)", marginBottom: "4px" }}>
+        <div className={styles.filterSearchContainer}>
+          <label htmlFor="ledger-product-search" className={styles.label}>
             Buscar producto
           </label>
           <input
@@ -71,74 +64,68 @@ export function StockLedger() {
             type="text"
             placeholder="Ej: Ozempic..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "6px var(--space-2)",
-              border: "1px solid var(--color-border)",
-              borderRadius: "var(--radius-sm)",
-              fontSize: "var(--text-sm)",
-            }}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            className={styles.input}
           />
         </div>
       </div>
 
-      <div style={{ border: "1px solid var(--color-border)", borderRadius: "var(--radius-md)", overflow: "hidden", background: "var(--color-surface)" }}>
+      <div className={styles.tableCard}>
         {isLoading ? (
-          <p style={{ padding: "var(--space-8)", textAlign: "center", color: "var(--color-text-muted)", fontSize: "var(--text-sm)" }}>
+          <p className={styles.statusText}>
             Cargando historial...
           </p>
         ) : filteredEvents.length === 0 ? (
-          <p style={{ padding: "var(--space-8)", textAlign: "center", color: "var(--color-text-muted)", fontSize: "var(--text-sm)" }}>
+          <p className={styles.statusText}>
             No se encontraron movimientos.
           </p>
         ) : (
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "var(--text-sm)", textAlign: "left" }}>
+          <div className={styles.tableWrapper}>
+            <table className={styles.table}>
               <thead>
-                <tr style={{ background: "var(--color-surface-2)", borderBottom: "1px solid var(--color-border)", color: "var(--color-text-muted)", fontSize: "var(--text-xs)", textTransform: "uppercase" }}>
-                  <th style={{ padding: "var(--space-3) var(--space-4)" }}>Fecha</th>
-                  <th style={{ padding: "var(--space-3) var(--space-4)" }}>Depósito</th>
-                  <th style={{ padding: "var(--space-3) var(--space-4)" }}>Tipo</th>
-                  <th style={{ padding: "var(--space-3) var(--space-4)" }}>Producto</th>
-                  <th style={{ padding: "var(--space-3) var(--space-4)", textAlign: "right" }}>Var.</th>
-                  <th style={{ padding: "var(--space-3) var(--space-4)", textAlign: "right" }}>Stock final</th>
-                  <th style={{ padding: "var(--space-3) var(--space-4)" }}>Notas</th>
+                <tr className={styles.tableHeaderRow}>
+                  <th className={styles.th}>Fecha</th>
+                  <th className={styles.th}>Depósito</th>
+                  <th className={styles.th}>Tipo</th>
+                  <th className={styles.th}>Producto</th>
+                  <th className={styles.thRight}>Var.</th>
+                  <th className={styles.thRight}>Stock final</th>
+                  <th className={styles.th}>Notas</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredEvents.map((e) => {
-                  const dateStr = formatEventDate(e.createdAt);
-                  const deltaLabel = e.delta > 0 ? `+${e.delta}` : `${e.delta}`;
+                {filteredEvents.map((event) => {
+                  const dateStr = formatEventDate(event.createdAt);
+                  const deltaLabel = event.delta > 0 ? `+${event.delta}` : `${event.delta}`;
                   const deltaColor =
-                    e.delta > 0
+                    event.delta > 0
                       ? "var(--color-green-text)"
-                      : e.delta < 0
+                      : event.delta < 0
                       ? "var(--color-red-text)"
                       : "var(--color-text-muted)";
 
                   return (
-                    <tr key={e.id} style={{ borderBottom: "1px solid var(--color-border)" }}>
-                      <td style={{ padding: "var(--space-3) var(--space-4)", color: "var(--color-text-muted)", whiteSpace: "nowrap" }}>
+                    <tr key={event.id} className={styles.tableRow}>
+                      <td className={styles.tdMutedNowrap}>
                         {dateStr}
                       </td>
-                      <td style={{ padding: "var(--space-3) var(--space-4)", fontWeight: "var(--weight-medium)" }}>
-                        {e.storageName}
+                      <td className={styles.tdMedium}>
+                        {event.storageName}
                       </td>
-                      <td style={{ padding: "var(--space-3) var(--space-4)", color: "var(--color-text-secondary)" }}>
-                        {STOCK_EVENT_LABELS[e.type] ?? e.type}
+                      <td className={styles.tdSecondary}>
+                        {STOCK_EVENT_LABELS[event.type] ?? event.type}
                       </td>
-                      <td style={{ padding: "var(--space-3) var(--space-4)" }}>
-                        {e.productName} <span style={{ color: "var(--color-text-muted)", fontSize: "var(--text-xs)" }}>{e.productDimension}</span>
+                      <td className={styles.tdProduct}>
+                        {event.productName} <span className={styles.productDimension}>{event.productDimension}</span>
                       </td>
-                      <td style={{ padding: "var(--space-3) var(--space-4)", textAlign: "right", fontWeight: "var(--weight-semibold)", color: deltaColor }}>
+                      <td className={styles.tdRightSemibold} style={{ color: deltaColor }}>
                         {deltaLabel}
                       </td>
-                      <td style={{ padding: "var(--space-3) var(--space-4)", textAlign: "right", fontWeight: "var(--weight-medium)" }}>
-                        {e.quantityAfter}
+                      <td className={styles.tdRightMedium}>
+                        {event.quantityAfter}
                       </td>
-                      <td style={{ padding: "var(--space-3) var(--space-4)", color: "var(--color-text-muted)", fontSize: "var(--text-xs)", maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={e.notes || ""}>
-                        {e.notes}
+                      <td className={styles.tdNotes} title={event.notes || ""}>
+                        {event.notes}
                       </td>
                     </tr>
                   );

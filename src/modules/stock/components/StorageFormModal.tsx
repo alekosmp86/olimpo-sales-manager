@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import type { StorageDTO } from "@/modules/stock/types";
+import styles from "./StorageFormModal.module.css";
 
 interface StorageFormModalProps {
   initial?: Partial<StorageDTO>;
@@ -16,55 +17,43 @@ export function StorageFormModal({ initial, onClose, onSubmit, isLoading }: Stor
   const [name, setName] = useState(initial?.name ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     if (!name.trim()) return;
     onSubmit({ name: name.trim(), description: description.trim() || undefined });
   }
 
   return (
     <Modal isOpen={true} title={initial?.id ? "Editar depósito" : "Nuevo depósito"} onClose={onClose}>
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
+      <form onSubmit={handleSubmit} className={styles.form}>
         <div>
-          <label htmlFor="storage-name" style={{ display: "block", fontSize: "var(--text-sm)", fontWeight: "var(--weight-medium)", marginBottom: "var(--space-2)" }}>
+          <label htmlFor="storage-name" className={styles.label}>
             Nombre *
           </label>
           <input
             id="storage-name"
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(event) => setName(event.target.value)}
             placeholder="Ej: Depósito Central"
             required
-            style={{
-              width: "100%",
-              padding: "var(--space-2) var(--space-3)",
-              border: "1px solid var(--color-border)",
-              borderRadius: "var(--radius-sm)",
-              fontSize: "var(--text-sm)",
-            }}
+            className={styles.input}
           />
         </div>
         <div>
-          <label htmlFor="storage-description" style={{ display: "block", fontSize: "var(--text-sm)", fontWeight: "var(--weight-medium)", marginBottom: "var(--space-2)" }}>
+          <label htmlFor="storage-description" className={styles.label}>
             Descripción
           </label>
           <input
             id="storage-description"
             type="text"
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(event) => setDescription(event.target.value)}
             placeholder="Opcional"
-            style={{
-              width: "100%",
-              padding: "var(--space-2) var(--space-3)",
-              border: "1px solid var(--color-border)",
-              borderRadius: "var(--radius-sm)",
-              fontSize: "var(--text-sm)",
-            }}
+            className={styles.input}
           />
         </div>
-        <div style={{ display: "flex", gap: "var(--space-3)", justifyContent: "flex-end" }}>
+        <div className={styles.buttonContainer}>
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancelar
           </Button>
