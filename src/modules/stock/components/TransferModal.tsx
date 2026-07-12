@@ -1,15 +1,17 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import type { StorageDTO } from "@/modules/stock/types";
 import { useStorages } from "@/modules/stock/hooks/useStorages";
 import { useStockLines } from "@/modules/stock/hooks/useStockLines";
 import { handleResponse } from "@/lib/utils/apiUtils";
-import styles from "./TransferModal.module.css";
 import { StockErrorType } from "../constants";
+import { TransferConflictModal } from "./TransferConflictModal";
+import type { ConflictWarning } from "./TransferConflictModal";
+import styles from "./TransferModal.module.css";
 
 interface TransferModalProps {
   fromStorage: StorageDTO;
@@ -25,12 +27,7 @@ export function TransferModal({ fromStorage, onClose }: TransferModalProps) {
   const [toStorageId, setToStorageId] = useState("");
   const [quantityStr, setQuantityStr] = useState("1");
   const [notes, setNotes] = useState("");
-
-  const [conflictWarning, setConflictWarning] = useState<{
-    productName: string;
-    totalReserved: number;
-    transferQuantity: number;
-  } | null>(null);
+  const [conflictWarning, setConflictWarning] = useState<ConflictWarning | null>(null);
 
   // Filter out the source storage from destinations
   const destinationStorages = useMemo(() => {
@@ -42,23 +39,22 @@ export function TransferModal({ fromStorage, onClose }: TransferModalProps) {
     return stockLines.filter((line) => line.quantity > 0);
   }, [stockLines]);
 
-  // Sync selected product once stockLines are loaded
-  useMemo(() => {
-    if (transferrableLines.length > 0 && !productId) {
-      setProductId(transferrableLines[0].productId);
-    }
+  // Derive selection values, defaulting to the first option if none is selected or selection is invalid
+  const hasSelectedProduct = useMemo(() => {
+    return transferrableLines.some((line) => line.productId === productId);
   }, [transferrableLines, productId]);
 
-  // Sync selected destination once destinations are loaded
-  useMemo(() => {
-    if (destinationStorages.length > 0 && !toStorageId) {
-      setToStorageId(destinationStorages[0].id);
-    }
+  const currentProductId = hasSelectedProduct ? productId : (transferrableLines[0]?.productId ?? "");
+
+  const hasSelectedDestination = useMemo(() => {
+    return destinationStorages.some((storage) => storage.id === toStorageId);
   }, [destinationStorages, toStorageId]);
 
+  const currentToStorageId = hasSelectedDestination ? toStorageId : (destinationStorages[0]?.id ?? "");
+
   const selectedLine = useMemo(() => {
-    return transferrableLines.find((line) => line.productId === productId);
-  }, [transferrableLines, productId]);
+    return transferrableLines.find((line) => line.productId === currentProductId);
+  }, [transferrableLines, currentProductId]);
 
   const transferMutation = useMutation({
     mutationFn: (data: {
@@ -102,8 +98,8 @@ export function TransferModal({ fromStorage, onClose }: TransferModalProps) {
   const quantity = parseInt(quantityStr, 10) || 0;
   const maxQuantity = selectedLine?.quantity ?? 0;
   const isValid =
-    productId &&
-    toStorageId &&
+    currentProductId &&
+    currentToStorageId &&
     quantity > 0 &&
     quantity <= maxQuantity &&
     !transferMutation.isPending;
@@ -114,8 +110,8 @@ export function TransferModal({ fromStorage, onClose }: TransferModalProps) {
 
     transferMutation.mutate({
       fromStorageId: fromStorage.id,
-      toStorageId,
-      productId,
+      toStorageId: currentToStorageId,
+      productId: currentProductId,
       quantity,
       force: false,
       notes: notes.trim() || undefined,
@@ -127,8 +123,8 @@ export function TransferModal({ fromStorage, onClose }: TransferModalProps) {
 
     transferMutation.mutate({
       fromStorageId: fromStorage.id,
-      toStorageId,
-      productId,
+      toStorageId: currentToStorageId,
+      productId: currentProductId,
       quantity,
       force: true,
       notes: notes.trim() || undefined,
@@ -137,40 +133,12 @@ export function TransferModal({ fromStorage, onClose }: TransferModalProps) {
 
   if (conflictWarning) {
     return (
-      <Modal
-        isOpen={true}
+      <TransferConflictModal
+        conflictWarning={conflictWarning}
         onClose={() => setConflictWarning(null)}
-        title="Advertencia de Reserva"
-        size="md"
-        footer={
-          <>
-            <Button variant="ghost" onClick={() => setConflictWarning(null)}>
-              Cancelar
-            </Button>
-            <Button variant="danger" onClick={handleConfirmConflict} loading={transferMutation.isPending}>
-              Confirmar Transferencia
-            </Button>
-          </>
-        }
-      >
-        <div className={styles.warningContainer}>
-          <p className={styles.warningBold}>
-            El depósito origen tiene reservas activas para este producto.
-          </p>
-          <p>
-            Producto: <strong>{conflictWarning.productName}</strong>
-          </p>
-          <p>
-            Stock Reservado: <strong>{conflictWarning.totalReserved} un.</strong>
-          </p>
-          <p>
-            Cantidad a Transferir: <strong>{conflictWarning.transferQuantity} un.</strong>
-          </p>
-          <p className={styles.warningAlert}>
-            Si continúas, las ventas asociadas deberán resolver el depósito de origen alternativo al momento de marcarse como Entregadas.
-          </p>
-        </div>
-      </Modal>
+        onConfirm={handleConfirmConflict}
+        isPending={transferMutation.isPending}
+      />
     );
   }
 
@@ -209,7 +177,7 @@ export function TransferModal({ fromStorage, onClose }: TransferModalProps) {
               </label>
               <select
                 id="transfer-product"
-                value={productId}
+                value={currentProductId}
                 onChange={(event) => setProductId(event.target.value)}
                 className={styles.select}
               >
@@ -232,7 +200,7 @@ export function TransferModal({ fromStorage, onClose }: TransferModalProps) {
               ) : (
                 <select
                   id="transfer-destination"
-                  value={toStorageId}
+                  value={currentToStorageId}
                   onChange={(event) => setToStorageId(event.target.value)}
                   className={styles.select}
                 >
