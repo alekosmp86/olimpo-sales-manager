@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { SearchInput } from "@/components/ui/SearchInput";
+import { Table } from "@/components/ui/Table";
 import type { StorageDTO, StockLineDTO } from "@/modules/stock/types";
 import styles from "./StorageDetailsModal.module.css";
 
@@ -21,6 +22,40 @@ export function StorageDetailsModal({ storage, lines, onClose }: StorageDetailsM
       line.product.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [lines, searchTerm]);
+
+  const columns = useMemo(() => [
+    {
+      header: "Producto",
+      render: (line: StockLineDTO) => (
+        <>
+          {line.product.name}{" "}
+          <span className={styles.productDimension}>
+            {line.product.dimension.label}
+          </span>
+        </>
+      ),
+    },
+    {
+      header: "Reservado",
+      className: styles.tdRight,
+      render: (line: StockLineDTO) =>
+        line.reserved > 0 ? (
+          <span className={styles.reserved}>{line.reserved} un.</span>
+        ) : (
+          "—"
+        ),
+    },
+    {
+      header: "Disponible",
+      className: styles.tdRight,
+      render: (line: StockLineDTO) => `${line.quantity - line.reserved} un.`,
+    },
+    {
+      header: "Físico",
+      className: styles.tdRight,
+      render: (line: StockLineDTO) => <strong>{line.quantity} un.</strong>,
+    },
+  ], []);
 
   return (
     <Modal
@@ -42,49 +77,12 @@ export function StorageDetailsModal({ storage, lines, onClose }: StorageDetailsM
           showIcon={true}
         />
 
-        <div className={styles.tableContainer}>
-          <table className={styles.table}>
-            <thead>
-              <tr className={styles.tableHeaderRow}>
-                <th className={styles.th}>Producto</th>
-                <th className={styles.thRight}>Reservado</th>
-                <th className={styles.thRight}>Disponible</th>
-                <th className={styles.thRight}>Físico</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredLines.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className={styles.noProducts}>
-                    No se encontraron productos en stock
-                  </td>
-                </tr>
-              ) : (
-                filteredLines.map((line) => {
-                  const available = line.quantity - line.reserved;
-                  return (
-                    <tr key={line.id} className={styles.tableRow}>
-                      <td className={styles.td}>
-                        {line.product.name} <span className={styles.productDimension}>{line.product.dimension.label}</span>
-                      </td>
-                      <td className={styles.tdRight}>
-                        {line.reserved > 0 ? (
-                          <span className={styles.reserved}>{line.reserved} un.</span>
-                        ) : (
-                          "-"
-                        )}
-                      </td>
-                      <td className={styles.tdRight}>{available} un.</td>
-                      <td className={styles.tdRight}>
-                        <strong>{line.quantity} un.</strong>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+        <Table
+          items={filteredLines}
+          columns={columns}
+          emptyMessage="No se encontraron productos en stock"
+          keyExtractor={(line) => line.id}
+        />
       </div>
     </Modal>
   );

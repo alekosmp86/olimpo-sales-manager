@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { SearchInput } from "@/components/ui/SearchInput";
+import { Table } from "@/components/ui/Table";
 import type { StorageDTO, StockLineDTO } from "@/modules/stock/types";
 import type { Product } from "@/lib/types";
 import { handleResponse } from "@/lib/utils/apiUtils";
@@ -97,6 +98,39 @@ export function CountModal({ storage, currentLines, onClose }: CountModalProps) 
     });
   }
 
+  const columns = useMemo(() => [
+    {
+      header: "Producto",
+      render: (product: Product) => (
+        <>
+          {product.name}{" "}
+          <span className={styles.productDimension}>
+            {product.dimension.label}
+          </span>
+        </>
+      ),
+    },
+    {
+      header: "Stock actual",
+      className: styles.tdCurrentStock,
+      render: (product: Product) => currentStockMap.get(product.id) ?? 0,
+    },
+    {
+      header: "Nuevo conteo",
+      className: styles.tdNewCount,
+      render: (product: Product) => (
+        <input
+          type="number"
+          min="0"
+          value={quantities[product.id] ?? 0}
+          onChange={(event) => handleQuantityChange(product.id, event.target.value)}
+          aria-label={`Nuevo conteo para ${product.name} ${product.dimension.label}`}
+          className={styles.quantityInput}
+        />
+      ),
+    },
+  ], [currentStockMap, quantities]);
+
   return (
     <Modal
       isOpen={true}
@@ -126,52 +160,12 @@ export function CountModal({ storage, currentLines, onClose }: CountModalProps) 
           showIcon={true}
         />
 
-        <div className={styles.tableContainer}>
-          <table className={styles.table}>
-            <thead>
-              <tr className={styles.tableHeaderRow}>
-                <th className={styles.thProduct}>Producto</th>
-                <th className={styles.thCurrentStock}>Stock actual</th>
-                <th className={styles.thNewCount}>Nuevo conteo</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProducts.length === 0 ? (
-                <tr>
-                  <td colSpan={3} className={styles.noProductsCell}>
-                    No se encontraron productos
-                  </td>
-                </tr>
-              ) : (
-                filteredProducts.map((product) => {
-                  const currentQty = currentStockMap.get(product.id) ?? 0;
-                  const newQty = quantities[product.id] ?? 0;
-
-                  return (
-                    <tr key={product.id} className={styles.tableRow}>
-                      <td className={styles.tdProduct}>
-                        {product.name} <span className={styles.productDimension}>{product.dimension.label}</span>
-                      </td>
-                      <td className={styles.tdCurrentStock}>
-                        {currentQty}
-                      </td>
-                      <td className={styles.tdNewCount}>
-                        <input
-                          type="number"
-                          min="0"
-                          value={newQty}
-                          onChange={(event) => handleQuantityChange(product.id, event.target.value)}
-                          aria-label={`Nuevo conteo para ${product.name} ${product.dimension.label}`}
-                          className={styles.quantityInput}
-                        />
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+        <Table
+          items={filteredProducts}
+          columns={columns}
+          emptyMessage="No se encontraron productos"
+          keyExtractor={(product) => product.id}
+        />
 
         <div>
           <label htmlFor="count-notes" className={styles.notesLabel}>
