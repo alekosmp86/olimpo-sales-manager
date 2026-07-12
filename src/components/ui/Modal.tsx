@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, ReactNode } from "react";
+import { useEffect, useRef, ReactNode, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import styles from "./Modal.module.css";
 
@@ -14,6 +14,8 @@ interface ModalProps {
   bodyClassName?: string;
 }
 
+const emptySubscribe = () => () => {};
+
 export function Modal({
   isOpen,
   onClose,
@@ -26,12 +28,18 @@ export function Modal({
   const backdropRef = useRef<HTMLDialogElement>(null);
   const onCloseRef = useRef(onClose);
 
+  const isClient = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
+
   useEffect(() => {
     onCloseRef.current = onClose;
   }, [onClose]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !isClient) return;
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onCloseRef.current();
     };
@@ -41,9 +49,10 @@ export function Modal({
       document.removeEventListener("keydown", handleKey);
       document.body.style.overflow = "";
     };
-  }, [isOpen]);
+  }, [isOpen, isClient]);
 
   useEffect(() => {
+    if (!isClient) return;
     const dialog = backdropRef.current;
     if (!dialog) return;
     const handleClick = (e: MouseEvent) => {
@@ -53,9 +62,9 @@ export function Modal({
     return () => {
       dialog.removeEventListener("click", handleClick);
     };
-  }, [isOpen]);
+  }, [isOpen, isClient]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !isClient || typeof window === "undefined") return null;
 
   return createPortal(
     <dialog

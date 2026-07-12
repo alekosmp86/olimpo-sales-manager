@@ -264,6 +264,10 @@
   border-bottom: 1px solid var(--color-border);
 }
 
+.td:focus-within {
+  z-index: 5 !important;
+}
+
 /* Column sizes */
 .th[data-col="select"], .td[data-col="select"] { width: calc(48px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(48px * var(--column-scale, var(--grid-zoom, 1))); }
 .th[data-col="actions"], .td[data-col="actions"] { width: calc(80px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(80px * var(--column-scale, var(--grid-zoom, 1))); }
