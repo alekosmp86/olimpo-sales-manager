@@ -9,6 +9,7 @@ import { useStorages } from "@/modules/stock/hooks/useStorages";
 import { useStockLines } from "@/modules/stock/hooks/useStockLines";
 import { handleResponse } from "@/lib/utils/apiUtils";
 import styles from "./TransferModal.module.css";
+import { StockErrorType } from "../constants";
 
 interface TransferModalProps {
   fromStorage: StorageDTO;
@@ -75,8 +76,8 @@ export function TransferModal({ fromStorage, onClose }: TransferModalProps) {
       }).then(async (response) => {
         if (response.status === 409) {
           const errData = await response.json();
-          if (errData.error === "RESERVATION_CONFLICT") {
-            throw { type: "RESERVATION_CONFLICT", conflict: errData.conflict };
+          if (errData.error === StockErrorType.RESERVATION_CONFLICT) {
+            throw { type: StockErrorType.RESERVATION_CONFLICT, conflict: errData.conflict };
           }
           throw new Error(errData.error || "Conflict occurred");
         }
@@ -87,7 +88,7 @@ export function TransferModal({ fromStorage, onClose }: TransferModalProps) {
       onClose();
     },
     onError: (err: any) => {
-      if (err.type === "RESERVATION_CONFLICT") {
+      if (err.type === StockErrorType.RESERVATION_CONFLICT) {
         setConflictWarning(err.conflict);
       } else {
         alert(err.message || "Error al realizar la transferencia.");

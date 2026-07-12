@@ -3,16 +3,15 @@
 import { useState } from "react";
 import { useStorages } from "@/modules/stock/hooks/useStorages";
 import { Plus } from "lucide-react";
+import { StockPageTab } from "@/modules/stock/constants";
 import styles from "./StockPage.module.css";
 import { StockLedger } from "./StockLedger";
 import { StorageFormModal } from "./StorageFormModal";
 import { StorageCard } from "./StorageCard";
 
-type Tab = "depositos" | "historial";
-
 export function StockPage() {
   const { storages, isLoading, createMutation, updateMutation, deleteMutation } = useStorages();
-  const [activeTab, setActiveTab] = useState<Tab>("depositos");
+  const [activeTab, setActiveTab] = useState<StockPageTab>(StockPageTab.DEPOSITOS);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   return (
@@ -30,24 +29,24 @@ export function StockPage() {
         <button
           type="button"
           role="tab"
-          aria-selected={activeTab === "depositos"}
-          className={[styles.tab, activeTab === "depositos" ? styles.activeTab : ""].join(" ")}
-          onClick={() => setActiveTab("depositos")}
+          aria-selected={activeTab === StockPageTab.DEPOSITOS}
+          className={[styles.tab, activeTab === StockPageTab.DEPOSITOS ? styles.activeTab : ""].join(" ")}
+          onClick={() => setActiveTab(StockPageTab.DEPOSITOS)}
         >
           Depósitos
         </button>
         <button
           type="button"
           role="tab"
-          aria-selected={activeTab === "historial"}
-          className={[styles.tab, activeTab === "historial" ? styles.activeTab : ""].join(" ")}
-          onClick={() => setActiveTab("historial")}
+          aria-selected={activeTab === StockPageTab.HISTORIAL}
+          className={[styles.tab, activeTab === StockPageTab.HISTORIAL ? styles.activeTab : ""].join(" ")}
+          onClick={() => setActiveTab(StockPageTab.HISTORIAL)}
         >
           Historial
         </button>
       </div>
 
-      {activeTab === "depositos" && (
+      {activeTab === StockPageTab.DEPOSITOS && (
         <>
           {isLoading ? (
             <p className={styles.emptyState}>Cargando depósitos...</p>
@@ -82,7 +81,7 @@ export function StockPage() {
         </>
       )}
 
-      {activeTab === "historial" && <StockLedger />}
+      {activeTab === StockPageTab.HISTORIAL && <StockLedger />}
 
       {showCreateModal && (
         <StorageFormModal

@@ -6,6 +6,8 @@ import { useStorages } from "@/modules/stock/hooks/useStorages";
 import { STOCK_EVENT_LABELS } from "@/modules/stock/constants";
 import { MONTH_ABBRS } from "@/lib/dateUtils";
 import { SearchInput } from "@/components/ui/SearchInput";
+import { Table } from "@/components/ui/Table";
+import type { StockEventDTO } from "@/modules/stock/types";
 import styles from "./StockLedger.module.css";
 
 function formatEventDate(dateStr: string): string {
@@ -33,6 +35,63 @@ export function StockLedger() {
       event.productName.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [data?.events, searchTerm]);
+
+  const columns = useMemo(() => [
+    {
+      header: "Fecha",
+      className: styles.tdMutedNowrap,
+      render: (event: StockEventDTO) => formatEventDate(event.createdAt),
+    },
+    {
+      header: "Depósito",
+      className: styles.tdMedium,
+      render: (event: StockEventDTO) => event.storageName,
+    },
+    {
+      header: "Tipo",
+      className: styles.tdSecondary,
+      render: (event: StockEventDTO) => STOCK_EVENT_LABELS[event.type] ?? event.type,
+    },
+    {
+      header: "Producto",
+      render: (event: StockEventDTO) => (
+        <>
+          {event.productName}{" "}
+          <span className={styles.productDimension}>
+            {event.productDimension}
+          </span>
+        </>
+      ),
+    },
+    {
+      header: "Var.",
+      className: styles.tdRightSemibold,
+      render: (event: StockEventDTO) => {
+        const deltaLabel = event.delta > 0 ? `+${event.delta}` : `${event.delta}`;
+        const deltaColor =
+          event.delta > 0
+            ? "var(--color-green-text)"
+            : event.delta < 0
+            ? "var(--color-red-text)"
+            : "var(--color-text-muted)";
+        return <span style={{ color: deltaColor }}>{deltaLabel}</span>;
+      },
+    },
+    {
+      header: "Stock final",
+      className: styles.tdRightMedium,
+      render: (event: StockEventDTO) => event.quantityAfter,
+    },
+    {
+      header: "Notas",
+      className: styles.tdNotes,
+      render: (event: StockEventDTO) => (
+        <span title={event.notes || ""}>
+          {event.notes}
+        </span>
+      ),
+    },
+  ], []);
 
   return (
     <div className={styles.container}>
@@ -74,64 +133,13 @@ export function StockLedger() {
           <p className={styles.statusText}>
             Cargando historial...
           </p>
-        ) : filteredEvents.length === 0 ? (
-          <p className={styles.statusText}>
-            No se encontraron movimientos.
-          </p>
         ) : (
-          <div className={styles.tableWrapper}>
-            <table className={styles.table}>
-              <thead>
-                <tr className={styles.tableHeaderRow}>
-                  <th className={styles.th}>Fecha</th>
-                  <th className={styles.th}>Depósito</th>
-                  <th className={styles.th}>Tipo</th>
-                  <th className={styles.th}>Producto</th>
-                  <th className={styles.thRight}>Var.</th>
-                  <th className={styles.thRight}>Stock final</th>
-                  <th className={styles.th}>Notas</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredEvents.map((event) => {
-                  const dateStr = formatEventDate(event.createdAt);
-                  const deltaLabel = event.delta > 0 ? `+${event.delta}` : `${event.delta}`;
-                  const deltaColor =
-                    event.delta > 0
-                      ? "var(--color-green-text)"
-                      : event.delta < 0
-                      ? "var(--color-red-text)"
-                      : "var(--color-text-muted)";
-
-                  return (
-                    <tr key={event.id} className={styles.tableRow}>
-                      <td className={styles.tdMutedNowrap}>
-                        {dateStr}
-                      </td>
-                      <td className={styles.tdMedium}>
-                        {event.storageName}
-                      </td>
-                      <td className={styles.tdSecondary}>
-                        {STOCK_EVENT_LABELS[event.type] ?? event.type}
-                      </td>
-                      <td className={styles.tdProduct}>
-                        {event.productName} <span className={styles.productDimension}>{event.productDimension}</span>
-                      </td>
-                      <td className={styles.tdRightSemibold} style={{ color: deltaColor }}>
-                        {deltaLabel}
-                      </td>
-                      <td className={styles.tdRightMedium}>
-                        {event.quantityAfter}
-                      </td>
-                      <td className={styles.tdNotes} title={event.notes || ""}>
-                        {event.notes}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <Table
+            items={filteredEvents}
+            columns={columns}
+            emptyMessage="No se encontraron movimientos."
+            keyExtractor={(event) => event.id}
+          />
         )}
       </div>
     </div>

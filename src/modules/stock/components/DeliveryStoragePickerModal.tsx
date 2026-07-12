@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
+import { AlertTriangle, AlertCircle } from "lucide-react";
 import { useStorages } from "@/modules/stock/hooks/useStorages";
 import type { UnresolvedDeliveryItem, DeliveryItemOverride } from "@/modules/stock/types";
+import { UnresolvedReason } from "@/modules/stock/constants";
 import styles from "./DeliveryStoragePickerModal.module.css";
 
 interface DeliveryStoragePickerModalProps {
@@ -86,13 +88,13 @@ export function DeliveryStoragePickerModal({
               </div>
 
               <div className={styles.reasonText}>
-                {item.reason === "no_reservation" ? (
+                {item.reason === UnresolvedReason.NO_RESERVATION ? (
                   <span className={styles.amberText}>
-                    ⚠️ Sin depósito reservado (Venta importada)
+                    <AlertTriangle size={14} /> Sin depósito reservado (Venta importada)
                   </span>
                 ) : (
                   <span className={styles.redText}>
-                    ❌ El depósito reservado no tiene suficiente stock físico
+                    <AlertCircle size={14} /> El depósito reservado no tiene suficiente stock físico
                   </span>
                 )}
               </div>
