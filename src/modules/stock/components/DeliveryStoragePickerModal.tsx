@@ -8,9 +8,10 @@ import { useStorages } from "@/modules/stock/hooks/useStorages";
 import type { UnresolvedDeliveryItem, DeliveryItemOverride } from "@/modules/stock/types";
 import { UnresolvedReason } from "@/modules/stock/constants";
 import styles from "./DeliveryStoragePickerModal.module.css";
+import { Sale } from "@/lib/types";
 
 interface DeliveryStoragePickerModalProps {
-  sale: any;
+  sale: Sale;
   unresolvedItems: UnresolvedDeliveryItem[];
   onClose: () => void;
   onConfirm: (overrides: DeliveryItemOverride[]) => void;
