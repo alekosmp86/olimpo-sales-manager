@@ -9,6 +9,7 @@ import { DeliveryStatus } from "@/lib/constants/statuses";
 import { handleResponse } from "@/lib/utils/apiUtils";
 import { Sale } from "@/lib/types";
 import { StockErrorType } from "../../constants";
+import { useConfirm } from "@/components/ui/Confirm";
 
 interface DeliverPayload {
   saleId: string;
@@ -19,12 +20,27 @@ interface DeliverResult {
   ok: boolean;
 }
 
+interface UnresolvedItemsError {
+  type: typeof StockErrorType.UNRESOLVED_ITEMS;
+  unresolvedItems: UnresolvedDeliveryItem[];
+}
+
+function isUnresolvedItemsError(err: unknown): err is UnresolvedItemsError {
+  return (
+    err !== null &&
+    typeof err === "object" &&
+    "type" in err &&
+    err.type === StockErrorType.UNRESOLVED_ITEMS
+  );
+}
+
 export function withStockDeliveryDropdown(DropdownComponent: typeof DeliveryDropdown) {
   return function StockDeliveryDropdown(
     props: React.ComponentProps<typeof DeliveryDropdown> & { sale: Sale }
   ) {
     const { sale, ...restProps } = props;
     const queryClient = useQueryClient();
+    const confirm = useConfirm();
     const [unresolvedItems, setUnresolvedItems] = useState<UnresolvedDeliveryItem[] | null>(null);
     const [resolvePromise, setResolvePromise] = useState<{
       resolve: (value: boolean) => void;
@@ -48,23 +64,30 @@ export function withStockDeliveryDropdown(DropdownComponent: typeof DeliveryDrop
         }),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["stock"] });
+        queryClient.invalidateQueries({ queryKey: ["sales"] });
       },
     });
 
-    async function handleBeforeChange(newValue: any): Promise<boolean> {
+    async function handleBeforeChange(newValue: DeliveryStatus): Promise<boolean> {
       if (newValue !== DeliveryStatus.DELIVERED) return true;
 
       try {
         await deliverMutation.mutateAsync({ saleId: sale.id });
         return true;
-      } catch (err: any) {
-        if (err.type === StockErrorType.UNRESOLVED_ITEMS) {
+      } catch (err: unknown) {
+        if (isUnresolvedItemsError(err)) {
           setUnresolvedItems(err.unresolvedItems);
           return new Promise<boolean>((resolve) => {
             setResolvePromise({ resolve });
           });
         }
-        alert(err.message || "Error al procesar la entrega.");
+        const message = err instanceof Error ? err.message : "Error al procesar la entrega.";
+        confirm({
+          title: "Error",
+          message,
+          onlyConfirm: true,
+          type: "danger",
+        });
         return false;
       }
     }
@@ -75,8 +98,14 @@ export function withStockDeliveryDropdown(DropdownComponent: typeof DeliveryDrop
         setUnresolvedItems(null);
         resolvePromise?.resolve(true);
         setResolvePromise(null);
-      } catch (err: any) {
-        alert(err.message || "Error al confirmar entrega.");
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Error al confirmar entrega.";
+        confirm({
+          title: "Error",
+          message,
+          onlyConfirm: true,
+          type: "danger",
+        });
       }
     }
 

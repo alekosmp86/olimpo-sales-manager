@@ -56,6 +56,13 @@ export interface StockEventDTO {
   createdAt: string;
 }
 
+export interface CountWarning {
+  productId: string;
+  productName: string;
+  newQuantity: number;
+  reserved: number;
+}
+
 // ─── Reservations ─────────────────────────────────────────────────────────────
 
 export interface ReservationDTO {

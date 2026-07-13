@@ -6,9 +6,10 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { Table } from "@/components/ui/Table";
-import type { StorageDTO, StockLineDTO } from "@/modules/stock/types";
+import type { StorageDTO, StockLineDTO, CountWarning } from "@/modules/stock/types";
 import type { Product } from "@/lib/types";
 import { handleResponse } from "@/lib/utils/apiUtils";
+import { useConfirm } from "@/components/ui/Confirm";
 import styles from "./CountModal.module.css";
 
 interface CountModalProps {
@@ -21,6 +22,7 @@ export function CountModal({ storage, currentLines, onClose }: CountModalProps) 
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [notes, setNotes] = useState("");
+  const confirm = useConfirm();
 
   const { data: products = [] } = useQuery<Product[]>({
     queryKey: ["products"],
@@ -51,16 +53,20 @@ export function CountModal({ storage, currentLines, onClose }: CountModalProps) 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-      }).then((response) => handleResponse<{ ok: boolean; warnings: any[] }>(response)),
+      }).then((response) => handleResponse<{ ok: boolean; warnings: CountWarning[] }>(response)),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["stock"] });
+      queryClient.invalidateQueries({ queryKey: ["sales"] });
       if (data.warnings && data.warnings.length > 0) {
         const warningMsg = data.warnings
           .map((warning) => `- ${warning.productName}: se fijó en ${warning.newQuantity} pero hay ${warning.reserved} reservadas.`)
           .join("\n");
-        alert(
-          `Conteo guardado con advertencias de reservas afectadas:\n\n${warningMsg}`
-        );
+        confirm({
+          title: "Advertencia",
+          message: `Conteo guardado con advertencias de reservas afectadas:\n\n${warningMsg}`,
+          onlyConfirm: true,
+          type: "warning",
+        });
       }
       onClose();
     },

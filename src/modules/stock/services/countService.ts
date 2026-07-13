@@ -1,17 +1,11 @@
 import "server-only";
 import { prisma } from "@/lib/prisma";
 import { writeStockEvent } from "./stockEventService";
+import { CountWarning } from "../types";
 
 export interface CountEntry {
   productId: string;
   quantity: number;
-}
-
-export interface CountWarning {
-  productId: string;
-  productName: string;
-  newQuantity: number;
-  reserved: number;
 }
 
 /**

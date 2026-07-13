@@ -11,7 +11,24 @@ import { handleResponse } from "@/lib/utils/apiUtils";
 import { StockErrorType } from "../constants";
 import { TransferConflictModal } from "./TransferConflictModal";
 import type { ConflictWarning } from "./TransferConflictModal";
+import { useConfirm } from "@/components/ui/Confirm";
 import styles from "./TransferModal.module.css";
+
+interface ReservationConflictError {
+  type: typeof StockErrorType.RESERVATION_CONFLICT;
+  conflict: ConflictWarning;
+}
+
+type TransferError = Error | ReservationConflictError;
+
+function isReservationConflictError(err: unknown): err is ReservationConflictError {
+  return (
+    err !== null &&
+    typeof err === "object" &&
+    "type" in err &&
+    err.type === StockErrorType.RESERVATION_CONFLICT
+  );
+}
 
 interface TransferModalProps {
   fromStorage: StorageDTO;
@@ -22,6 +39,7 @@ export function TransferModal({ fromStorage, onClose }: TransferModalProps) {
   const queryClient = useQueryClient();
   const { storages } = useStorages();
   const { data: stockLines = [] } = useStockLines(fromStorage.id);
+  const confirm = useConfirm();
 
   const [productId, setProductId] = useState("");
   const [toStorageId, setToStorageId] = useState("");
@@ -56,15 +74,15 @@ export function TransferModal({ fromStorage, onClose }: TransferModalProps) {
     return transferrableLines.find((line) => line.productId === currentProductId);
   }, [transferrableLines, currentProductId]);
 
-  const transferMutation = useMutation({
-    mutationFn: (data: {
-      fromStorageId: string;
-      toStorageId: string;
-      productId: string;
-      quantity: number;
-      force?: boolean;
-      notes?: string;
-    }) =>
+  const transferMutation = useMutation<{ ok: boolean }, TransferError, {
+    fromStorageId: string;
+    toStorageId: string;
+    productId: string;
+    quantity: number;
+    force?: boolean;
+    notes?: string;
+  }>({
+    mutationFn: (data) =>
       fetch("/api/stock/transfer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -81,13 +99,20 @@ export function TransferModal({ fromStorage, onClose }: TransferModalProps) {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stock"] });
+      queryClient.invalidateQueries({ queryKey: ["sales"] });
       onClose();
     },
-    onError: (err: any) => {
-      if (err.type === StockErrorType.RESERVATION_CONFLICT) {
+    onError: (err) => {
+      if (isReservationConflictError(err)) {
         setConflictWarning(err.conflict);
       } else {
-        alert(err.message || "Error al realizar la transferencia.");
+        const message = err instanceof Error ? err.message : "Error al realizar la transferencia.";
+        confirm({
+          title: "Error",
+          message,
+          onlyConfirm: true,
+          type: "danger",
+        });
       }
     },
     meta: {

@@ -83,6 +83,7 @@ export function useSales(year: number, month: number, search: string) {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["sales"] });
+      queryClient.invalidateQueries({ queryKey: ["stock"] });
     },
     meta: {
       successMessage: "Venta creada con éxito",
@@ -124,6 +125,7 @@ export function useSales(year: number, month: number, search: string) {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["sales"] });
+      queryClient.invalidateQueries({ queryKey: ["stock"] });
     },
     meta: {
       successMessage: "Venta guardada con éxito",
@@ -156,6 +158,7 @@ export function useSales(year: number, month: number, search: string) {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["sales"] });
+      queryClient.invalidateQueries({ queryKey: ["stock"] });
     },
     meta: {
       successMessage: "Venta(s) eliminada(s) con éxito",
@@ -213,6 +216,7 @@ export function useSales(year: number, month: number, search: string) {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["sales"] });
+      queryClient.invalidateQueries({ queryKey: ["stock"] });
     },
     meta: {
       successMessage: "Venta duplicada con éxito",
