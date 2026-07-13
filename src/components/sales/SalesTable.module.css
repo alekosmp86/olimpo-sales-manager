@@ -154,6 +154,8 @@
     z-index: 2;
     background-color: var(--color-surface);
     border-right: 2px solid var(--color-border-strong);
+    width: calc(160px * var(--column-scale, var(--grid-zoom, 1))) !important;
+    min-width: calc(160px * var(--column-scale, var(--grid-zoom, 1))) !important;
   }
 
   .th[data-col="clientName"] {
