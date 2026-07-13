@@ -64,6 +64,7 @@ export function withStockDeliveryDropdown(DropdownComponent: typeof DeliveryDrop
         }),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["stock"] });
+        queryClient.invalidateQueries({ queryKey: ["sales"] });
       },
     });
 

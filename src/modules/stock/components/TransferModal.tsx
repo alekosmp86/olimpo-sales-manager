@@ -99,6 +99,7 @@ export function TransferModal({ fromStorage, onClose }: TransferModalProps) {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stock"] });
+      queryClient.invalidateQueries({ queryKey: ["sales"] });
       onClose();
     },
     onError: (err) => {

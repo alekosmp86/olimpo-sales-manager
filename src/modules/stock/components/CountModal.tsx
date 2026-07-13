@@ -56,6 +56,7 @@ export function CountModal({ storage, currentLines, onClose }: CountModalProps) 
       }).then((response) => handleResponse<{ ok: boolean; warnings: CountWarning[] }>(response)),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["stock"] });
+      queryClient.invalidateQueries({ queryKey: ["sales"] });
       if (data.warnings && data.warnings.length > 0) {
         const warningMsg = data.warnings
           .map((warning) => `- ${warning.productName}: se fijó en ${warning.newQuantity} pero hay ${warning.reserved} reservadas.`)
