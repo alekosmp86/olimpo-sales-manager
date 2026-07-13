@@ -6,6 +6,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { Table } from "@/components/ui/Table";
+import { Stepper } from "@/components/ui/Stepper";
 import type { StorageDTO, StockLineDTO, CountWarning } from "@/modules/stock/types";
 import type { Product } from "@/lib/types";
 import { handleResponse } from "@/lib/utils/apiUtils";
@@ -35,8 +36,8 @@ export function CountModal({ storage, currentLines, onClose }: CountModalProps) 
   }, [currentLines]);
 
   // Track the user's manual inputs
-  const [quantities, setQuantities] = useState<Record<string, number>>(() => {
-    const initial: Record<string, number> = {};
+  const [quantities, setQuantities] = useState<Record<string, number | "">>(() => {
+    const initial: Record<string, number | ""> = {};
     currentLines.forEach((line) => {
       initial[line.productId] = line.quantity;
     });
@@ -82,19 +83,11 @@ export function CountModal({ storage, currentLines, onClose }: CountModalProps) 
     );
   }, [products, searchTerm]);
 
-  function handleQuantityChange(productId: string, value: string) {
-    const parsed = parseInt(value, 10);
-    setQuantities((prev) => ({
-      ...prev,
-      [productId]: isNaN(parsed) || parsed < 0 ? 0 : parsed,
-    }));
-  }
-
   function handleSave() {
     // Only send entries that have been defined/edited or have non-zero stock
     const entries = Object.entries(quantities).map(([productId, quantity]) => ({
       productId,
-      quantity,
+      quantity: quantity === "" ? 0 : quantity,
     }));
 
     countMutation.mutate({
@@ -125,13 +118,15 @@ export function CountModal({ storage, currentLines, onClose }: CountModalProps) 
       header: "Nuevo conteo",
       className: styles.tdNewCount,
       render: (product: Product) => (
-        <input
-          type="number"
-          min="0"
+        <Stepper
           value={quantities[product.id] ?? 0}
-          onChange={(event) => handleQuantityChange(product.id, event.target.value)}
-          aria-label={`Nuevo conteo para ${product.name} ${product.dimension.label}`}
-          className={styles.quantityInput}
+          onChange={(val) =>
+            setQuantities((prev) => ({
+              ...prev,
+              [product.id]: val,
+            }))
+          }
+          ariaLabel={`Nuevo conteo para ${product.name} ${product.dimension.label}`}
         />
       ),
     },
