@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef, useEffect, useSyncExternalStore } from "react";
+import { useState, useCallback, useMemo } from "react";
 import type { RowSelectionState } from "@tanstack/react-table";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useSales } from "@/hooks/useSales";
@@ -10,39 +10,6 @@ import { MIN_ZOOM, MAX_ZOOM } from "@/components/sales/constants";
 import { HighlightColor } from "@/lib/constants/colors";
 import type { Sale } from "@/lib/types";
 
-const listeners = new Set<() => void>();
-function emitChange() {
-  for (const listener of listeners) {
-    listener();
-  }
-}
-
-const highlightsStore = {
-  subscribe(listener: () => void) {
-    listeners.add(listener);
-    return () => listeners.delete(listener);
-  },
-  getSnapshot() {
-    if (typeof window === "undefined") return "{}";
-    let data = localStorage.getItem("sale-name-highlights:v1");
-    if (!data) {
-      const oldData = localStorage.getItem("sale-name-highlights");
-      if (oldData) {
-        localStorage.setItem("sale-name-highlights:v1", oldData);
-        localStorage.removeItem("sale-name-highlights");
-        data = oldData;
-      }
-    }
-    return data || "{}";
-  },
-  getServerSnapshot() {
-    return "{}";
-  },
-  setHighlights(next: Record<string, HighlightColor>) {
-    localStorage.setItem("sale-name-highlights:v1", JSON.stringify(next));
-    emitChange();
-  }
-};
 
 export function useSalesTableState() {
   // ── UI state ──────────────────────────────────────────────────────────────
@@ -77,29 +44,21 @@ export function useSalesTableState() {
   const { mutate: createSale } = createMutation;
   const { mutate: deleteSales } = deleteMutation;
 
-  // ── Stable callbacks using refs to prevent child re-renders on mutation changes ──
-  const updateMutationRef = useRef(updateMutation);
-  const duplicateMutationRef = useRef(duplicateMutation);
-
-  useEffect(() => {
-    updateMutationRef.current = updateMutation;
-    duplicateMutationRef.current = duplicateMutation;
-  }, [updateMutation, duplicateMutation]);
-
   const handleUpdate = useCallback(
     (payload: { id: string; data: Record<string, unknown> }) => {
-      updateMutationRef.current.mutate(payload);
+      updateMutation.mutate(payload);
     },
-    []
+    [updateMutation.mutate]
   );
+
   const handleDuplicate = useCallback((saleId: string) => {
-    duplicateMutationRef.current.mutate(saleId, {
+    duplicateMutation.mutate(saleId, {
       onSuccess: (newSale: Sale) => {
         setNewRowId(newSale.id);
         setTimeout(() => setNewRowId(null), 1000);
       },
     });
-  }, []);
+  }, [duplicateMutation.mutate]);
 
   const handleOpenProducts = useCallback(
     (saleId: string) => setProductsModal({ saleId }),
@@ -134,48 +93,18 @@ export function useSalesTableState() {
     });
   }, [rowSelection, deleteSales, confirm]);
 
-  const highlightsJson = useSyncExternalStore(
-    highlightsStore.subscribe,
-    highlightsStore.getSnapshot,
-    highlightsStore.getServerSnapshot
-  );
-
   const highlights = useMemo(() => {
-    let localMap: Record<string, HighlightColor> = {};
-    try {
-      localMap = JSON.parse(highlightsJson) as Record<string, HighlightColor>;
-    } catch {
-      localMap = {};
-    }
-
-    const mergedMap = { ...localMap };
+    const map: Record<string, HighlightColor> = {};
     sales.forEach((sale) => {
       if (sale.highlightColor) {
-        mergedMap[sale.id] = sale.highlightColor as HighlightColor;
-      } else {
-        delete mergedMap[sale.id];
+        map[sale.id] = sale.highlightColor as HighlightColor;
       }
     });
-
-    const nextJson = JSON.stringify(mergedMap);
-    if (nextJson !== highlightsJson) {
-      setTimeout(() => highlightsStore.setHighlights(mergedMap), 0);
-    }
-
-    return mergedMap;
-  }, [highlightsJson, sales]);
+    return map;
+  }, [sales]);
 
   const handleHighlight = useCallback((saleId: string, color: HighlightColor | null) => {
     handleUpdate({ id: saleId, data: { highlightColor: color } });
-
-    const prev = JSON.parse(highlightsStore.getSnapshot());
-    const next = { ...prev };
-    if (color) {
-      next[saleId] = color;
-    } else {
-      delete next[saleId];
-    }
-    highlightsStore.setHighlights(next);
   }, [handleUpdate]);
 
   const filteredSales = sales;
