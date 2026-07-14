@@ -93,9 +93,7 @@ export function SalesTable() {
 
       <div className={styles.statusBar}>
         <span>
-          {filteredSales.length} de {sales.length} venta
-          {sales.length !== 1 ? "s" : ""}
-          {debouncedSearch ? " (búsqueda)" : ""}
+          {sales.length} {sales.length !== 1 ? "ventas" : "venta"}
         </span>
         {selectedIds.length > 0 && (
           <span>
