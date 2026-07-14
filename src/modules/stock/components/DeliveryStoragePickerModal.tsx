@@ -3,10 +3,8 @@
 import { useState } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
-import { AlertTriangle, AlertCircle } from "lucide-react";
-import { useStorages } from "@/modules/stock/hooks/useStorages";
 import type { UnresolvedDeliveryItem, DeliveryItemOverride } from "@/modules/stock/types";
-import { UnresolvedReason } from "@/modules/stock/constants";
+import { UnresolvedItemCard } from "./UnresolvedItemCard";
 import styles from "./DeliveryStoragePickerModal.module.css";
 import { Sale } from "@/lib/types";
 
@@ -23,7 +21,6 @@ export function DeliveryStoragePickerModal({
   onClose,
   onConfirm,
 }: DeliveryStoragePickerModalProps) {
-  const { storages } = useStorages();
   const [selections, setSelections] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
     unresolvedItems.forEach((item) => {
@@ -31,8 +28,6 @@ export function DeliveryStoragePickerModal({
     });
     return initial;
   });
-
-  const activeStorages = storages.filter((storage) => storage.isActive);
 
   function handleSelect(saleItemId: string, storageId: string) {
     setSelections((prev) => ({ ...prev, [saleItemId]: storageId }));
@@ -57,6 +52,7 @@ export function DeliveryStoragePickerModal({
       onClose={onClose}
       title="Resolver Origen de Stock"
       size="md"
+      bodyClassName={styles.modalBody}
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>
@@ -75,50 +71,12 @@ export function DeliveryStoragePickerModal({
 
         <div className={styles.itemsList}>
           {unresolvedItems.map((item) => (
-            <div
+            <UnresolvedItemCard
               key={item.saleItemId}
-              className={styles.itemCard}
-            >
-              <div className={styles.itemHeader}>
-                <span className={styles.productName}>
-                  {item.productName}
-                </span>
-                <span className={styles.productQty}>
-                  Cant: {item.quantity} u.
-                </span>
-              </div>
-
-              <div className={styles.reasonText}>
-                {item.reason === UnresolvedReason.NO_RESERVATION ? (
-                  <span className={styles.amberText}>
-                    <AlertTriangle size={14} /> Sin depósito reservado (Venta importada)
-                  </span>
-                ) : (
-                  <span className={styles.redText}>
-                    <AlertCircle size={14} /> El depósito reservado no tiene suficiente stock físico
-                  </span>
-                )}
-              </div>
-
-              <div className={styles.storageSelectWrapper}>
-                <label htmlFor={`select-storage-${item.saleItemId}`} className={styles.selectLabel}>
-                  Seleccionar depósito de origen:
-                </label>
-                <select
-                  id={`select-storage-${item.saleItemId}`}
-                  value={selections[item.saleItemId] || ""}
-                  onChange={(event) => handleSelect(item.saleItemId, event.target.value)}
-                  className={styles.select}
-                >
-                  <option value="">-- Elegir depósito --</option>
-                  {activeStorages.map((storage) => (
-                    <option key={storage.id} value={storage.id}>
-                      {storage.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
+              item={item}
+              selectedStorageId={selections[item.saleItemId] || ""}
+              onSelectStorage={(storageId) => handleSelect(item.saleItemId, storageId)}
+            />
           ))}
         </div>
       </div>

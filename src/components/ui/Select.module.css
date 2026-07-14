@@ -1,0 +1,128 @@
+.container {
+  position: relative;
+  width: 100%;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  min-height: 36px;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.trigger:focus,
+.container.open .trigger {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+.placeholder {
+  color: var(--color-text-muted);
+}
+
+.value {
+  color: var(--color-text);
+}
+
+.chevron {
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+  margin-left: var(--space-2);
+}
+
+.dropdown {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-1) 0;
+  margin: 0;
+  list-style: none;
+  max-height: 150px;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.dropdown.downward {
+  top: calc(100% + 4px);
+  bottom: auto;
+  animation: slideDownSelect 0.15s ease-out;
+}
+
+.dropdown.upward {
+  bottom: calc(100% + 4px);
+  top: auto;
+  animation: slideUpSelect 0.15s ease-out;
+}
+
+@keyframes slideDownSelect {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUpSelect {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.option {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.option:hover {
+  background-color: var(--color-surface-3);
+  color: var(--color-text);
+}
+
+.option.selected {
+  background-color: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  font-weight: var(--weight-medium);
+}
+
+.optionDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.disabled .trigger {
+  opacity: 0.6;
+  background-color: var(--color-surface-2);
+  cursor: not-allowed;
+  border-color: var(--color-border);
+}
+
+.disabled .trigger:focus {
+  box-shadow: none;
+  border-color: var(--color-border);
+}
