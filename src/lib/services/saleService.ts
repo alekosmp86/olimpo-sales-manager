@@ -84,6 +84,7 @@ export async function updateSale(
     deliveryStatus: DeliveryStatus;
     paymentStatus: PaymentStatus;
     comments: string | null;
+    highlightColor: string | null;
     items: Array<{ productId: string; quantity: number; storageId?: string }>;
   }>
 ) {
@@ -154,6 +155,7 @@ export async function duplicateSale(id: string) {
         phone: original.phone,
         address: original.address,
         comments: original.comments,
+        highlightColor: original.highlightColor,
         deliveryStatus: DeliveryStatus.NOT_DELIVERED,
         paymentStatus: PaymentStatus.NOT_PAID,
       },

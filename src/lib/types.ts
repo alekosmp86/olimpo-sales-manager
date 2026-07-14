@@ -51,6 +51,7 @@ export interface Sale {
   deliveryStatus: DeliveryStatus;
   paymentStatus: PaymentStatus;
   comments: string | null;
+  highlightColor: string | null;
   items: SaleItem[];
   createdAt: string;
   updatedAt: string;

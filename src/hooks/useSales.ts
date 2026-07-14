@@ -61,6 +61,7 @@ export function useSales(year: number, month: number, search: string) {
         deliveryStatus: DeliveryStatus.NOT_DELIVERED,
         paymentStatus: PaymentStatus.NOT_PAID,
         comments: "",
+        highlightColor: null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -194,6 +195,7 @@ export function useSales(year: number, month: number, search: string) {
             deliveryStatus: DeliveryStatus.NOT_DELIVERED,
             paymentStatus: PaymentStatus.NOT_PAID,
             comments: "",
+            highlightColor: null,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           };

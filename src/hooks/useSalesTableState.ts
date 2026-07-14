@@ -53,31 +53,6 @@ export function useSalesTableState() {
   const [productsModal, setProductsModal] = useState<{ saleId: string } | null>(null);
   const [zoomLevel, setZoomLevel] = useState(1.0);
 
-  const highlightsJson = useSyncExternalStore(
-    highlightsStore.subscribe,
-    highlightsStore.getSnapshot,
-    highlightsStore.getServerSnapshot
-  );
-
-  const highlights = useMemo(() => {
-    try {
-      return JSON.parse(highlightsJson) as Record<string, HighlightColor>;
-    } catch {
-      return {};
-    }
-  }, [highlightsJson]);
-
-  const handleHighlight = useCallback((saleId: string, color: HighlightColor | null) => {
-    const prev = JSON.parse(highlightsStore.getSnapshot());
-    const next = { ...prev };
-    if (color) {
-      next[saleId] = color;
-    } else {
-      delete next[saleId];
-    }
-    highlightsStore.setHighlights(next);
-  }, []);
-
   const confirm = useConfirm();
 
   const handleZoomIn = useCallback(() => {
@@ -158,6 +133,50 @@ export function useSalesTableState() {
       onSuccess: () => setRowSelection({}),
     });
   }, [rowSelection, deleteSales, confirm]);
+
+  const highlightsJson = useSyncExternalStore(
+    highlightsStore.subscribe,
+    highlightsStore.getSnapshot,
+    highlightsStore.getServerSnapshot
+  );
+
+  const highlights = useMemo(() => {
+    let localMap: Record<string, HighlightColor> = {};
+    try {
+      localMap = JSON.parse(highlightsJson) as Record<string, HighlightColor>;
+    } catch {
+      localMap = {};
+    }
+
+    const mergedMap = { ...localMap };
+    sales.forEach((sale) => {
+      if (sale.highlightColor) {
+        mergedMap[sale.id] = sale.highlightColor as HighlightColor;
+      } else {
+        delete mergedMap[sale.id];
+      }
+    });
+
+    const nextJson = JSON.stringify(mergedMap);
+    if (nextJson !== highlightsJson) {
+      setTimeout(() => highlightsStore.setHighlights(mergedMap), 0);
+    }
+
+    return mergedMap;
+  }, [highlightsJson, sales]);
+
+  const handleHighlight = useCallback((saleId: string, color: HighlightColor | null) => {
+    handleUpdate({ id: saleId, data: { highlightColor: color } });
+
+    const prev = JSON.parse(highlightsStore.getSnapshot());
+    const next = { ...prev };
+    if (color) {
+      next[saleId] = color;
+    } else {
+      delete next[saleId];
+    }
+    highlightsStore.setHighlights(next);
+  }, [handleUpdate]);
 
   const filteredSales = sales;
 

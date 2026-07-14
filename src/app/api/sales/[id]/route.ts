@@ -18,6 +18,7 @@ const UpdateSaleSchema = z.object({
     ])
     .optional(),
   comments: z.string().nullable().optional(),
+  highlightColor: z.string().nullable().optional(),
   items: z
     .array(
       z.object({
