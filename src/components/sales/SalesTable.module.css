@@ -6,16 +6,60 @@
 }
 
 /* ─── Toolbar ─────────────────────────────────────────────────────────────── */
-.toolbar {
+.toolbarContainer {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobileToggleBtn {
+  display: none;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: none;
+  color: var(--color-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.mobileToggleBtn:hover {
+  background-color: var(--color-surface-2);
+}
+
+.mobileToggleLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.expanded .mobileToggleBtn {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.toolbarContent {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.25s ease;
+  opacity: 1;
+}
+
+.toolbarInner {
+  overflow: hidden;
   display: flex;
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
   flex-wrap: wrap;
-  flex-shrink: 0;
+  width: 100%;
+  transition: padding var(--transition-slow);
 }
 
 .toolbarLeft {
@@ -502,8 +546,25 @@
   cursor: pointer;
 }
 
+@media (max-width: 1024px) {
+  .mobileToggleBtn {
+    display: flex;
+  }
+
+  .collapsed .toolbarContent {
+    grid-template-rows: 0fr;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .collapsed .toolbarInner {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+}
+
 @media (max-width: 768px) {
-  .toolbar {
+  .toolbarInner {
     flex-direction: column;
     align-items: stretch;
     padding: var(--space-3);
