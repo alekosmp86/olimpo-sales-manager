@@ -33,18 +33,6 @@ export default function RootLayout({
         <Providers>
           <NavBar />
           {children}
-          <div className="orientation-warning" aria-hidden="true">
-            <div className="orientation-content">
-              <div className="phone-icon-wrapper">
-                <svg className="phone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                  <rect x="5" y="2" width="14" height="20" rx="2" />
-                  <line x1="12" y1="18" x2="12.01" y2="18" strokeLinecap="round" />
-                </svg>
-              </div>
-              <h2>Por favor, gira tu dispositivo</h2>
-              <p>Esta aplicación está optimizada para el modo vertical en teléfonos móviles.</p>
-            </div>
-          </div>
         </Providers>
       </body>
     </html>
