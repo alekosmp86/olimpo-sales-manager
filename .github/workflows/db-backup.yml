@@ -34,7 +34,8 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           BACKUP_FILENAME="backup-$(date -u '+%Y-%m-%d').dump"
-          pg_dump "$DATABASE_URL" \
+          # Use the explicit path so the system's older pg_dump (v16) is not picked up from PATH
+          /usr/lib/postgresql/18/bin/pg_dump "$DATABASE_URL" \
             --format=custom \
             --no-acl \
             --no-owner \
