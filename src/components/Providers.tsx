@@ -2,21 +2,28 @@
 
 import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from "@tanstack/react-query";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ToastProvider } from "./ui/Toast";
 import { triggerGlobalToast } from "@/lib/utils/toastTrigger";
 import { ConfirmProvider } from "./ui/Confirm";
 import { MessageType } from "@/lib/constants/messageType";
+import { UnauthorizedError } from "@/lib/utils/apiUtils";
 
-function makeQueryClient() {
+function makeQueryClient(onUnauthorized: () => void) {
   return new QueryClient({
     defaultOptions: {
       queries: {
         staleTime: 30 * 1000,
-        retry: 1,
+        // Don't retry on 401 — the session is gone, retrying won't help.
+        retry: (failureCount, err) => !(err instanceof UnauthorizedError) && failureCount < 1,
       },
     },
     queryCache: new QueryCache({
       onError: (err: Error, query) => {
+        if (err instanceof UnauthorizedError) {
+          onUnauthorized();
+          return;
+        }
         const meta = query.meta as { errorMessage?: string; silent?: boolean } | undefined;
         if (meta?.silent) return;
         const message = meta?.errorMessage || err.message || "Error al cargar datos";
@@ -32,6 +39,10 @@ function makeQueryClient() {
         }
       },
       onError: (err: Error, variables, context, mutation) => {
+        if (err instanceof UnauthorizedError) {
+          onUnauthorized();
+          return;
+        }
         const meta = mutation.meta as { errorMessage?: string; silent?: boolean } | undefined;
         if (meta?.silent) return;
         const message = meta?.errorMessage || err.message || "Ha ocurrido un error";
@@ -40,19 +51,17 @@ function makeQueryClient() {
     }),
   });
 }
-
-let browserQueryClient: QueryClient | undefined;
-
-function getQueryClient() {
-  if (typeof window === "undefined") {
-    return makeQueryClient();
-  }
-  if (!browserQueryClient) browserQueryClient = makeQueryClient();
-  return browserQueryClient;
-}
-
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => getQueryClient());
+  const router = useRouter();
+
+  const handleUnauthorized = () => {
+    // Clear the session cookie server-side, then redirect to login.
+    fetch("/api/auth/logout", { method: "POST" }).finally(() => {
+      router.push("/login");
+    });
+  };
+
+  const [queryClient] = useState(() => makeQueryClient(handleUnauthorized));
 
   return (
     <QueryClientProvider client={queryClient}>
