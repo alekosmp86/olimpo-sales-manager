@@ -1,7 +1,7 @@
 .wrapper {
   display: flex;
   flex-direction: column;
-  height: 100dvh;
+  height: calc(100dvh - 45px);
   background: var(--color-surface-3);
 }
 
@@ -198,6 +198,8 @@
     z-index: 2;
     background-color: var(--color-surface);
     border-right: 2px solid var(--color-border-strong);
+    width: calc(160px * var(--column-scale, var(--grid-zoom, 1))) !important;
+    min-width: calc(160px * var(--column-scale, var(--grid-zoom, 1))) !important;
   }
 
   .th[data-col="clientName"] {
@@ -306,6 +308,10 @@
   vertical-align: middle;
   font-size: calc(var(--text-sm) * var(--grid-zoom, 1));
   border-bottom: 1px solid var(--color-border);
+}
+
+.td:focus-within {
+  z-index: 5 !important;
 }
 
 /* Column sizes */

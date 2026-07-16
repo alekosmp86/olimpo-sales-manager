@@ -31,6 +31,13 @@ export interface SaleItem {
   quantity: number;
   /** Computed field: quantity * product.unitPrice */
   totalPrice: number;
+  reservation?: {
+    id: string;
+    storageId: string;
+    storageName: string;
+    productId: string;
+    quantity: number;
+  } | null;
 }
 
 // ─── Sale ─────────────────────────────────────────────────────────────────────
@@ -44,6 +51,7 @@ export interface Sale {
   deliveryStatus: DeliveryStatus;
   paymentStatus: PaymentStatus;
   comments: string | null;
+  highlightColor: string | null;
   items: SaleItem[];
   createdAt: string;
   updatedAt: string;

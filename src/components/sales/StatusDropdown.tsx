@@ -14,11 +14,21 @@ import {
 interface DeliveryDropdownProps {
   value: DeliveryStatus;
   onChange: (value: DeliveryStatus) => void;
+  onBeforeChange?: (value: DeliveryStatus) => Promise<boolean>;
   disabled?: boolean;
 }
 
-export function DeliveryDropdown({ value, onChange, disabled }: DeliveryDropdownProps) {
+export function DeliveryDropdown({ value, onChange, onBeforeChange, disabled }: DeliveryDropdownProps) {
   const options = Object.values(DeliveryStatus);
+
+  async function handleSelect(newVal: string) {
+    if (onBeforeChange) {
+      const ok = await onBeforeChange(newVal as DeliveryStatus);
+      if (!ok) return;
+    }
+    onChange(newVal as DeliveryStatus);
+  }
+
   return (
     <StatusSelect
       value={value}
@@ -28,7 +38,7 @@ export function DeliveryDropdown({ value, onChange, disabled }: DeliveryDropdown
         [DeliveryStatus.NOT_DELIVERED]: "gray",
         [DeliveryStatus.DELIVERED]: "amber",
       }}
-      onChange={onChange as (v: string) => void}
+      onChange={handleSelect}
       disabled={disabled}
     />
   );

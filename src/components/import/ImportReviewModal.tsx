@@ -47,6 +47,7 @@ export function ImportReviewModal({ isOpen, onClose, result }: Props) {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sales"] });
+      queryClient.invalidateQueries({ queryKey: ["stock"] });
       setSuccess(true);
     },
     meta: {

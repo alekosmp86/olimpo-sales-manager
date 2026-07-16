@@ -18,11 +18,13 @@ const UpdateSaleSchema = z.object({
     ])
     .optional(),
   comments: z.string().nullable().optional(),
+  highlightColor: z.string().nullable().optional(),
   items: z
     .array(
       z.object({
         productId: z.string().min(1),
         quantity: z.number().int().positive(),
+        storageId: z.string().optional(),
       })
     )
     .optional(),

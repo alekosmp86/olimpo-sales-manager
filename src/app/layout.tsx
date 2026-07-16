@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
+import { NavBar } from "@/components/ui/NavBar";
 
 export const metadata: Metadata = {
   title: "Olimpo — Gestión de Ventas",
@@ -30,6 +31,7 @@ export default function RootLayout({
       </head>
       <body>
         <Providers>
+          <NavBar />
           {children}
         </Providers>
       </body>

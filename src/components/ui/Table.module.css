@@ -1,0 +1,44 @@
+.tableContainer {
+  width: 100%;
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.tableHeaderRow {
+  background: var(--color-surface-2);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.th {
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+}
+
+.tableRow {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+.td {
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-text-secondary);
+}
+
+.noProducts {
+  padding: var(--space-4);
+  text-align: center;
+  color: var(--color-text-muted);
+}
