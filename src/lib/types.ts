@@ -29,7 +29,8 @@ export interface SaleItem {
   productId: string;
   product: Product;
   quantity: number;
-  /** Computed field: quantity * product.unitPrice */
+  unitPrice: number;
+  /** Computed field: quantity * unitPrice */
   totalPrice: number;
   reservation?: {
     id: string;

@@ -25,6 +25,7 @@ const UpdateSaleSchema = z.object({
         productId: z.string().min(1),
         quantity: z.number().int().positive(),
         storageId: z.string().optional(),
+        unitPrice: z.number().positive().optional(),
       })
     )
     .optional(),
@@ -58,8 +59,8 @@ export async function PATCH(
 
     const sale = await updateSale(id, data);
     return NextResponse.json(sale);
-  } catch (err) {
-    console.error("[PATCH /api/sales/[id]]", err);
+  } catch (error) {
+    console.error("[PATCH /api/sales/[id]]", error);
     return NextResponse.json({ error: "Error al actualizar venta." }, { status: 500 });
   }
 }
@@ -77,8 +78,8 @@ export async function DELETE(
     const { id } = await params;
     await deleteSales([id]);
     return NextResponse.json({ ok: true });
-  } catch (err) {
-    console.error("[DELETE /api/sales/[id]]", err);
+  } catch (error) {
+    console.error("[DELETE /api/sales/[id]]", error);
     return NextResponse.json({ error: "Error al eliminar venta." }, { status: 500 });
   }
 }

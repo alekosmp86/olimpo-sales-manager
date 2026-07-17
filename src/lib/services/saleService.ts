@@ -85,7 +85,7 @@ export async function updateSale(
     paymentStatus: PaymentStatus;
     comments: string | null;
     highlightColor: string | null;
-    items: Array<{ productId: string; quantity: number; storageId?: string }>;
+    items: Array<{ productId: string; quantity: number; storageId?: string; unitPrice?: number }>;
   }>
 ) {
   const { items, ...saleFields } = data;
@@ -100,18 +100,32 @@ export async function updateSale(
     if (items !== undefined) {
       // First delete reservations
       const existingItems = await tx.saleItem.findMany({ where: { saleId: id } });
-      const itemIds = existingItems.map((i) => i.id);
+      const itemIds = existingItems.map((item) => item.id);
       await tx.stockReservation.deleteMany({ where: { saleItemId: { in: itemIds } } });
       await tx.saleItem.deleteMany({ where: { saleId: id } });
 
       if (items.length > 0) {
+        // Fetch products to get default unit prices if not specified
+        const productIds = items.map((item) => item.productId);
+        const products = await tx.product.findMany({
+          where: { id: { in: productIds } },
+          select: { id: true, unitPrice: true },
+        });
+        const productPriceMap = new Map(
+          products.map((product) => [product.id, product.unitPrice])
+        );
+
         await Promise.all(
           items.map(async (item) => {
+            const defaultPrice = productPriceMap.get(item.productId) ?? 0;
+            const resolvedPrice = item.unitPrice !== undefined ? item.unitPrice : defaultPrice;
+
             const createdItem = await tx.saleItem.create({
               data: {
                 saleId: id,
                 productId: item.productId,
                 quantity: item.quantity,
+                unitPrice: resolvedPrice,
               },
             });
             if (item.storageId) {
@@ -167,6 +181,7 @@ export async function duplicateSale(id: string) {
           saleId: newSale.id,
           productId: item.productId,
           quantity: item.quantity,
+          unitPrice: item.unitPrice,
         })),
       });
     }
@@ -188,6 +203,7 @@ type SaleWithItems = Awaited<ReturnType<typeof prisma.sale.findFirstOrThrow>> & 
     saleId: string;
     productId: string;
     quantity: number;
+    unitPrice: number | null;
     reservation: ({
       storage: { id: string; name: string };
     } & {
@@ -219,7 +235,8 @@ function serializeSale(sale: SaleWithItems) {
     updatedAt: sale.updatedAt.toISOString(),
     items: sale.items.map((item) => ({
       ...item,
-      totalPrice: item.quantity * item.product.unitPrice,
+      unitPrice: item.unitPrice ?? item.product.unitPrice,
+      totalPrice: item.quantity * (item.unitPrice ?? item.product.unitPrice),
       reservation: item.reservation
         ? {
             id: item.reservation.id,

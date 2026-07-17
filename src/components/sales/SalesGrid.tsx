@@ -15,7 +15,7 @@ import { useSaleColumns } from "../../hooks/useSaleColumns";
 import { usePinchToZoom } from "@/hooks/usePinchToZoom";
 import { HighlightColor } from "@/lib/constants/colors";
 import styles from "./SalesTable.module.css";
-import { MIN_ZOOM, MAX_ZOOM } from "./constants";
+import { MIN_ZOOM, MAX_ZOOM } from "@/lib/constants/zoom";
 
 interface SalesGridProps {
   sales: Sale[];

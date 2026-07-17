@@ -5,7 +5,7 @@ import { useSalesTableState } from "@/hooks/useSalesTableState";
 import { SalesToolbar } from "./SalesToolbar";
 import { SalesGrid } from "./SalesGrid";
 import { MonthSheetBar } from "./MonthSheetBar";
-import { ProductsModal } from "./ProductsModal";
+import { ProductsModal } from "./products-modal/ProductsModal";
 import { withStockProductsModal } from "@/modules/stock/components/extensions/withStockProductsModal";
 import { formatPrice, calculateSalesTotal } from "@/lib/utils/priceUtils";
 import styles from "./SalesTable.module.css";
@@ -103,11 +103,14 @@ export function SalesTable() {
 
       <div className={styles.statusBar}>
         <span>
-          {sales.length} {sales.length !== 1 ? "ventas" : "venta"} | Total: {formatPrice(totalAmountSold)}
+          {sales.length} {sales.length !== 1 ? "ventas" : "venta"} | Total:{" "}
+          {formatPrice(totalAmountSold)}
         </span>
         {selectedIds.length > 0 && (
           <span>
-            {selectedIds.length} {selectedIds.length !== 1 ? "seleccionadas" : "seleccionada"} | Total: {formatPrice(selectedAmountSold)}
+            {selectedIds.length}{" "}
+            {selectedIds.length !== 1 ? "seleccionadas" : "seleccionada"} |
+            Total: {formatPrice(selectedAmountSold)}
           </span>
         )}
       </div>

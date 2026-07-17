@@ -284,7 +284,7 @@ export async function validateAndClassifyRows(
 
 export async function insertConfirmedRows(rows: ImportValidRow[]) {
   // Pre-resolve all unique dimensions concurrently to avoid race conditions.
-  const uniqueDimensions = Array.from(new Set(rows.map((r) => r.dimension.trim())));
+  const uniqueDimensions = Array.from(new Set(rows.map((row) => row.dimension.trim())));
   const dims = await Promise.all(
     uniqueDimensions.map((label) => findOrCreateDimension(label))
   );
@@ -309,8 +309,8 @@ export async function insertConfirmedRows(rows: ImportValidRow[]) {
   }
 
   const products = await Promise.all(
-    Array.from(uniqueProductKeys.values()).map((p) =>
-      findOrCreateProduct(p.name, p.dimensionId, p.unitPrice)
+    Array.from(uniqueProductKeys.values()).map((product) =>
+      findOrCreateProduct(product.name, product.dimensionId, product.unitPrice)
     )
   );
 
@@ -344,8 +344,11 @@ export async function insertConfirmedRows(rows: ImportValidRow[]) {
           saleId: sale.id,
           productId: prodId,
           quantity: row.quantity,
+          unitPrice: row.unitPrice,
         },
       });
     })
   );
 }
+
+

@@ -9,8 +9,10 @@ interface StepperProps {
   onChange: (value: number | "") => void;
   min?: number;
   max?: number;
+  step?: number;
   disabled?: boolean;
   ariaLabel?: string;
+  className?: string;
 }
 
 export function Stepper({
@@ -18,22 +20,28 @@ export function Stepper({
   onChange,
   min = 0,
   max,
+  step = 1,
   disabled = false,
   ariaLabel,
+  className,
 }: StepperProps) {
   const handleDecrement = () => {
     const numericValue = typeof value === "number" ? value : 0;
-    const nextValue = numericValue - 1;
+    const nextValue = numericValue - step;
     if (nextValue >= min) {
-      onChange(nextValue);
+      const precision = step % 1 === 0 ? 0 : 2;
+      const rounded = parseFloat(nextValue.toFixed(precision));
+      onChange(rounded);
     }
   };
 
   const handleIncrement = () => {
     const numericValue = typeof value === "number" ? value : 0;
-    const nextValue = numericValue + 1;
+    const nextValue = numericValue + step;
     if (max === undefined || nextValue <= max) {
-      onChange(nextValue);
+      const precision = step % 1 === 0 ? 0 : 2;
+      const rounded = parseFloat(nextValue.toFixed(precision));
+      onChange(rounded);
     }
   };
 
@@ -43,7 +51,7 @@ export function Stepper({
       onChange("");
       return;
     }
-    const parsed = parseInt(inputValue, 10);
+    const parsed = parseFloat(inputValue);
     if (isNaN(parsed)) return;
 
     if (parsed < min) {
@@ -58,7 +66,7 @@ export function Stepper({
   const numericValue = typeof value === "number" ? value : 0;
 
   return (
-    <div className={`${styles.stepper} ${disabled ? styles.disabled : ""}`}>
+    <div className={`${styles.stepper} ${disabled ? styles.disabled : ""} ${className || ""}`}>
       <button
         type="button"
         onClick={handleDecrement}
@@ -72,6 +80,7 @@ export function Stepper({
         type="number"
         min={min}
         max={max}
+        step={step}
         value={value}
         onChange={handleInputChange}
         disabled={disabled}
