@@ -6,6 +6,7 @@ import { ProductListItem } from "./ProductListItem";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { useFilter } from "@/hooks/useFilter";
 import type { Product, Dimension } from "@/lib/types";
+import { handleResponse } from "@/lib/utils/apiUtils";
 import styles from "./ProductsTab.module.css";
 
 export function ProductsTab() {
@@ -13,12 +14,12 @@ export function ProductsTab() {
 
   const { data: products = [], isLoading } = useQuery<Product[]>({
     queryKey: ["products"],
-    queryFn: () => fetch("/api/products").then((r) => r.json()),
+    queryFn: () => fetch("/api/products").then((response) => handleResponse<Product[]>(response)),
   });
 
   const { data: dimensions = [] } = useQuery<Dimension[]>({
     queryKey: ["dimensions"],
-    queryFn: () => fetch("/api/dimensions").then((r) => r.json()),
+    queryFn: () => fetch("/api/dimensions").then((response) => handleResponse<Dimension[]>(response)),
   });
 
   const createMutation = useMutation({
@@ -27,10 +28,7 @@ export function ProductsTab() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-      }).then(async (r) => {
-        if (!r.ok) throw new Error((await r.json()).error);
-        return r.json();
-      }),
+      }).then((response) => handleResponse<Product>(response)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
     },
@@ -46,7 +44,7 @@ export function ProductsTab() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ unitPrice }),
-      }).then((r) => r.json()),
+      }).then((response) => handleResponse<Product>(response)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
     },
@@ -58,9 +56,9 @@ export function ProductsTab() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) =>
-      fetch(`/api/products/${id}`, { method: "DELETE" }).then(async (r) => {
-        if (!r.ok) throw new Error((await r.json()).error);
-      }),
+      fetch(`/api/products/${id}`, { method: "DELETE" }).then((response) =>
+        handleResponse<void>(response)
+      ),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["products"] }),
     meta: {
       successMessage: "Producto eliminado con éxito",

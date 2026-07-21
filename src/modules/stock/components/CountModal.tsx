@@ -27,7 +27,7 @@ export function CountModal({ storage, currentLines, onClose }: CountModalProps) 
 
   const { data: products = [] } = useQuery<Product[]>({
     queryKey: ["products"],
-    queryFn: () => fetch("/api/products").then((response) => response.json()),
+    queryFn: () => fetch("/api/products").then((response) => handleResponse<Product[]>(response)),
   });
 
   // Map product IDs to their current physical stock quantity

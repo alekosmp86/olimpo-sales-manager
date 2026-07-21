@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/Button";
 import styles from "./ProductsModal.module.css";
 import type { SaleItem, Product } from "@/lib/types";
 import { formatPrice } from "@/lib/utils/priceUtils";
+import { handleResponse } from "@/lib/utils/apiUtils";
 import type { StorageAvailability } from "@/modules/stock/types";
 
 interface ProductsModalProps {
@@ -41,7 +42,7 @@ export function ProductsModal({ isOpen, onClose, saleId, items, renderItemExtras
 
   const { data: products = [] } = useQuery<Product[]>({
     queryKey: ["products"],
-    queryFn: () => fetch("/api/products").then((r) => r.json()),
+    queryFn: () => fetch("/api/products").then((response) => handleResponse<Product[]>(response)),
     enabled: isOpen,
   });
 
@@ -51,7 +52,7 @@ export function ProductsModal({ isOpen, onClose, saleId, items, renderItemExtras
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ items }),
-      }).then((r) => r.json()),
+      }).then((response) => handleResponse<unknown>(response)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sales"] });
       setIsDirty(false);

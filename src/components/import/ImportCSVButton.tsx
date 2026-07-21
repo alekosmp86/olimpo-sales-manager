@@ -7,6 +7,7 @@ import type { CsvRow, ImportClassificationResult } from "@/lib/types";
 import { ImportReviewModal } from "./ImportReviewModal";
 import { AliasMappingModal } from "./AliasMappingModal";
 import { Upload } from "lucide-react";
+import { handleResponse } from "@/lib/utils/apiUtils";
 
 import styles from "./ImportCSVButton.module.css";
 
@@ -26,13 +27,12 @@ export function ImportCSVButton() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/import", {
+      const response = await fetch("/api/import", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rows }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      const data = await handleResponse<ImportClassificationResult & { unmatched?: string[] }>(response);
 
       if (data.unmatched) {
         setUnmatched(data.unmatched);

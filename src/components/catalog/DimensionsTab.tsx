@@ -9,6 +9,7 @@ import { SearchInput } from "@/components/ui/SearchInput";
 import { useFilter } from "@/hooks/useFilter";
 import { MessageType } from "@/lib/constants/messageType";
 import type { Dimension } from "@/lib/types";
+import { handleResponse } from "@/lib/utils/apiUtils";
 import styles from "./DimensionsTab.module.css";
 
 export function DimensionsTab() {
@@ -21,7 +22,7 @@ export function DimensionsTab() {
 
   const { data: dimensions = [], isLoading } = useQuery<Dimension[]>({
     queryKey: ["dimensions"],
-    queryFn: () => fetch("/api/dimensions").then((r) => r.json()),
+    queryFn: () => fetch("/api/dimensions").then((response) => handleResponse<Dimension[]>(response)),
   });
 
   const createMutation = useMutation({
@@ -30,16 +31,13 @@ export function DimensionsTab() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ label }),
-      }).then(async (r) => {
-        if (!r.ok) throw new Error((await r.json()).error);
-        return r.json();
-      }),
+      }).then((response) => handleResponse<Dimension>(response)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["dimensions"] });
       setNewLabel("");
       setError("");
     },
-    onError: (e: Error) => setError(e.message),
+    onError: (err: Error) => setError(err.message),
     meta: {
       successMessage: "Dimensión creada con éxito",
       errorMessage: "Error al crear la dimensión",
@@ -52,7 +50,7 @@ export function DimensionsTab() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ label }),
-      }).then((r) => r.json()),
+      }).then((response) => handleResponse<Dimension>(response)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["dimensions"] });
       queryClient.invalidateQueries({ queryKey: ["products"] });
@@ -66,13 +64,13 @@ export function DimensionsTab() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) =>
-      fetch(`/api/dimensions/${id}`, { method: "DELETE" }).then(async (r) => {
-        if (!r.ok) throw new Error((await r.json()).error);
-      }),
+      fetch(`/api/dimensions/${id}`, { method: "DELETE" }).then((response) =>
+        handleResponse<void>(response)
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["dimensions"] });
     },
-    onError: (e: Error) => setError(e.message),
+    onError: (err: Error) => setError(err.message),
     meta: {
       successMessage: "Dimensión eliminada con éxito",
       errorMessage: "Error al eliminar la dimensión",
