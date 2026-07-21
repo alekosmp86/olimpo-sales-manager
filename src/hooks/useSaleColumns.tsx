@@ -67,15 +67,15 @@ export function useSaleColumns(
         cell: ({ row }) => {
           const handleCopy = async () => {
             const sale = row.original;
-            const itemsText = (sale.items ?? []).reduce<string[]>((acc, item) => {
+            const itemsText = (sale.items ?? []).reduce<string[]>((accumulator, item) => {
               if (item && item.product) {
-                const pName = item.product.name;
-                const dimLabel = item.product.dimension?.label ? ` (${item.product.dimension.label})` : "";
-                const qty = item.quantity;
-                const price = formatPrice(item.totalPrice ?? (qty * (item.product.unitPrice ?? 0)));
-                acc.push(`- ${pName}${dimLabel}: ${qty} u. · ${price}`);
+                const productName = item.product.name;
+                const dimensionLabel = item.product.dimension?.label ? ` (${item.product.dimension.label})` : "";
+                const quantity = item.quantity;
+                const price = formatPrice(item.totalPrice ?? (quantity * (item.product.unitPrice ?? 0)));
+                accumulator.push(`- ${productName}${dimensionLabel}: ${quantity} u. · ${price}`);
               }
-              return acc;
+              return accumulator;
             }, []).join("\n");
 
             const text = [
@@ -84,13 +84,14 @@ export function useSaleColumns(
               `Dirección: ${sale.address ?? "No especificada"}`,
               `Productos:`,
               itemsText || "- Sin productos",
-            ].join("\n");
+              sale.comments ? `Comentarios: ${sale.comments}` : null,
+            ].filter(Boolean).join("\n");
 
             try {
               await navigator.clipboard.writeText(text);
               triggerGlobalToast("Detalles copiados al portapapeles", MessageType.SUCCESS);
-            } catch (err) {
-              console.error("Error al copiar al portapapeles:", err);
+            } catch (error) {
+              console.error("Error al copiar al portapapeles:", error);
               triggerGlobalToast("Error al copiar al portapapeles", MessageType.DANGER);
             }
           };
