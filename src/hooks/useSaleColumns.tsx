@@ -6,7 +6,7 @@ import { DeliveryDropdown, PaymentDropdown } from "../components/sales/StatusDro
 import { withStockDeliveryDropdown } from "@/modules/stock/components/extensions/withStockDeliveryDropdown";
 import { ProductsCell } from "../components/sales/ProductsCell";
 import { ClientNameCell } from "../components/sales/ClientNameCell";
-import { CommentsCell } from "../components/sales/CommentsCell";
+import { AutoResizingTextareaCell } from "../components/sales/AutoResizingTextAreaCell";
 import type { Sale } from "@/lib/types";
 import { formatReviewDate } from "@/lib/dateUtils";
 import { Calendar, MessageSquareText, Copy } from "lucide-react";
@@ -141,14 +141,14 @@ export function useSaleColumns(
                 type="date"
                 className={styles.dateHiddenInput}
                 defaultValue={dateStr}
-                onClick={(e) => {
+                onClick={(clickEvent) => {
                   try {
-                    e.currentTarget.showPicker();
+                    clickEvent.currentTarget.showPicker();
                   } catch {}
                 }}
-                onChange={(e) => {
-                  if (e.target.value && e.target.value !== dateStr) {
-                    onUpdate({ id: row.original.id, data: { date: e.target.value } });
+                onChange={(changeEvent) => {
+                  if (changeEvent.target.value && changeEvent.target.value !== dateStr) {
+                    onUpdate({ id: row.original.id, data: { date: changeEvent.target.value } });
                   }
                 }}
                 aria-label="Fecha de la venta"
@@ -184,9 +184,9 @@ export function useSaleColumns(
             className={styles.cellInput}
             defaultValue={getValue() ?? ""}
             placeholder="Teléfono"
-            onBlur={(e) => {
-              if (e.target.value !== (getValue() ?? ""))
-                onUpdate({ id: row.original.id, data: { phone: e.target.value || null } });
+            onBlur={(blurEvent) => {
+              if (blurEvent.target.value !== (getValue() ?? ""))
+                onUpdate({ id: row.original.id, data: { phone: blurEvent.target.value || null } });
             }}
             aria-label="Teléfono del cliente"
           />
@@ -199,16 +199,13 @@ export function useSaleColumns(
       columnHelper.accessor("address", {
         header: "Dirección",
         cell: ({ getValue, row }) => (
-          <input
-            type="text"
-            className={styles.cellInput}
-            defaultValue={getValue() ?? ""}
+          <AutoResizingTextareaCell
+            initialValue={getValue()}
             placeholder="Dirección"
-            onBlur={(e) => {
-              if (e.target.value !== (getValue() ?? ""))
-                onUpdate({ id: row.original.id, data: { address: e.target.value || null } });
-            }}
-            aria-label="Dirección de entrega"
+            ariaLabel="Dirección de entrega"
+            onUpdate={(addressValue) =>
+              onUpdate({ id: row.original.id, data: { address: addressValue } })
+            }
           />
         ),
         size: 400,
@@ -234,8 +231,8 @@ export function useSaleColumns(
           <StockDeliveryDropdown
             value={getValue()}
             sale={row.original}
-            onChange={(val) =>
-              onUpdate({ id: row.original.id, data: { deliveryStatus: val } })
+            onChange={(newStatus) =>
+              onUpdate({ id: row.original.id, data: { deliveryStatus: newStatus } })
             }
           />
         ),
@@ -248,8 +245,8 @@ export function useSaleColumns(
         cell: ({ getValue, row }) => (
           <PaymentDropdown
             value={getValue()}
-            onChange={(val) =>
-              onUpdate({ id: row.original.id, data: { paymentStatus: val } })
+            onChange={(newStatus) =>
+              onUpdate({ id: row.original.id, data: { paymentStatus: newStatus } })
             }
           />
         ),
@@ -260,8 +257,10 @@ export function useSaleColumns(
       columnHelper.accessor("comments", {
         header: "Comentarios",
         cell: ({ getValue, row }) => (
-          <CommentsCell
+          <AutoResizingTextareaCell
             initialValue={getValue()}
+            placeholder="Comentarios"
+            ariaLabel="Comentarios de la venta"
             onUpdate={(commentValue) =>
               onUpdate({ id: row.original.id, data: { comments: commentValue } })
             }

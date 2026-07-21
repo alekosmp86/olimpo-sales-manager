@@ -3,16 +3,25 @@
 import { useState, useRef, useLayoutEffect } from "react";
 import styles from "./SalesTable.module.css";
 
-interface CommentsCellProps {
+interface AutoResizingTextareaCellProps {
   initialValue: string | null;
-  onUpdate: (commentValue: string | null) => void;
+  onUpdate: (value: string | null) => void;
+  placeholder?: string;
+  ariaLabel?: string;
+  className?: string;
 }
 
 /**
- * CommentsCell renders an auto-resizing textarea for the sales grid comments column.
+ * AutoResizingTextareaCell renders an auto-resizing textarea for grid cells.
  * The textarea dynamically expands and shrinks based on the text content height.
  */
-export function CommentsCell({ initialValue, onUpdate }: CommentsCellProps) {
+export function AutoResizingTextareaCell({
+  initialValue,
+  onUpdate,
+  placeholder,
+  ariaLabel,
+  className = styles.cellTextarea,
+}: AutoResizingTextareaCellProps) {
   const [currentValue, setCurrentValue] = useState(initialValue ?? "");
   const [previousInitialValue, setPreviousInitialValue] = useState(initialValue);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -50,12 +59,12 @@ export function CommentsCell({ initialValue, onUpdate }: CommentsCellProps) {
   return (
     <textarea
       ref={textareaRef}
-      className={styles.cellTextarea}
+      className={className}
       value={currentValue}
-      placeholder="Comentarios"
+      placeholder={placeholder}
       onChange={handleChange}
       onBlur={handleBlur}
-      aria-label="Comentarios de la venta"
+      aria-label={ariaLabel}
       rows={1}
     />
   );
