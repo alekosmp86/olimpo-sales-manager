@@ -352,6 +352,37 @@
   box-shadow: 0 0 0 3px rgba(13, 115, 119, 0.1);
 }
 
+.cellTextarea {
+  width: 100%;
+  padding: calc(var(--space-2) * var(--grid-zoom, 1)) calc(var(--space-2) * var(--grid-zoom, 1));
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text);
+  font-size: calc(var(--text-sm) * var(--grid-zoom, 1));
+  font-family: inherit;
+  line-height: 1.4;
+  min-height: calc(var(--touch-target) * var(--grid-zoom, 1));
+  resize: none;
+  overflow: hidden;
+  field-sizing: content;
+  box-sizing: border-box;
+  display: block;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.cellTextarea:hover {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+}
+
+.cellTextarea:focus {
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(13, 115, 119, 0.1);
+}
+
 /* ─── Checkbox ────────────────────────────────────────────────────────────── */
 .checkbox {
   width: calc(18px * var(--grid-zoom, 1));

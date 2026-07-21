@@ -6,6 +6,7 @@ import { DeliveryDropdown, PaymentDropdown } from "../components/sales/StatusDro
 import { withStockDeliveryDropdown } from "@/modules/stock/components/extensions/withStockDeliveryDropdown";
 import { ProductsCell } from "../components/sales/ProductsCell";
 import { ClientNameCell } from "../components/sales/ClientNameCell";
+import { CommentsCell } from "../components/sales/CommentsCell";
 import type { Sale } from "@/lib/types";
 import { formatReviewDate } from "@/lib/dateUtils";
 import { Calendar, MessageSquareText, Copy } from "lucide-react";
@@ -258,16 +259,11 @@ export function useSaleColumns(
       columnHelper.accessor("comments", {
         header: "Comentarios",
         cell: ({ getValue, row }) => (
-          <input
-            type="text"
-            className={styles.cellInput}
-            defaultValue={getValue() ?? ""}
-            placeholder="Comentarios"
-            onBlur={(e) => {
-              if (e.target.value !== (getValue() ?? ""))
-                onUpdate({ id: row.original.id, data: { comments: e.target.value || null } });
-            }}
-            aria-label="Comentarios de la venta"
+          <CommentsCell
+            initialValue={getValue()}
+            onUpdate={(commentValue) =>
+              onUpdate({ id: row.original.id, data: { comments: commentValue } })
+            }
           />
         ),
         size: 350,
