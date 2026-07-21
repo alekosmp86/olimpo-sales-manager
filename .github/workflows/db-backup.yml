@@ -1,0 +1,52 @@
+name: Daily DB Backup
+
+on:
+  # Runs every day at 03:00 UTC = 00:00 Montevideo (UTC-3)
+  schedule:
+    - cron: "0 3 * * *"
+  # Allows manual triggering from the GitHub Actions UI
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    name: PostgreSQL Backup
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install PostgreSQL 18 client
+        run: |
+          # Add the official PostgreSQL apt repository so we can get pg_dump v18,
+          # which must match the Neon server version.
+          sudo apt-get install -y --no-install-recommends curl ca-certificates gnupg
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+            | sudo gpg --dearmor -o /usr/share/keyrings/postgresql.gpg
+          echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] \
+            https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+            | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends postgresql-client-18
+
+      - name: Create backup
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          BACKUP_FILENAME="backup-$(date -u '+%Y-%m-%d').dump"
+          # Use the explicit path so the system's older pg_dump (v16) is not picked up from PATH
+          /usr/lib/postgresql/18/bin/pg_dump "$DATABASE_URL" \
+            --format=custom \
+            --no-acl \
+            --no-owner \
+            --file="$BACKUP_FILENAME"
+          echo "BACKUP_FILENAME=$BACKUP_FILENAME" >> "$GITHUB_ENV"
+
+      - name: Upload backup as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ github.run_id }}
+          path: ${{ env.BACKUP_FILENAME }}
+          # Retain backups for 90 days (GitHub maximum for public repos; 400 for private)
+          retention-days: 90
+          if-no-files-found: error
