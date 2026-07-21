@@ -316,7 +316,7 @@
 
 /* Column sizes */
 .th[data-col="select"], .td[data-col="select"] { width: calc(48px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(48px * var(--column-scale, var(--grid-zoom, 1))); }
-.th[data-col="actions"], .td[data-col="actions"] { width: calc(80px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(80px * var(--column-scale, var(--grid-zoom, 1))); }
+.th[data-col="actions"], .td[data-col="actions"] { width: 80px; min-width: 80px; }
 .th[data-col="date"], .td[data-col="date"] { width: calc(170px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(170px * var(--column-scale, var(--grid-zoom, 1))); }
 .th[data-col="clientName"], .td[data-col="clientName"] { width: calc(240px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(240px * var(--column-scale, var(--grid-zoom, 1))); }
 .th[data-col="phone"], .td[data-col="phone"] { width: calc(160px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(160px * var(--column-scale, var(--grid-zoom, 1))); }
@@ -651,6 +651,7 @@
   justify-content: center;
   width: 28px;
   height: 28px;
+  flex-shrink: 0;
   border-radius: var(--radius-sm);
   background: transparent;
   border: 1px solid transparent;
