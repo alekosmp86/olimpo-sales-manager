@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { DeliveryDropdown } from "@/components/sales/StatusDropdown";
+import { DeliveryDropdown } from "@/components/sales/DeliveryDropdown";
 import { DeliveryStoragePickerModal } from "../DeliveryStoragePickerModal";
 import type { UnresolvedDeliveryItem, DeliveryItemOverride } from "@/modules/stock/types";
 import { DeliveryStatus } from "@/lib/constants/statuses";

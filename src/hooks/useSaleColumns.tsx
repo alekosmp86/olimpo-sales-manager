@@ -2,13 +2,14 @@
 
 import { useMemo } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
-import { DeliveryDropdown, PaymentDropdown } from "../components/sales/StatusDropdown";
+import { DeliveryDropdown } from "../components/sales/DeliveryDropdown";
+import { PaymentDropdown } from "../components/sales/PaymentDropdown";
 import { withStockDeliveryDropdown } from "@/modules/stock/components/extensions/withStockDeliveryDropdown";
 import { ProductsCell } from "../components/sales/ProductsCell";
 import { ClientNameCell } from "../components/sales/ClientNameCell";
 import { AutoResizingTextareaCell } from "../components/sales/AutoResizingTextAreaCell";
 import type { Sale } from "@/lib/types";
-import { formatReviewDate } from "@/lib/dateUtils";
+import { formatReviewDate } from "@/lib/utils/dateUtils";
 import { Calendar, MessageSquareText, Copy } from "lucide-react";
 import { triggerGlobalToast } from "@/lib/utils/toastTrigger";
 import { MessageType } from "@/lib/constants/messageType";

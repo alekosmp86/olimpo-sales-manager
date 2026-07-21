@@ -82,6 +82,11 @@
   animation: slideDown var(--transition-fast);
 }
 
+.dropdownUpward {
+  top: auto;
+  bottom: calc((100% + 4px) * var(--grid-zoom, 1));
+}
+
 .option {
   padding: calc(var(--space-2) * var(--grid-zoom, 1)) calc(var(--space-3) * var(--grid-zoom, 1));
   border-radius: var(--radius-sm);
