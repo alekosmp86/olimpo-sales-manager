@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "@/hooks/useDebounce";
 import type { Sale } from "@/lib/types";
 import { Paintbrush } from "lucide-react";
@@ -24,17 +25,17 @@ interface ClientNameCellProps {
   onHighlight: (color: HighlightColor | null) => void;
 }
 
-/** Builds deduplicated top-5 suggestions from in-memory sales. */
-function getSuggestions(query: string, sales: Sale[], excludeId: string): ClientSuggestion[] {
-  const q = query.trim().toLowerCase();
-  if (!q) return [];
+/** Builds deduplicated top-5 suggestions from in-memory sales as local fallback. */
+function getLocalSuggestions(query: string, sales: Sale[], excludeId: string): ClientSuggestion[] {
+  const trimmedQuery = query.trim().toLowerCase();
+  if (!trimmedQuery) return [];
 
   // Iterate forward; later entries overwrite earlier ones so we keep the most recent data.
-  const seen = new Map<string, ClientSuggestion>();
+  const seenClients = new Map<string, ClientSuggestion>();
   for (const sale of sales) {
     if (sale.id === excludeId) continue;
-    if (sale.clientName.trim().toLowerCase().includes(q)) {
-      seen.set(sale.clientName.trim().toLowerCase(), {
+    if (sale.clientName.trim().toLowerCase().includes(trimmedQuery)) {
+      seenClients.set(sale.clientName.trim().toLowerCase(), {
         clientName: sale.clientName,
         phone: sale.phone,
         address: sale.address,
@@ -42,7 +43,7 @@ function getSuggestions(query: string, sales: Sale[], excludeId: string): Client
     }
   }
 
-  return Array.from(seen.values()).slice(0, 5);
+  return Array.from(seenClients.values()).slice(0, 5);
 }
 
 export function ClientNameCell({ 
@@ -64,8 +65,8 @@ export function ClientNameCell({
   // Close color picker on click outside
   useEffect(() => {
     if (!showPicker) return;
-    function handleOutsideClick(e: MouseEvent) {
-      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+    function handleOutsideClick(event: MouseEvent) {
+      if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
         setShowPicker(false);
       }
     }
@@ -87,12 +88,33 @@ export function ClientNameCell({
 
   // Debounce the typed value before running the suggestion lookup
   const debouncedValue = useDebounce(value, 200);
+  const searchPattern = debouncedValue.trim();
 
-  // Compute suggestions during render instead of performing cascading setState in useEffect
+  // Query remote client suggestions via TanStack Query (handles caching, cancellation, and deduplication)
+  const { data: remoteSuggestions = [] } = useQuery<ClientSuggestion[]>({
+    queryKey: ["client-suggestions", searchPattern],
+    queryFn: async ({ signal }) => {
+      const response = await fetch(`/api/clients?q=${encodeURIComponent(searchPattern)}`, { signal });
+      if (!response.ok) {
+        return [];
+      }
+      const remoteData = (await response.json()) as ClientSuggestion[];
+      return Array.isArray(remoteData) ? remoteData.slice(0, 5) : [];
+    },
+    enabled: focused && searchPattern.length > 0,
+    staleTime: 30_000,
+  });
+
+  // Combine remote suggestions with local fallback
   const suggestions = useMemo(() => {
-    if (!focused) return [];
-    return getSuggestions(debouncedValue, sales, saleId);
-  }, [debouncedValue, sales, saleId, focused]);
+    if (!focused || !searchPattern) {
+      return [];
+    }
+    if (remoteSuggestions.length > 0) {
+      return remoteSuggestions.slice(0, 5);
+    }
+    return getLocalSuggestions(searchPattern, sales, saleId);
+  }, [focused, searchPattern, remoteSuggestions, sales, saleId]);
 
   function updateDropdownDirection() {
     if (wrapperRef.current) {
@@ -102,8 +124,8 @@ export function ClientNameCell({
     }
   }
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setValue(e.target.value);
+  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setValue(event.target.value);
     setOpen(true);
     updateDropdownDirection();
   }
@@ -158,9 +180,9 @@ export function ClientNameCell({
           styles.highlightBtn,
           highlightColor ? styles[`highlightBtn_${highlightColor}`] || styles.highlightBtnActive : ""
         ].filter(Boolean).join(" ")}
-        onClick={(e) => {
-          e.stopPropagation();
-          e.preventDefault();
+        onClick={(event) => {
+          event.stopPropagation();
+          event.preventDefault();
           setOpen(false); // Close autocomplete
           updateDropdownDirection();
           setShowPicker(!showPicker);
@@ -183,24 +205,24 @@ export function ClientNameCell({
 
       {open && suggestions.length > 0 && (
         <div className={`${styles.list} ${showUpward ? styles.listUpward : ""}`} role="listbox">
-          {suggestions.map((s) => (
+          {suggestions.map((suggestion) => (
             <div
-              key={s.clientName}
+              key={suggestion.clientName}
               role="option"
               tabIndex={-1}
-              aria-selected={value === s.clientName}
+              aria-selected={value === suggestion.clientName}
               className={styles.item}
-              // mousedown fires before blur — e.preventDefault() keeps the input focused
+              // mousedown fires before blur — event.preventDefault() keeps the input focused
               // long enough for the click to complete, then handleSelect fires
-              onMouseDown={(e) => {
-                e.preventDefault();
-                handleSelect(s);
+              onMouseDown={(event) => {
+                event.preventDefault();
+                handleSelect(suggestion);
               }}
             >
-              <span className={styles.name}>{s.clientName}</span>
-              {(s.phone || s.address) && (
+              <span className={styles.name}>{suggestion.clientName}</span>
+              {(suggestion.phone || suggestion.address) && (
                 <span className={styles.meta}>
-                  {[s.phone, s.address].filter(Boolean).join(" · ")}
+                  {[suggestion.phone, suggestion.address].filter(Boolean).join(" · ")}
                 </span>
               )}
             </div>
@@ -210,3 +232,4 @@ export function ClientNameCell({
     </div>
   );
 }
+
