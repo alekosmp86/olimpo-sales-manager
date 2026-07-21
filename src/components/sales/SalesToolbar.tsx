@@ -7,7 +7,7 @@ import { ImportCSVButton } from "@/components/import/ImportCSVButton";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { CatalogModal } from "@/components/catalog/CatalogModal";
 import styles from "./SalesTable.module.css";
-import { MIN_ZOOM, MAX_ZOOM } from "./constants";
+import { MIN_ZOOM, MAX_ZOOM } from "../../lib/constants/zoom";
 
 interface SalesToolbarProps {
   search: string;
