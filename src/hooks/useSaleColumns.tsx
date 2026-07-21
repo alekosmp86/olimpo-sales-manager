@@ -250,7 +250,7 @@ export function useSaleColumns(
             }
           />
         ),
-        size: 170,
+        size: 190,
       }),
 
       // ── Comments ────────────────────────────────────────────────────────────

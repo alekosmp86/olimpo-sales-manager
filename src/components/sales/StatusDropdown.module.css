@@ -1,6 +1,7 @@
 .wrapper {
   position: relative;
   display: inline-block;
+  max-width: 100%;
 }
 
 .trigger {
@@ -15,6 +16,13 @@
   border: 1px solid transparent;
   transition: opacity var(--transition-fast), box-shadow var(--transition-fast);
   min-height: calc(var(--touch-target) * var(--grid-zoom, 1));
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
@@ -28,7 +36,7 @@
 }
 
 .chevron {
-  font-size: calc(10px * var(--grid-zoom, 1));
+  flex-shrink: 0;
   opacity: 0.7;
   margin-left: calc(2px * var(--grid-zoom, 1));
 }

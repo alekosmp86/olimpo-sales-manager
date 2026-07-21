@@ -323,7 +323,7 @@
 .th[data-col="address"], .td[data-col="address"] { width: calc(400px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(400px * var(--column-scale, var(--grid-zoom, 1))); }
 .th[data-col="items"], .td[data-col="items"] { width: calc(250px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(250px * var(--column-scale, var(--grid-zoom, 1))); }
 .th[data-col="deliveryStatus"], .td[data-col="deliveryStatus"] { width: calc(150px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(150px * var(--column-scale, var(--grid-zoom, 1))); }
-.th[data-col="paymentStatus"], .td[data-col="paymentStatus"] { width: calc(170px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(170px * var(--column-scale, var(--grid-zoom, 1))); }
+.th[data-col="paymentStatus"], .td[data-col="paymentStatus"] { width: calc(190px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(190px * var(--column-scale, var(--grid-zoom, 1))); }
 .th[data-col="comments"], .td[data-col="comments"] { width: calc(350px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(350px * var(--column-scale, var(--grid-zoom, 1))); }
 
 

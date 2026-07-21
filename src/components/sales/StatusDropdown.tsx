@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { ChevronDown } from "lucide-react";
 import styles from "./StatusDropdown.module.css";
 import {
   DeliveryStatus,
@@ -87,12 +88,14 @@ function StatusSelect({ value, options, labelMap, colorMap, onChange, disabled }
 
   useEffect(() => {
     if (!open) return;
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    const handler = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) setOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
+
+  const currentLabel = labelMap[value] ?? value;
 
   return (
     <div className={styles.wrapper} ref={ref}>
@@ -103,9 +106,10 @@ function StatusSelect({ value, options, labelMap, colorMap, onChange, disabled }
         type="button"
         aria-haspopup="listbox"
         aria-expanded={open}
+        title={currentLabel}
       >
-        {labelMap[value] ?? value}
-        {!disabled && <span className={styles.chevron}>▾</span>}
+        <span className={styles.label}>{currentLabel}</span>
+        {!disabled && <ChevronDown size={12} className={styles.chevron} />}
       </button>
 
       {open && (
@@ -125,9 +129,9 @@ function StatusSelect({ value, options, labelMap, colorMap, onChange, disabled }
                 onChange(opt);
                 setOpen(false);
               }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
                   onChange(opt);
                   setOpen(false);
                 }
@@ -141,3 +145,4 @@ function StatusSelect({ value, options, labelMap, colorMap, onChange, disabled }
     </div>
   );
 }
+
