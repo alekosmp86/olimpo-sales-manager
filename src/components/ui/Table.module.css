@@ -1,9 +1,14 @@
 .tableContainer {
   width: 100%;
-  max-height: 400px;
-  overflow-y: auto;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
+}
+
+.scrollable {
+  flex: 1;
+  min-height: 140px;
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 .table {
@@ -15,6 +20,9 @@
 .tableHeaderRow {
   background: var(--color-surface-2);
   border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .th {

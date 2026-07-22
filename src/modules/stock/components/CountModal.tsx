@@ -22,7 +22,6 @@ interface CountModalProps {
 export function CountModal({ storage, currentLines, onClose }: CountModalProps) {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
-  const [notes, setNotes] = useState("");
   const confirm = useConfirm();
 
   const { data: products = [] } = useQuery<Product[]>({
@@ -93,7 +92,6 @@ export function CountModal({ storage, currentLines, onClose }: CountModalProps) 
     countMutation.mutate({
       storageId: storage.id,
       entries,
-      notes: notes.trim() || undefined,
     });
   }
 
@@ -166,20 +164,8 @@ export function CountModal({ storage, currentLines, onClose }: CountModalProps) 
           columns={columns}
           emptyMessage="No se encontraron productos"
           keyExtractor={(product) => product.id}
+          scrollable={true}
         />
-
-        <div>
-          <label htmlFor="count-notes" className={styles.notesLabel}>
-            Notas / Motivo del conteo
-          </label>
-          <textarea
-            id="count-notes"
-            value={notes}
-            onChange={(event) => setNotes(event.target.value)}
-            placeholder="Opcional. Ej: Conteo mensual de inventario"
-            className={styles.notesTextarea}
-          />
-        </div>
       </div>
     </Modal>
   );

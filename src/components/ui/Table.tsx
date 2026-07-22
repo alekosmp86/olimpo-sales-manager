@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { cn } from "@/lib/utils/classNames";
 import styles from "./Table.module.css";
 
 export interface ColumnConfig<T> {
@@ -14,6 +15,8 @@ interface TableProps<T> {
   columns: ColumnConfig<T>[];
   emptyMessage?: string;
   keyExtractor: (item: T) => string;
+  containerClassName?: string;
+  scrollable?: boolean;
 }
 
 export function Table<T>({
@@ -21,16 +24,18 @@ export function Table<T>({
   columns,
   emptyMessage = "No se encontraron elementos",
   keyExtractor,
+  containerClassName,
+  scrollable = false,
 }: TableProps<T>) {
   return (
-    <div className={styles.tableContainer}>
+    <div className={cn(styles.tableContainer, scrollable && styles.scrollable, containerClassName)}>
       <table className={styles.table}>
         <thead>
           <tr className={styles.tableHeaderRow}>
             {columns.map((column) => (
               <th
                 key={column.header}
-                className={[styles.th, column.className].filter(Boolean).join(" ")}
+                className={cn(styles.th, column.className)}
               >
                 {column.header}
               </th>
@@ -50,7 +55,7 @@ export function Table<T>({
                 {columns.map((column) => (
                   <td
                     key={column.header}
-                    className={[styles.td, column.className].filter(Boolean).join(" ")}
+                    className={cn(styles.td, column.className)}
                   >
                     {column.render(item)}
                   </td>

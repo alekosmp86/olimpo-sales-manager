@@ -139,6 +139,7 @@ export function StockLedger() {
             columns={columns}
             emptyMessage="No se encontraron movimientos."
             keyExtractor={(event) => event.id}
+            scrollable={true}
           />
         )}
       </div>

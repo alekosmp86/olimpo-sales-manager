@@ -82,6 +82,7 @@ export function StorageDetailsModal({ storage, lines, onClose }: StorageDetailsM
           columns={columns}
           emptyMessage="No se encontraron productos en stock"
           keyExtractor={(line) => line.id}
+          scrollable={true}
         />
       </div>
     </Modal>

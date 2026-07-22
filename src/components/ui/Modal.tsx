@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, ReactNode, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
+import { cn } from "@/lib/utils/classNames";
 import styles from "./Modal.module.css";
 
 interface ModalProps {
@@ -73,7 +74,7 @@ export function Modal({
       aria-label={title}
       open
     >
-      <div className={[styles.modal, styles[size]].join(" ")}>
+      <div className={cn(styles.modal, styles[size])}>
         <div className={styles.header}>
           <h2 className={styles.title}>{title}</h2>
           <button
@@ -85,7 +86,7 @@ export function Modal({
             ✕
           </button>
         </div>
-        <div className={[styles.body, bodyClassName].filter(Boolean).join(" ")}>{children}</div>
+        <div className={cn(styles.body, bodyClassName)}>{children}</div>
         {footer && <div className={styles.footer}>{footer}</div>}
       </div>
     </dialog>,

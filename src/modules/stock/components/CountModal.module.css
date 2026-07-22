@@ -2,6 +2,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+  flex: 1;
+  min-height: 0;
 }
 
 .productDimension {
@@ -17,23 +19,4 @@
 .tdNewCount {
   text-align: right;
   width: 140px;
-}
-
-
-
-.notesLabel {
-  display: block;
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  margin-bottom: var(--space-1);
-}
-
-.notesTextarea {
-  width: 100%;
-  height: 60px;
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-sm);
-  resize: none;
 }
