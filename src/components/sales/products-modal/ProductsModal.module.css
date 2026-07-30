@@ -70,17 +70,21 @@
 }
 
 .removeBtn {
-  width: 40px;
-  height: 40px;
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  color: var(--color-text-secondary);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-text-muted);
   cursor: pointer;
   border-radius: var(--radius-sm);
   transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+  z-index: 5;
 }
 
 .removeBtn:hover,
@@ -117,7 +121,7 @@
 
 .coreRow {
   display: grid;
-  grid-template-columns: minmax(150px, 1fr) auto auto 120px 40px;
+  grid-template-columns: minmax(180px, 1fr) 115px 145px 110px;
   gap: var(--space-3);
   align-items: end;
   width: 100%;
@@ -133,7 +137,7 @@
 @media (max-width: 768px) {
   .coreRow {
     display: grid;
-    grid-template-columns: 1fr 1fr 40px;
+    grid-template-columns: 1fr 1fr;
     gap: var(--space-3);
     align-items: end;
   }
@@ -142,6 +146,7 @@
     grid-column: 1 / -1;
     grid-row: 1;
     width: 100%;
+    padding-right: var(--space-7);
   }
 
   .qtyWrapper {
@@ -154,12 +159,6 @@
     grid-column: 2;
     grid-row: 2;
     min-width: 0;
-  }
-
-  .removeBtn {
-    grid-column: 3;
-    grid-row: 2;
-    align-self: end;
   }
 
   .priceWrapper {
