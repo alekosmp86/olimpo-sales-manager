@@ -55,23 +55,6 @@
   outline: none;
 }
 
-.qtyInput {
-  padding: var(--space-2) var(--space-3);
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-size: var(--text-sm);
-  min-height: 40px;
-  text-align: right;
-  transition: border-color var(--transition-fast);
-}
-
-.qtyInput:focus {
-  border-color: var(--color-primary);
-  outline: none;
-}
-
 .price {
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
@@ -82,24 +65,24 @@
 }
 
 .removeBtn {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
-  background: transparent;
-  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
   cursor: pointer;
   border-radius: var(--radius-sm);
-  font-size: var(--text-sm);
-  transition: background-color var(--transition-fast), color var(--transition-fast);
-  margin-bottom: 2px;
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
 }
 
-.removeBtn:hover {
+.removeBtn:hover,
+.removeBtn:active {
   background-color: var(--color-red-bg);
   color: var(--color-red-text);
+  border-color: var(--color-red-text);
 }
 
 .addBtn {
@@ -129,7 +112,7 @@
 
 .coreRow {
   display: grid;
-  grid-template-columns: 1fr 100px 120px 36px;
+  grid-template-columns: 1fr auto 120px 40px;
   gap: var(--space-3);
   align-items: end;
   width: 100%;
@@ -145,20 +128,15 @@
 @media (max-width: 600px) {
   .coreRow {
     display: grid;
-    grid-template-columns: 1fr auto;
-    gap: var(--space-3) var(--space-4);
+    grid-template-columns: auto 1fr 40px;
+    gap: var(--space-3);
     align-items: end;
   }
 
   .selectWrapper {
-    grid-column: 1;
+    grid-column: 1 / -1;
     grid-row: 1;
-  }
-
-  .removeBtn {
-    grid-column: 2;
-    grid-row: 1;
-    margin-bottom: 2px;
+    width: 100%;
   }
 
   .qtyWrapper {
@@ -166,16 +144,17 @@
     grid-row: 2;
   }
 
-  .qtyInput {
-    max-width: 100px;
-    text-align: left;
-  }
-
   .priceWrapper {
     grid-column: 2;
     grid-row: 2;
     text-align: right;
     align-items: flex-end;
+  }
+
+  .removeBtn {
+    grid-column: 3;
+    grid-row: 2;
+    align-self: end;
   }
 }
 

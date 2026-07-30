@@ -1,11 +1,11 @@
 .stepper {
   display: inline-flex;
   align-items: center;
-  border: 1px solid var(--color-border);
+  border: 1.5px solid var(--color-border);
   border-radius: var(--radius-sm);
   background-color: var(--color-surface);
   overflow: hidden;
-  height: 32px;
+  height: 40px;
   box-shadow: var(--shadow-sm);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
@@ -19,7 +19,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
+  width: 36px;
   height: 100%;
   border: none;
   background: transparent;
@@ -44,7 +44,7 @@
 }
 
 .quantityInput {
-  width: 50px;
+  width: 48px;
   height: 100%;
   text-align: center;
   border: none;
@@ -54,7 +54,7 @@
   padding: 0;
   margin: 0;
   font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-semibold);
   color: var(--color-text);
   outline: none;
 }

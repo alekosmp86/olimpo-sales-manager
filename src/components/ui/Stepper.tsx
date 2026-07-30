@@ -11,6 +11,7 @@ interface StepperProps {
   max?: number;
   disabled?: boolean;
   ariaLabel?: string;
+  className?: string;
 }
 
 export function Stepper({
@@ -20,6 +21,7 @@ export function Stepper({
   max,
   disabled = false,
   ariaLabel,
+  className,
 }: StepperProps) {
   const handleDecrement = () => {
     const numericValue = typeof value === "number" ? value : 0;
@@ -58,7 +60,7 @@ export function Stepper({
   const numericValue = typeof value === "number" ? value : 0;
 
   return (
-    <div className={`${styles.stepper} ${disabled ? styles.disabled : ""}`}>
+    <div className={`${styles.stepper} ${disabled ? styles.disabled : ""} ${className ?? ""}`}>
       <button
         type="button"
         onClick={handleDecrement}
@@ -66,7 +68,7 @@ export function Stepper({
         disabled={disabled || numericValue <= min}
         aria-label="Disminuir"
       >
-        <Minus size={14} />
+        <Minus size={16} />
       </button>
       <input
         type="number"
@@ -85,7 +87,7 @@ export function Stepper({
         disabled={disabled || (max !== undefined && numericValue >= max)}
         aria-label="Incrementar"
       >
-        <Plus size={14} />
+        <Plus size={16} />
       </button>
     </div>
   );

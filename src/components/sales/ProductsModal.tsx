@@ -2,8 +2,10 @@
 
 import { useState, useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Trash2 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
+import { Stepper } from "@/components/ui/Stepper";
 import styles from "./ProductsModal.module.css";
 import type { SaleItem, Product } from "@/lib/types";
 import { formatPrice } from "@/lib/utils/priceUtils";
@@ -24,18 +26,18 @@ interface ProductsModalProps {
 interface EditableItem {
   keyId: string;
   productId: string;
-  quantity: number;
+  quantity: number | "";
   storageId?: string;
 }
 
 export function ProductsModal({ isOpen, onClose, saleId, items, renderItemExtras }: ProductsModalProps) {
   const queryClient = useQueryClient();
   const [editableItems, setEditableItems] = useState<EditableItem[]>(() =>
-    items.map((i, index) => ({
-      keyId: `${i.productId}-${index}`,
-      productId: i.productId,
-      quantity: i.quantity,
-      storageId: i.reservation?.storageId ?? undefined,
+    items.map((item, index) => ({
+      keyId: `${item.productId}-${index}`,
+      productId: item.productId,
+      quantity: item.quantity,
+      storageId: item.reservation?.storageId ?? undefined,
     }))
   );
   const [isDirty, setIsDirty] = useState(false);
@@ -47,11 +49,11 @@ export function ProductsModal({ isOpen, onClose, saleId, items, renderItemExtras
   });
 
   const updateMutation = useMutation({
-    mutationFn: (items: Omit<EditableItem, "keyId">[]) =>
+    mutationFn: (payloadItems: Omit<EditableItem, "keyId">[]) =>
       fetch(`/api/sales/${saleId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items }),
+        body: JSON.stringify({ items: payloadItems }),
       }).then((response) => handleResponse<unknown>(response)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sales"] });
@@ -65,7 +67,7 @@ export function ProductsModal({ isOpen, onClose, saleId, items, renderItemExtras
   });
 
   const productMap = useMemo(
-    () => new Map(products.map((p) => [p.id, p])),
+    () => new Map(products.map((product) => [product.id, product])),
     [products]
   );
 
@@ -84,42 +86,44 @@ export function ProductsModal({ isOpen, onClose, saleId, items, renderItemExtras
   }
 
   function removeItem(index: number) {
-    setEditableItems((prev) => prev.filter((_, i) => i !== index));
+    setEditableItems((prev) => prev.filter((_, itemIndex) => itemIndex !== index));
     setIsDirty(true);
   }
 
-  function updateItem(index: number, field: keyof EditableItem, value: string | number) {
+  function updateItem(index: number, field: keyof EditableItem, value: string | number | "") {
     setEditableItems((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
+      prev.map((item, itemIndex) => (itemIndex === index ? { ...item, [field]: value } : item))
     );
     setIsDirty(true);
   }
 
   function handleSave() {
-    const valid = editableItems.flatMap((i) => {
-      if (!i.productId || i.quantity <= 0) return [];
+    const valid = editableItems.flatMap((editableItem) => {
+      const numericQuantity = typeof editableItem.quantity === "number" ? editableItem.quantity : 0;
+      if (!editableItem.productId || numericQuantity <= 0) return [];
 
-      let storageId = i.storageId;
+      let storageId = editableItem.storageId;
       if (!storageId) {
         const availabilities = queryClient.getQueryData<StorageAvailability[]>([
           "stock",
           "lines",
           "product",
-          i.productId,
+          editableItem.productId,
         ]);
         if (availabilities && availabilities.length > 0) {
           storageId = availabilities[0].storageId;
         }
       }
 
-      return [{ productId: i.productId, quantity: i.quantity, storageId }];
+      return [{ productId: editableItem.productId, quantity: numericQuantity, storageId }];
     });
     updateMutation.mutate(valid);
   }
 
   const total = editableItems.reduce((sum, item) => {
-    const p = productMap.get(item.productId);
-    return sum + (p ? p.unitPrice * item.quantity : 0);
+    const product = productMap.get(item.productId);
+    const numericQuantity = typeof item.quantity === "number" ? item.quantity : 0;
+    return sum + (product ? product.unitPrice * numericQuantity : 0);
   }, 0);
 
   return (
@@ -151,7 +155,8 @@ export function ProductsModal({ isOpen, onClose, saleId, items, renderItemExtras
 
         {editableItems.map((item, index) => {
           const product = productMap.get(item.productId);
-          const lineTotal = product ? product.unitPrice * item.quantity : 0;
+          const numericQuantity = typeof item.quantity === "number" ? item.quantity : 0;
+          const lineTotal = product ? product.unitPrice * numericQuantity : 0;
 
           return (
             <div key={item.keyId} className={styles.row}>
@@ -162,28 +167,23 @@ export function ProductsModal({ isOpen, onClose, saleId, items, renderItemExtras
                     id={`product-select-${item.keyId}`}
                     className={styles.select}
                     value={item.productId}
-                    onChange={(e) => updateItem(index, "productId", e.target.value)}
+                    onChange={(event) => updateItem(index, "productId", event.target.value)}
                   >
-                    {products.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name} {p.dimension.label}
+                    {products.map((pItem) => (
+                      <option key={pItem.id} value={pItem.id}>
+                        {pItem.name} {pItem.dimension.label}
                       </option>
                     ))}
                   </select>
                 </div>
 
                 <div className={styles.qtyWrapper}>
-                  <label htmlFor={`quantity-input-${item.keyId}`} className={styles.label}>Cantidad</label>
-                  <input
-                    id={`quantity-input-${item.keyId}`}
-                    className={styles.qtyInput}
-                    type="number"
-                    min="1"
+                  <span className={styles.label}>Cantidad</span>
+                  <Stepper
                     value={item.quantity}
-                    onChange={(e) =>
-                      updateItem(index, "quantity", parseInt(e.target.value, 10) || 1)
-                    }
-                    aria-label="Cantidad"
+                    min={1}
+                    onChange={(newValue) => updateItem(index, "quantity", newValue)}
+                    ariaLabel={`Cantidad de ${product ? product.name : "producto"}`}
                   />
                 </div>
 
@@ -198,7 +198,7 @@ export function ProductsModal({ isOpen, onClose, saleId, items, renderItemExtras
                   type="button"
                   aria-label="Eliminar producto"
                 >
-                  ✕
+                  <Trash2 size={16} />
                 </button>
               </div>
 
