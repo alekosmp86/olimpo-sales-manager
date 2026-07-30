@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import type { Product } from "@/lib/types";
+import { handleResponse } from "@/lib/utils/apiUtils";
 import styles from "./AliasMappingModal.module.css";
 import { useConfirm } from "@/components/ui/Confirm";
 import { MessageType } from "@/lib/constants/messageType";
@@ -26,7 +27,7 @@ export function AliasMappingModal({
   const queryClient = useQueryClient();
   const { data: products = [] } = useQuery<Product[]>({
     queryKey: ["products"],
-    queryFn: () => fetch("/api/products").then((r) => r.json()),
+    queryFn: () => fetch("/api/products").then((response) => handleResponse<Product[]>(response)),
   });
 
   const standardNamesSet = useMemo(() => new Set(products.map((p) => p.name)), [products]);
@@ -52,10 +53,7 @@ export function AliasMappingModal({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mappings }),
-      }).then(async (r) => {
-        if (!r.ok) throw new Error((await r.json()).error);
-        return r.json();
-      }),
+      }).then((response) => handleResponse<unknown>(response)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       onSuccess();

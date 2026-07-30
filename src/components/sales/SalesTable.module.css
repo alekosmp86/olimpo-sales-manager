@@ -316,14 +316,14 @@
 
 /* Column sizes */
 .th[data-col="select"], .td[data-col="select"] { width: calc(48px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(48px * var(--column-scale, var(--grid-zoom, 1))); }
-.th[data-col="actions"], .td[data-col="actions"] { width: calc(80px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(80px * var(--column-scale, var(--grid-zoom, 1))); }
+.th[data-col="actions"], .td[data-col="actions"] { width: 80px; min-width: 80px; }
 .th[data-col="date"], .td[data-col="date"] { width: calc(170px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(170px * var(--column-scale, var(--grid-zoom, 1))); }
 .th[data-col="clientName"], .td[data-col="clientName"] { width: calc(240px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(240px * var(--column-scale, var(--grid-zoom, 1))); }
 .th[data-col="phone"], .td[data-col="phone"] { width: calc(160px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(160px * var(--column-scale, var(--grid-zoom, 1))); }
 .th[data-col="address"], .td[data-col="address"] { width: calc(400px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(400px * var(--column-scale, var(--grid-zoom, 1))); }
 .th[data-col="items"], .td[data-col="items"] { width: calc(250px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(250px * var(--column-scale, var(--grid-zoom, 1))); }
 .th[data-col="deliveryStatus"], .td[data-col="deliveryStatus"] { width: calc(150px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(150px * var(--column-scale, var(--grid-zoom, 1))); }
-.th[data-col="paymentStatus"], .td[data-col="paymentStatus"] { width: calc(170px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(170px * var(--column-scale, var(--grid-zoom, 1))); }
+.th[data-col="paymentStatus"], .td[data-col="paymentStatus"] { width: calc(190px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(190px * var(--column-scale, var(--grid-zoom, 1))); }
 .th[data-col="comments"], .td[data-col="comments"] { width: calc(350px * var(--column-scale, var(--grid-zoom, 1))); min-width: calc(350px * var(--column-scale, var(--grid-zoom, 1))); }
 
 
@@ -346,6 +346,37 @@
 }
 
 .cellInput:focus {
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(13, 115, 119, 0.1);
+}
+
+.cellTextarea {
+  width: 100%;
+  padding: calc(var(--space-2) * var(--grid-zoom, 1)) calc(var(--space-2) * var(--grid-zoom, 1));
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-text);
+  font-size: calc(var(--text-sm) * var(--grid-zoom, 1));
+  font-family: inherit;
+  line-height: 1.4;
+  min-height: calc(var(--touch-target) * var(--grid-zoom, 1));
+  resize: none;
+  overflow: hidden;
+  field-sizing: content;
+  box-sizing: border-box;
+  display: block;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.cellTextarea:hover {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+}
+
+.cellTextarea:focus {
   border-color: var(--color-primary);
   background: var(--color-surface);
   outline: none;
@@ -620,6 +651,7 @@
   justify-content: center;
   width: 28px;
   height: 28px;
+  flex-shrink: 0;
   border-radius: var(--radius-sm);
   background: transparent;
   border: 1px solid transparent;

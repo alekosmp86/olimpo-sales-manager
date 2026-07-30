@@ -34,7 +34,8 @@
 
 .selectWrapper,
 .qtyWrapper,
-.priceWrapper {
+.priceWrapper,
+.unitPriceWrapper {
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -59,24 +60,6 @@
   outline: none;
 }
 
-.qtyInput {
-  width: 100%;
-  padding: var(--space-2) var(--space-3);
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-size: var(--text-sm);
-  min-height: 40px;
-  text-align: right;
-  transition: border-color var(--transition-fast);
-}
-
-.qtyInput:focus {
-  border-color: var(--color-primary);
-  outline: none;
-}
-
 .price {
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
@@ -87,27 +70,24 @@
 }
 
 .removeBtn {
-  position: absolute;
-  top: var(--space-2);
-  right: var(--space-2);
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
-  background: transparent;
-  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
   cursor: pointer;
   border-radius: var(--radius-sm);
-  font-size: var(--text-sm);
-  transition: background-color var(--transition-fast), color var(--transition-fast);
-  z-index: 10;
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
 }
 
-.removeBtn:hover {
+.removeBtn:hover,
+.removeBtn:active {
   background-color: var(--color-red-bg);
   color: var(--color-red-text);
+  border-color: var(--color-red-text);
 }
 
 .addBtn {
@@ -137,34 +117,10 @@
 
 .coreRow {
   display: grid;
-  grid-template-columns: minmax(150px, 1fr) 110px 140px 100px;
+  grid-template-columns: minmax(150px, 1fr) auto auto 120px 40px;
   gap: var(--space-3);
   align-items: end;
   width: 100%;
-}
-
-.unitPriceWrapper {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.priceInput {
-  width: 100%;
-  padding: var(--space-2) var(--space-3);
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font-size: var(--text-sm);
-  min-height: 40px;
-  text-align: right;
-  transition: border-color var(--transition-fast);
-}
-
-.priceInput:focus {
-  border-color: var(--color-primary);
-  outline: none;
 }
 
 .extrasRow {
@@ -177,15 +133,15 @@
 @media (max-width: 768px) {
   .coreRow {
     display: grid;
-    grid-template-columns: 110px minmax(0, 1fr);
-    gap: var(--space-3) var(--space-4);
+    grid-template-columns: 1fr 1fr 40px;
+    gap: var(--space-3);
     align-items: end;
   }
 
   .selectWrapper {
-    grid-column: 1 / span 2;
+    grid-column: 1 / -1;
     grid-row: 1;
-    min-width: 0;
+    width: 100%;
   }
 
   .qtyWrapper {
@@ -194,24 +150,20 @@
     min-width: 0;
   }
 
-  .qtyInput {
-    max-width: 100%;
-    text-align: left;
-  }
-
   .unitPriceWrapper {
     grid-column: 2;
     grid-row: 2;
     min-width: 0;
   }
 
-  .priceInput {
-    max-width: 100%;
-    text-align: left;
+  .removeBtn {
+    grid-column: 3;
+    grid-row: 2;
+    align-self: end;
   }
 
   .priceWrapper {
-    grid-column: 1 / span 2;
+    grid-column: 1 / -1;
     grid-row: 3;
     flex-direction: row;
     justify-content: space-between;
@@ -220,4 +172,3 @@
     padding-top: var(--space-2);
   }
 }
-

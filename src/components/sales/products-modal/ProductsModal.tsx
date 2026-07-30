@@ -1,5 +1,6 @@
 "use client";
 
+import { Trash2 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Stepper } from "@/components/ui/Stepper";
@@ -70,14 +71,6 @@ export function ProductsModal({ isOpen, onClose, saleId, items, renderItemExtras
 
           return (
             <div key={item.keyId} className={styles.row}>
-              <button
-                className={styles.removeBtn}
-                onClick={() => removeItem(index)}
-                type="button"
-                aria-label="Eliminar producto"
-              >
-                ✕
-              </button>
               <div className={styles.coreRow}>
                 <div className={styles.selectWrapper}>
                   <label htmlFor={`product-select-${item.keyId}`} className={styles.label}>Producto</label>
@@ -121,6 +114,15 @@ export function ProductsModal({ isOpen, onClose, saleId, items, renderItemExtras
                   <span className={styles.label}>Total</span>
                   <span className={styles.price}>{formatPrice(lineTotal)}</span>
                 </div>
+
+                <button
+                  className={styles.removeBtn}
+                  onClick={() => removeItem(index)}
+                  type="button"
+                  aria-label="Eliminar producto"
+                >
+                  <Trash2 size={16} />
+                </button>
               </div>
 
               {renderItemExtras && (

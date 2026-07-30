@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import styles from "./SalesTable.module.css";
-import { MONTH_ABBRS } from "@/lib/dateUtils";
+import { MONTH_ABBRS } from "@/lib/utils/dateUtils";
 
 interface MonthSheetBarProps {
   selectedYear: number;

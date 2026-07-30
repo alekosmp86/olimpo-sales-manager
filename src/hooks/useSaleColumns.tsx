@@ -2,12 +2,14 @@
 
 import { useMemo } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
-import { DeliveryDropdown, PaymentDropdown } from "../components/sales/StatusDropdown";
+import { DeliveryDropdown } from "../components/sales/DeliveryDropdown";
+import { PaymentDropdown } from "../components/sales/PaymentDropdown";
 import { withStockDeliveryDropdown } from "@/modules/stock/components/extensions/withStockDeliveryDropdown";
 import { ProductsCell } from "../components/sales/ProductsCell";
 import { ClientNameCell } from "../components/sales/ClientNameCell";
+import { AutoResizingTextareaCell } from "../components/sales/AutoResizingTextAreaCell";
 import type { Sale } from "@/lib/types";
-import { formatReviewDate } from "@/lib/dateUtils";
+import { formatReviewDate } from "@/lib/utils/dateUtils";
 import { Calendar, MessageSquareText, Copy } from "lucide-react";
 import { triggerGlobalToast } from "@/lib/utils/toastTrigger";
 import { MessageType } from "@/lib/constants/messageType";
@@ -66,15 +68,15 @@ export function useSaleColumns(
         cell: ({ row }) => {
           const handleCopy = async () => {
             const sale = row.original;
-            const itemsText = (sale.items ?? []).reduce<string[]>((acc, item) => {
+            const itemsText = (sale.items ?? []).reduce<string[]>((accumulator, item) => {
               if (item && item.product) {
-                const pName = item.product.name;
-                const dimLabel = item.product.dimension?.label ? ` (${item.product.dimension.label})` : "";
-                const qty = item.quantity;
-                const price = formatPrice(item.totalPrice ?? (qty * (item.product.unitPrice ?? 0)));
-                acc.push(`- ${pName}${dimLabel}: ${qty} u. · ${price}`);
+                const productName = item.product.name;
+                const dimensionLabel = item.product.dimension?.label ? ` (${item.product.dimension.label})` : "";
+                const quantity = item.quantity;
+                const price = formatPrice(item.totalPrice ?? (quantity * (item.product.unitPrice ?? 0)));
+                accumulator.push(`- ${productName}${dimensionLabel}: ${quantity} u. · ${price}`);
               }
-              return acc;
+              return accumulator;
             }, []).join("\n");
 
             const text = [
@@ -83,13 +85,14 @@ export function useSaleColumns(
               `Dirección: ${sale.address ?? "No especificada"}`,
               `Productos:`,
               itemsText || "- Sin productos",
-            ].join("\n");
+              sale.comments ? `Comentarios: ${sale.comments}` : null,
+            ].filter(Boolean).join("\n");
 
             try {
               await navigator.clipboard.writeText(text);
               triggerGlobalToast("Detalles copiados al portapapeles", MessageType.SUCCESS);
-            } catch (err) {
-              console.error("Error al copiar al portapapeles:", err);
+            } catch (error) {
+              console.error("Error al copiar al portapapeles:", error);
               triggerGlobalToast("Error al copiar al portapapeles", MessageType.DANGER);
             }
           };
@@ -139,14 +142,14 @@ export function useSaleColumns(
                 type="date"
                 className={styles.dateHiddenInput}
                 defaultValue={dateStr}
-                onClick={(e) => {
+                onClick={(clickEvent) => {
                   try {
-                    e.currentTarget.showPicker();
+                    clickEvent.currentTarget.showPicker();
                   } catch {}
                 }}
-                onChange={(e) => {
-                  if (e.target.value && e.target.value !== dateStr) {
-                    onUpdate({ id: row.original.id, data: { date: e.target.value } });
+                onChange={(changeEvent) => {
+                  if (changeEvent.target.value && changeEvent.target.value !== dateStr) {
+                    onUpdate({ id: row.original.id, data: { date: changeEvent.target.value } });
                   }
                 }}
                 aria-label="Fecha de la venta"
@@ -182,9 +185,9 @@ export function useSaleColumns(
             className={styles.cellInput}
             defaultValue={getValue() ?? ""}
             placeholder="Teléfono"
-            onBlur={(e) => {
-              if (e.target.value !== (getValue() ?? ""))
-                onUpdate({ id: row.original.id, data: { phone: e.target.value || null } });
+            onBlur={(blurEvent) => {
+              if (blurEvent.target.value !== (getValue() ?? ""))
+                onUpdate({ id: row.original.id, data: { phone: blurEvent.target.value || null } });
             }}
             aria-label="Teléfono del cliente"
           />
@@ -197,16 +200,13 @@ export function useSaleColumns(
       columnHelper.accessor("address", {
         header: "Dirección",
         cell: ({ getValue, row }) => (
-          <input
-            type="text"
-            className={styles.cellInput}
-            defaultValue={getValue() ?? ""}
+          <AutoResizingTextareaCell
+            initialValue={getValue()}
             placeholder="Dirección"
-            onBlur={(e) => {
-              if (e.target.value !== (getValue() ?? ""))
-                onUpdate({ id: row.original.id, data: { address: e.target.value || null } });
-            }}
-            aria-label="Dirección de entrega"
+            ariaLabel="Dirección de entrega"
+            onUpdate={(addressValue) =>
+              onUpdate({ id: row.original.id, data: { address: addressValue } })
+            }
           />
         ),
         size: 400,
@@ -232,8 +232,8 @@ export function useSaleColumns(
           <StockDeliveryDropdown
             value={getValue()}
             sale={row.original}
-            onChange={(val) =>
-              onUpdate({ id: row.original.id, data: { deliveryStatus: val } })
+            onChange={(newStatus) =>
+              onUpdate({ id: row.original.id, data: { deliveryStatus: newStatus } })
             }
           />
         ),
@@ -246,28 +246,25 @@ export function useSaleColumns(
         cell: ({ getValue, row }) => (
           <PaymentDropdown
             value={getValue()}
-            onChange={(val) =>
-              onUpdate({ id: row.original.id, data: { paymentStatus: val } })
+            onChange={(newStatus) =>
+              onUpdate({ id: row.original.id, data: { paymentStatus: newStatus } })
             }
           />
         ),
-        size: 170,
+        size: 190,
       }),
 
       // ── Comments ────────────────────────────────────────────────────────────
       columnHelper.accessor("comments", {
         header: "Comentarios",
         cell: ({ getValue, row }) => (
-          <input
-            type="text"
-            className={styles.cellInput}
-            defaultValue={getValue() ?? ""}
+          <AutoResizingTextareaCell
+            initialValue={getValue()}
             placeholder="Comentarios"
-            onBlur={(e) => {
-              if (e.target.value !== (getValue() ?? ""))
-                onUpdate({ id: row.original.id, data: { comments: e.target.value || null } });
-            }}
-            aria-label="Comentarios de la venta"
+            ariaLabel="Comentarios de la venta"
+            onUpdate={(commentValue) =>
+              onUpdate({ id: row.original.id, data: { comments: commentValue } })
+            }
           />
         ),
         size: 350,

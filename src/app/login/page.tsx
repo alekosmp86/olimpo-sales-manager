@@ -18,17 +18,18 @@ async function loginAction(
   const password = formData.get("password") as string;
   const confirmPassword = formData.get("confirmPassword") as string | undefined;
 
-  const res = await fetch("/api/auth/login", {
+  const response = await fetch("/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password, confirmPassword: confirmPassword || undefined }),
   });
 
-  const data = await res.json();
-
-  if (!res.ok) {
-    return { error: data.error, firstTime: data.firstTime };
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    return { error: errorData.error, firstTime: errorData.firstTime };
   }
+
+  await response.json();
 
   // Redirect handled by router below via state
   return { firstTime: false };

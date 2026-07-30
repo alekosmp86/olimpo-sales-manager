@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { useStockEvents } from "@/modules/stock/hooks/useStockEvents";
 import { useStorages } from "@/modules/stock/hooks/useStorages";
 import { STOCK_EVENT_LABELS } from "@/modules/stock/constants";
-import { MONTH_ABBRS } from "@/lib/dateUtils";
+import { MONTH_ABBRS } from "@/lib/utils/dateUtils";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { Table } from "@/components/ui/Table";
 import type { StockEventDTO } from "@/modules/stock/types";
@@ -139,6 +139,7 @@ export function StockLedger() {
             columns={columns}
             emptyMessage="No se encontraron movimientos."
             keyExtractor={(event) => event.id}
+            scrollable={true}
           />
         )}
       </div>

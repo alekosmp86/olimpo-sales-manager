@@ -1,0 +1,4 @@
+/* Delivery-specific dropdown overrides */
+.deliveryDropdown {
+  display: inline-block;
+}

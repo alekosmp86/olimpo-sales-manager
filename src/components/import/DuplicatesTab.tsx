@@ -2,7 +2,7 @@
 
 import type { ImportDuplicatePair } from "@/lib/types";
 import styles from "./ImportReviewModal.module.css";
-import { formatReviewDate } from "@/lib/dateUtils";
+import { formatReviewDate } from "@/lib/utils/dateUtils";
 
 interface DuplicatesTabProps {
   pairs: ImportDuplicatePair[];

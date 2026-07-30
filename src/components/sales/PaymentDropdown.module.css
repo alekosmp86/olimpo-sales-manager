@@ -1,0 +1,4 @@
+/* Payment-specific dropdown overrides */
+.paymentDropdown {
+  display: inline-block;
+}

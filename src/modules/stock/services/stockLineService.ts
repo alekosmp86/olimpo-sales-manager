@@ -24,7 +24,7 @@ export async function getStockLines(storageId: string): Promise<StockLineWithDet
   // Run both queries concurrently — they are independent (neither uses the other's result)
   const [lines, reservationSums] = await Promise.all([
     prisma.stockLine.findMany({
-      where: { storageId },
+      where: { storageId, quantity: { gte: 1 } },
       include: {
         product: { include: { dimension: true } },
       },
